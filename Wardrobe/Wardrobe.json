@@ -1,0 +1,10 @@
+{
+  "Author": "your name here",
+  "Name": "Wardrobe",
+  "Punchline": "A short one-liner that shows up in /xlplugins.",
+  "Description": "A description that shows up in /xlplugins. Use /wardrobe to open the plugin.",
+  "ApplicableVersion": "any",
+  "Tags": [
+    "wardrobe"
+  ]
+}
