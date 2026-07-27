@@ -60,7 +60,8 @@ public class MainWindow : Window, IDisposable
                 selectedCollectionId = collections.Count > 0 ? collections[0].Id : Guid.Empty;
             }
 
-            // Draw tab bar
+            // Draw tab bar with spacing
+            ImGui.Spacing();
             if (ImGui.BeginTabBar("##CollectionsTabBar"))
             {
                 foreach (var collection in collections)
@@ -81,7 +82,7 @@ public class MainWindow : Window, IDisposable
                             ImGui.CloseCurrentPopup();
                         }
 
-                        if (ImGui.MenuItem("Delete"))
+                        if (ImGui.MenuItem("Delete", "Del"))
                         {
                             collectionService.DeleteCollection(collection.Id);
                             if (selectedCollectionId == collection.Id)
@@ -104,22 +105,34 @@ public class MainWindow : Window, IDisposable
                 ImGui.EndTabBar();
             }
 
+            ImGui.Spacing();
             ImGui.Separator();
+            ImGui.Spacing();
 
             // Display designs from selected collection
             if (selectedCollectionId != Guid.Empty)
             {
                 var designs = collectionService.GetDesignsByCollection(selectedCollectionId);
-                ImGui.Text($"Collection contains {designs.Count} designs");
+                
+                // Styled design count display
+                ImGui.TextColored(new Vector4(0.9f, 0.8f, 0.7f, 1f), $"{designs.Count} designs");
+                ImGui.Spacing();
 
                 if (designs.Count > 0)
                 {
-                    ImGui.TextWrapped("Design list will be rendered here with thumbnails (TODO)");
+                    ImGui.TextWrapped("Design gallery will be rendered here with thumbnails (TODO)");
+                }
+                else
+                {
+                    ImGui.TextColored(new Vector4(0.6f, 0.6f, 0.6f, 1f), "No designs in this collection.");
                 }
             }
             else if (collections.Count == 0)
             {
-                ImGui.TextColored(new Vector4(1, 1, 0, 1), "No collections created yet. Click + to create one.");
+                ImGui.Spacing();
+                ImGui.Spacing();
+                ImGui.TextColored(new Vector4(0.9f, 0.8f, 0.7f, 1f), "No collections yet");
+                ImGui.TextWrapped("Click the '+' tab to create your first collection and organize your designs!");
             }
         }
         catch (Exception)

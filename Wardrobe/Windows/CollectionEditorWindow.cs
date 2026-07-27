@@ -55,21 +55,49 @@ public class CollectionEditorWindow : Window, IDisposable
             return;
 
         ImGui.SetNextWindowPos(ImGui.GetMainViewport().GetCenter(), ImGuiCond.Appearing, new Vector2(0.5f, 0.5f));
-        ImGui.SetNextWindowSize(new Vector2(500, 350), ImGuiCond.Appearing);
+        ImGui.SetNextWindowSize(new Vector2(550, 400), ImGuiCond.Appearing);
 
+        // Header Section
+        ImGui.Spacing();
+        ImGui.Spacing();
+        
+        // Title - centered style
+        string windowTitle = isEditing ? "Edit Collection" : "Create New Collection";
+        float titleWidth = ImGui.CalcTextSize(windowTitle).X;
+        ImGui.SetCursorPosX((ImGui.GetWindowWidth() - titleWidth) / 2);
+        ImGui.TextColored(new Vector4(0.9f, 0.8f, 0.7f, 1f), windowTitle);
+        
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Spacing();
+
+        // Collection Name Section
+        ImGui.AlignTextToFramePadding();
         ImGui.Text("Collection Name:");
-        ImGui.InputText("##CollectionName", ref collectionName, 100);
+        ImGui.SameLine();
+        ImGui.TextDisabled("*");
+        ImGui.InputTextWithHint("##CollectionName", "e.g., Dresses, Casual, Formal", ref collectionName, 100);
 
         ImGui.Spacing();
-        ImGui.Text("Folder Paths (one per line):");
-        ImGui.InputTextMultiline("##FolderPaths", ref folderPathsText, 500, new Vector2(400, 150));
+        ImGui.Spacing();
+
+        // Folder Paths Section
+        ImGui.AlignTextToFramePadding();
+        ImGui.Text("Folder Paths:");
+        ImGui.TextWrapped("(Optional) Enter paths one per line. Leave empty for uncategorized designs.");
+        ImGui.InputTextMultiline("##FolderPaths", ref folderPathsText, 500, new Vector2(ImGui.GetWindowWidth() - 30, 120));
 
         ImGui.Spacing();
         ImGui.Separator();
+        ImGui.Spacing();
 
-        // Buttons
-        float buttonWidth = 120;
-        ImGui.SetCursorPosX(ImGui.GetWindowWidth() - (buttonWidth * 2 + 20));
+        // Buttons - centered
+        float buttonWidth = 100;
+        float buttonSpacing = 10;
+        float totalButtonWidth = (buttonWidth * 2) + buttonSpacing;
+        float buttonPosX = (ImGui.GetWindowWidth() - totalButtonWidth) / 2;
+
+        ImGui.SetCursorPosX(buttonPosX);
 
         if (ImGui.Button("Save", new Vector2(buttonWidth, 0)))
         {
@@ -116,15 +144,22 @@ public class CollectionEditorWindow : Window, IDisposable
         bool showEmptyNameError = true;
         if (ImGui.BeginPopupModal("ErrorPopup##EmptyName", ref showEmptyNameError, ImGuiWindowFlags.AlwaysAutoResize))
         {
-            ImGui.Text("Collection name cannot be empty.");
-            if (ImGui.Button("OK##EmptyName", new Vector2(120, 0)))
+            ImGui.Spacing();
+            ImGui.TextColored(new Vector4(1f, 0.3f, 0.3f, 1f), "⚠ Collection name is required");
+            ImGui.Spacing();
+            ImGui.Separator();
+            ImGui.Spacing();
+            
+            float buttonWidth = 100;
+            float buttonPosX = (ImGui.GetWindowWidth() - buttonWidth) / 2;
+            ImGui.SetCursorPosX(buttonPosX);
+            
+            if (ImGui.Button("OK##EmptyName", new Vector2(buttonWidth, 0)))
             {
                 ImGui.CloseCurrentPopup();
             }
             ImGui.EndPopup();
         }
-
-
     }
 
     private void Reset()
@@ -133,6 +168,22 @@ public class CollectionEditorWindow : Window, IDisposable
         folderPathsText = string.Empty;
         editingCollection = null;
         isEditing = false;
+    }
+
+    /// <summary>
+    /// Custom helper for multiline input with placeholder hint (simulating InputTextMultilineWithHint).
+    /// </summary>
+    private void InputTextMultilineWithHint(string label, string hint, ref string value, uint maxLength, Vector2 size)
+    {
+        ImGui.InputTextMultiline(label, ref value, maxLength, size, ImGuiInputTextFlags.None);
+        
+        // Show hint text when field is empty
+        if (string.IsNullOrEmpty(value))
+        {
+            ImGui.SetCursorPosY(ImGui.GetCursorPosY() - size.Y - ImGui.GetStyle().FramePadding.Y);
+            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetStyle().FramePadding.X + 1);
+            ImGui.TextDisabled(hint);
+        }
     }
 
     public void Dispose()
