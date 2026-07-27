@@ -121,7 +121,7 @@ public class MainWindow : Window, IDisposable
                             ImGui.CloseCurrentPopup();
                         }
 
-                        if (ImGui.MenuItem("Delete", "Del"))
+                        if (ImGui.MenuItem("Delete"))
                         {
                             collectionService.DeleteCollection(collection.Id);
                             if (selectedCollectionId == collection.Id)
@@ -407,21 +407,82 @@ public class MainWindow : Window, IDisposable
             ImGui.EndTooltip();
         }
 
-        // Spacing before button
+        // Spacing before buttons
         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 4f);
 
-        // Edit button - centered
-        float buttonWidth = 85f;
-        ImGui.SetCursorPosX((width - buttonWidth) / 2);
+        // Three-button layout: Apply | Edit | Delete
+        float btnWidth = 62f;
+        float deleteBtnWidth = 70f; // Slightly wider for "Delete"
+        float btnHeight = 28f;
+        float btnSpacing = 12f;
+        float totalBtnWidth = (btnWidth * 2) + deleteBtnWidth + (btnSpacing * 2);
+        float btnStartX = (width - totalBtnWidth) / 2;
+
+        ImGui.SetCursorPosX(btnStartX);
 
         ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 4f);
-        ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.65f, 0.4f, 0.4f, 1f));
-        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.8f, 0.5f, 0.5f, 1f));
-        ImGui.PushStyleColor(ImGuiCol.ButtonActive, new Vector4(0.9f, 0.6f, 0.6f, 1f));
 
-        if (ImGui.Button($"Edit##btn_{designId}", new Vector2(buttonWidth, 30)))
+        // Apply button - Muted Steel Blue
+        ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.45f, 0.55f, 0.65f, 1f));
+        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.55f, 0.65f, 0.75f, 1f));
+        ImGui.PushStyleColor(ImGuiCol.ButtonActive, new Vector4(0.60f, 0.70f, 0.80f, 1f));
+
+        if (ImGui.Button($"Apply##btn_apply_{designId}", new Vector2(btnWidth, btnHeight)))
+        {
+            bool equipmentOnly = ImGui.GetIO().KeyCtrl;
+            plugin.GlamourerService.ApplyDesign(designId, equipmentOnly);
+        }
+
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.BeginTooltip();
+            ImGui.Text("Apply this design");
+            ImGui.TextDisabled("Ctrl+Click: Equipment only");
+            ImGui.EndTooltip();
+        }
+
+        ImGui.PopStyleColor(3);
+
+        // Edit button - Muted Warm Grey
+        ImGui.SameLine(btnStartX + btnWidth + btnSpacing);
+        ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.55f, 0.50f, 0.45f, 1f));
+        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.65f, 0.60f, 0.55f, 1f));
+        ImGui.PushStyleColor(ImGuiCol.ButtonActive, new Vector4(0.70f, 0.65f, 0.60f, 1f));
+
+        if (ImGui.Button($"Edit##btn_edit_{designId}", new Vector2(btnWidth, btnHeight)))
         {
             designEditorWindow?.OpenEdit(designId);
+        }
+
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.BeginTooltip();
+            ImGui.Text("Edit configuration");
+            ImGui.EndTooltip();
+        }
+
+        ImGui.PopStyleColor(3);
+
+        // Delete button - Muted Red-Grey
+        ImGui.SameLine(btnStartX + (btnWidth * 2) + (btnSpacing * 2));
+        ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.60f, 0.40f, 0.40f, 1f));
+        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.70f, 0.50f, 0.50f, 1f));
+        ImGui.PushStyleColor(ImGuiCol.ButtonActive, new Vector4(0.75f, 0.55f, 0.55f, 1f));
+
+        if (ImGui.Button($"Delete##btn_delete_{designId}", new Vector2(deleteBtnWidth, btnHeight)))
+        {
+            if (ImGui.GetIO().KeyCtrl)
+            {
+                plugin.GlamourerService.DeleteDesign(designId);
+            }
+        }
+
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.BeginTooltip();
+            ImGui.Text("Delete the design from Glamourer");
+            ImGui.TextDisabled("Ctrl+Click to confirm");
+            ImGui.EndTooltip();
         }
 
         ImGui.PopStyleColor(3);

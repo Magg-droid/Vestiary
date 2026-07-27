@@ -39,7 +39,7 @@ public sealed class Plugin : IDalamudPlugin
     {
         Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
 
-        GlamourerService = new GlamourerService(PluginInterface);
+        GlamourerService = new GlamourerService(PluginInterface, Log);
         CollectionService = new CollectionService(Configuration, GlamourerService);
         DesignMetadataService = new DesignMetadataService(Configuration, GlamourerService);
         TextureCache = new TextureCache(TextureProvider);

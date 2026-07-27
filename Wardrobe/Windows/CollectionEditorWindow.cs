@@ -61,10 +61,8 @@ public class CollectionEditorWindow : Window, IDisposable
         ImGui.Spacing();
         ImGui.Spacing();
         
-        // Title - centered style
+        // Title - left aligned
         string windowTitle = isEditing ? "Edit Collection" : "Create New Collection";
-        float titleWidth = ImGui.CalcTextSize(windowTitle).X;
-        ImGui.SetCursorPosX((ImGui.GetWindowWidth() - titleWidth) / 2);
         ImGui.TextColored(new Vector4(0.9f, 0.8f, 0.7f, 1f), windowTitle);
         
         ImGui.Spacing();
@@ -91,13 +89,8 @@ public class CollectionEditorWindow : Window, IDisposable
         ImGui.Separator();
         ImGui.Spacing();
 
-        // Buttons - centered
+        // Buttons - left aligned
         float buttonWidth = 100;
-        float buttonSpacing = 10;
-        float totalButtonWidth = (buttonWidth * 2) + buttonSpacing;
-        float buttonPosX = (ImGui.GetWindowWidth() - totalButtonWidth) / 2;
-
-        ImGui.SetCursorPosX(buttonPosX);
 
         if (ImGui.Button("Save", new Vector2(buttonWidth, 0)))
         {
@@ -151,9 +144,6 @@ public class CollectionEditorWindow : Window, IDisposable
             ImGui.Spacing();
             
             float buttonWidth = 100;
-            float buttonPosX = (ImGui.GetWindowWidth() - buttonWidth) / 2;
-            ImGui.SetCursorPosX(buttonPosX);
-            
             if (ImGui.Button("OK##EmptyName", new Vector2(buttonWidth, 0)))
             {
                 ImGui.CloseCurrentPopup();
