@@ -1,16 +1,16 @@
-# Wardrobe v0.0 Release - MVP Complete
+# Wardrobe v0.1.0 Release
 
 **Status**: ✅ **READY FOR RELEASE**  
 **Date**: 2026-07-27  
-**Version**: 0.0
+**Version**: 0.1.0
 
 ---
 
 ## Overview
 
-Wardrobe v0.0 is the first release of a visual companion plugin for Glamourer. It provides a gallery-based interface for browsing and applying Glamourer outfit designs with custom thumbnails and collection organization.
+Wardrobe v0.1.0 is the first release of a visual companion plugin for Glamourer. It provides a gallery-based interface for browsing and applying Glamourer outfit designs with custom thumbnails and collection organization.
 
-**Core Vision**: Help players with lots of Glamourer designs find and apply outfits quickly through visual browsing instead of text searching.
+**Core Vision**: Wardrobe is a visual companion for Glamourer that helps players browse, organise and apply outfit designs through thumbnails and collections instead of scrolling long text lists.
 
 ---
 
@@ -145,9 +145,9 @@ Wardrobe v0.0 is the first release of a visual companion plugin for Glamourer. I
 
 ---
 
-## Known Limitations (Post-v0.0)
+## Known Limitations (Post-v0.1.0)
 
-These features are not included in v0.0 but could be added in future releases:
+These features are not included in v0.1.0 but could be added in future releases:
 
 - Search/filter within collection
 - Drag-and-drop to apply outfits
@@ -237,13 +237,13 @@ None - this is the first release.
 
 ## Future Roadmap
 
-### v0.1
+### v0.2.0
 - Search/filter?
 
 ---
 
 ## Conclusion
 
-Wardrobe v0.0 is ready for initial release and user testing. All core features are implemented, tested, and working as intended. The plugin provides a solid foundation for visual outfit browsing and management.
+Wardrobe v0.1.0 is ready for initial release and user testing. All core features are implemented, tested, and working as intended. The plugin provides a solid foundation for visual outfit browsing and management.
 
 **Next Step**: Release to players for feedback and iteration.
