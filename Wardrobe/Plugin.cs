@@ -164,16 +164,44 @@ public sealed class Plugin : IDalamudPlugin
                 
                 // Get image from clipboard
                 Image? image = null;
+                string? sourceFilePath = null;
                 try
                 {
                     if (Clipboard.ContainsImage())
                     {
                         image = Clipboard.GetImage();
-                        Log.Information("Successfully retrieved image from clipboard");
+                        Log.Information("Successfully retrieved image data from clipboard");
+                    }
+                    else if (Clipboard.ContainsFileDropList())
+                    {
+                        // Check if file was copied from File Explorer (Ctrl+C)
+                        var files = Clipboard.GetFileDropList();
+                        Log.Information($"Clipboard contains {files.Count} file(s)");
+                        
+                        // Find first image file
+                        var imageExtensions = new[] { ".jpg", ".jpeg", ".png", ".bmp", ".gif", ".webp" };
+                        foreach (var file in files)
+                        {
+                            if (string.IsNullOrEmpty(file))
+                                continue;
+                            
+                            var ext = Path.GetExtension(file).ToLower();
+                            if (imageExtensions.Contains(ext) && File.Exists(file))
+                            {
+                                sourceFilePath = file;
+                                Log.Information($"Found image file in clipboard: {file}");
+                                break;
+                            }
+                        }
+                        
+                        if (sourceFilePath == null)
+                        {
+                            Log.Warning("Clipboard contains files but no image files found");
+                        }
                     }
                     else
                     {
-                        Log.Warning("Clipboard does not contain an image");
+                        Log.Warning("Clipboard does not contain an image or image files");
                     }
                 }
                 catch (Exception clipboardEx)
@@ -182,6 +210,7 @@ public sealed class Plugin : IDalamudPlugin
                     return;
                 }
 
+                // Process clipboard image data
                 if (image != null)
                 {
                     try
@@ -207,6 +236,32 @@ public sealed class Plugin : IDalamudPlugin
                     catch (Exception saveEx)
                     {
                         Log.Error(saveEx, "Failed to save image");
+                    }
+                }
+                // Process file from File Explorer
+                else if (sourceFilePath != null)
+                {
+                    try
+                    {
+                        // Generate filename with original extension
+                        var originalExtension = Path.GetExtension(sourceFilePath);
+                        var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss_fff");
+                        var filename = $"clipboard_{timestamp}{originalExtension}";
+                        var thumbnailsDir = Path.Combine(PluginDirectory, "thumbnails");
+                        var savePath = Path.Combine(thumbnailsDir, filename);
+
+                        // Create thumbnails directory if needed
+                        Directory.CreateDirectory(thumbnailsDir);
+
+                        // Copy file
+                        File.Copy(sourceFilePath, savePath, overwrite: true);
+
+                        Log.Information($"Image file copied to: {savePath}");
+                        onImageSaved(savePath);
+                    }
+                    catch (Exception copyEx)
+                    {
+                        Log.Error(copyEx, "Failed to copy image file");
                     }
                 }
             }
