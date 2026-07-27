@@ -57,6 +57,7 @@ Examples:
 - Wedding
 - Combat
 - Seasonal
+- Uncategorized
 
 A collection can be linked to one or more Glamourer folder paths.
 
@@ -66,6 +67,15 @@ Example:
 
 → SFW/Dresses
 → NSFW/Dresses
+
+A collection can also have NO paths, in which case it displays designs that don't exist in any folder (root-level designs).
+
+Example:
+
+"Uncategorized" (empty paths)
+
+→ Shows "Spring Shirt - Caroline Towel"
+→ Hides "SFW/Dresses/AM - Jaque Bridesmaid"
 
 Collections exist only inside Wardrobe.
 
@@ -137,11 +147,22 @@ Wardrobe tells Glamourer to apply the design
 
 # Current Scope (MVP)
 
+## Implemented ✅
 - Read Glamourer designs
-- Read Glamourer folders
-- Create collections
-- Display gallery
-- Apply designs
-- Upload thumbnails
+- Read Glamourer folder structure
+- Create/edit/delete collections
+- Collections with multiple folder paths per collection
+- Uncategorized collections (designs without folders)
+- Filter designs by collection
+- Persistent collection storage in plugin Configuration
+- Right-click context menu for Edit/Delete on collection tabs
+
+## TODO ❌
+- Display gallery with outfit thumbnails
+- Apply designs (click to apply)
+- Upload/capture thumbnails
+- Search/filter within collection
+- Drag-and-drop to apply outfits
+- Thumbnail system with persistent storage
 
 Everything else is considered future work.

@@ -27,23 +27,30 @@ public sealed class Plugin : IDalamudPlugin
     public readonly WindowSystem WindowSystem = new("Wardrobe");
     private ConfigWindow ConfigWindow { get; init; }
     private MainWindow MainWindow { get; init; }
+    private CollectionEditorWindow CollectionEditorWindow { get; init; }
 
     public GlamourerService GlamourerService { get; init; }
+    public CollectionService CollectionService { get; init; }
 
     public Plugin()
     {
         Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
 
         GlamourerService = new GlamourerService(PluginInterface);
+        CollectionService = new CollectionService(Configuration, GlamourerService);
 
         // You might normally want to embed resources and load them from the manifest stream
         var goatImagePath = Path.Combine(PluginInterface.AssemblyLocation.Directory?.FullName!, "goat.png");
 
         ConfigWindow = new ConfigWindow(this);
-        MainWindow = new MainWindow(this, goatImagePath);
+        MainWindow = new MainWindow(this, goatImagePath, CollectionService);
+        CollectionEditorWindow = new CollectionEditorWindow(CollectionService);
 
         WindowSystem.AddWindow(ConfigWindow);
         WindowSystem.AddWindow(MainWindow);
+        WindowSystem.AddWindow(CollectionEditorWindow);
+        
+        MainWindow.SetCollectionEditorWindow(CollectionEditorWindow);
 
         CommandManager.AddHandler(CommandName, new CommandInfo(OnCommand)
         {

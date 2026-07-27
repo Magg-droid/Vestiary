@@ -1,15 +1,18 @@
 ﻿using Dalamud.Configuration;
 using System;
+using System.Collections.Generic;
+using Wardrobe.Models;
 
 namespace Wardrobe;
 
 [Serializable]
 public class Configuration : IPluginConfiguration
 {
-    public int Version { get; set; } = 0;
+    public int Version { get; set; } = 1;
 
     public bool IsConfigWindowMovable { get; set; } = true;
     public bool SomePropertyToBeSavedAndWithADefault { get; set; } = true;
+    public List<Collection> Collections { get; set; } = new();
 
     // The below exists just to make saving less cumbersome
     public void Save()
