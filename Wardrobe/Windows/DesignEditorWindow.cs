@@ -261,6 +261,26 @@ public class DesignEditorWindow : Window, IDisposable
             // Copy the new image with unique name
             File.Copy(selectedPath, destinationPath, overwrite: true);
 
+            // If the source was a clipboard temp file in the thumbnails directory, delete it now
+            // that we've copied it to the design-specific path
+            var thumbnailsDirNorm = Path.GetFullPath(thumbnailsDir);
+            var sourceDir = Path.GetFullPath(Path.GetDirectoryName(selectedPath) ?? "");
+            var sourceFileName = Path.GetFileName(selectedPath);
+            if (string.Equals(sourceDir, thumbnailsDirNorm, StringComparison.OrdinalIgnoreCase) &&
+                sourceFileName.StartsWith("clipboard_", StringComparison.OrdinalIgnoreCase))
+            {
+                try
+                {
+                    plugin.TextureCache.InvalidateTexture(selectedPath);
+                    File.Delete(selectedPath);
+                    Plugin.Log.Information($"Deleted clipboard temp file: {selectedPath}");
+                }
+                catch (Exception deleteEx)
+                {
+                    Plugin.Log.Warning(deleteEx, $"Failed to delete clipboard temp file: {selectedPath}");
+                }
+            }
+
             customImagePath = destinationPath;
             Plugin.Log.Information($"New image saved with unique name: {destinationPath}");
         }
