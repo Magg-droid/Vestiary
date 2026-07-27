@@ -24,7 +24,6 @@ public class MainWindow : Window, IDisposable
     private CollectionEditorWindow? collectionEditorWindow;
     private DesignEditorWindow? designEditorWindow;
     private Guid selectedCollectionId = Guid.Empty;
-    private Dictionary<Guid, IntPtr> thumbnailCache = new();
 
     // We give this window a hidden ID using ##.
     // The user will see "My Amazing Window" as window title,
@@ -61,6 +60,22 @@ public class MainWindow : Window, IDisposable
     public void SetDesignEditorWindow(DesignEditorWindow editor)
     {
         designEditorWindow = editor;
+    }
+
+    /// <summary>
+    /// Check if a design has a custom image.
+    /// </summary>
+    private bool HasCustomImage(Guid designId)
+    {
+        try
+        {
+            var metadata = designMetadataService.GetMetadata(designId);
+            return !string.IsNullOrEmpty(metadata?.CustomImagePath) && File.Exists(metadata.CustomImagePath);
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     public void Dispose() { }
@@ -306,15 +321,46 @@ public class MainWindow : Window, IDisposable
                 1f
             );
 
-        // Center text in thumbnail
-        string thumbText = "No Preview";
-        Vector2 textSize = ImGui.CalcTextSize(thumbText);
-        Vector2 textPos =
-            thumbStartPos
-            + new Vector2((thumbWidth - textSize.X) / 2, (thumbHeight - textSize.Y) / 2);
-        ImGui
-            .GetWindowDrawList()
-            .AddText(textPos, ImGui.GetColorU32(new Vector4(0.5f, 0.5f, 0.55f, 0.7f)), thumbText);
+        // Try to load and display custom image or fallback to placeholder
+        var metadata = designMetadataService.GetMetadata(designId);
+        bool hasCustomImage = !string.IsNullOrEmpty(metadata?.CustomImagePath) && File.Exists(metadata.CustomImagePath);
+        
+        if (hasCustomImage && metadata?.CustomImagePath != null)
+        {
+            // Try to load the texture
+            var wrap = plugin.TextureCache.GetOrLoadTexture(metadata.CustomImagePath)?.GetWrapOrDefault();
+            
+            if (wrap != null)
+            {
+                // Display the actual image texture
+                ImGui.GetWindowDrawList().AddImage(
+                    wrap.Handle,
+                    thumbStartPos,
+                    thumbEndPos,
+                    Vector2.Zero,
+                    Vector2.One,
+                    ImGui.GetColorU32(Vector4.One)
+                );
+            }
+            else
+            {
+                // Fallback: show placeholder with custom image indicator
+                string thumbText = "✓ Custom Image";
+                Vector4 thumbTextColor = new Vector4(0.6f, 0.85f, 0.6f, 0.9f);
+                Vector2 textSize = ImGui.CalcTextSize(thumbText);
+                Vector2 textPos = thumbStartPos + new Vector2((thumbWidth - textSize.X) / 2, (thumbHeight - textSize.Y) / 2);
+                ImGui.GetWindowDrawList().AddText(textPos, ImGui.GetColorU32(thumbTextColor), thumbText);
+            }
+        }
+        else
+        {
+            // No custom image - show placeholder
+            string thumbText = "No Preview";
+            Vector4 thumbTextColor = new Vector4(0.5f, 0.5f, 0.55f, 0.7f);
+            Vector2 textSize = ImGui.CalcTextSize(thumbText);
+            Vector2 textPos = thumbStartPos + new Vector2((thumbWidth - textSize.X) / 2, (thumbHeight - textSize.Y) / 2);
+            ImGui.GetWindowDrawList().AddText(textPos, ImGui.GetColorU32(thumbTextColor), thumbText);
+        }
 
         ImGui.Dummy(new Vector2(thumbWidth, thumbHeight));
 
