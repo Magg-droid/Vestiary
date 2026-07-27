@@ -73,6 +73,6 @@ public class TextureCache : IDisposable
 
     public void Dispose()
     {
-        ClearAll();
+        textureCache.Clear();
     }
 }
