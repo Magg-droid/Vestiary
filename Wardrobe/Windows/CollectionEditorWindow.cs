@@ -170,22 +170,6 @@ public class CollectionEditorWindow : Window, IDisposable
         isEditing = false;
     }
 
-    /// <summary>
-    /// Custom helper for multiline input with placeholder hint (simulating InputTextMultilineWithHint).
-    /// </summary>
-    private void InputTextMultilineWithHint(string label, string hint, ref string value, uint maxLength, Vector2 size)
-    {
-        ImGui.InputTextMultiline(label, ref value, maxLength, size, ImGuiInputTextFlags.None);
-        
-        // Show hint text when field is empty
-        if (string.IsNullOrEmpty(value))
-        {
-            ImGui.SetCursorPosY(ImGui.GetCursorPosY() - size.Y - ImGui.GetStyle().FramePadding.Y);
-            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetStyle().FramePadding.X + 1);
-            ImGui.TextDisabled(hint);
-        }
-    }
-
     public void Dispose()
     {
     }
