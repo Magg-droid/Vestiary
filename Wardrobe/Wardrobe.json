@@ -1,10 +1,25 @@
 {
-  "Author": "your name here",
+  "Author": "Maggie",
   "Name": "Wardrobe",
-  "Punchline": "A short one-liner that shows up in /xlplugins.",
-  "Description": "A description that shows up in /xlplugins. Use /wardrobe to open the plugin.",
+  "InternalName": "Wardrobe",
+  "AssemblyVersion": "0.1.0.0",
+  "Description": "A visual companion for Glamourer. Browse, organize, and apply outfit designs through custom thumbnails and collections.",
   "ApplicableVersion": "any",
+  "RepoUrl": "https://github.com/Magg-droid/Wardrobe",
   "Tags": [
-    "wardrobe"
-  ]
+    "glamourer",
+    "wardrobe",
+    "collections",
+    "thumbnails",
+    "visual",
+    "gallery",
+    "outfits"
+  ],
+  "DalamudApiLevel": 15,
+  "LoadRequiredState": 0,
+  "LoadSync": false,
+  "CanUnloadAsync": false,
+  "LoadPriority": 0,
+  "Punchline": "Browse your outfits, not your text list.",
+  "AcceptsFeedback": true
 }
