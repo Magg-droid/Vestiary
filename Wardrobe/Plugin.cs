@@ -22,6 +22,7 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static IPluginLog Log { get; private set; } = null!;
 
     private const string CommandName = "/wardrobe";
+    private const string ShortCommandName = "/wr";
 
     public Configuration Configuration { get; init; }
 
@@ -112,7 +113,11 @@ public sealed class Plugin : IDalamudPlugin
 
         CommandManager.AddHandler(CommandName, new CommandInfo(OnCommand)
         {
-            HelpMessage = "A useful message to display in /xlhelp"
+            HelpMessage = "Open the Wardrobe plugin"
+        });
+        CommandManager.AddHandler(ShortCommandName, new CommandInfo(OnCommand)
+        {
+            HelpMessage = "Open the Wardrobe plugin (shortcut)"
         });
 
         // Tell the UI system that we want our windows to be drawn through the window system
@@ -146,6 +151,7 @@ public sealed class Plugin : IDalamudPlugin
         TextureCache.Dispose();
 
         CommandManager.RemoveHandler(CommandName);
+        CommandManager.RemoveHandler(ShortCommandName);
     }
 
     private void OnCommand(string command, string args)
