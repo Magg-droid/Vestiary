@@ -34,6 +34,14 @@ public class MainWindow : Window, IDisposable
 
     public override void Draw()
     {
-        ImGui.Text("Wardrobe");
+        try
+        {
+            var designs = plugin.GlamourerService.GetDesignList();
+            ImGui.Text($"Wardrobe - {designs.Count} designs found");
+        }
+        catch (Exception)
+        {
+            ImGui.TextColored(new Vector4(1, 0, 0, 1), "Glamourer not found or not installed");
+        }
     }
 }

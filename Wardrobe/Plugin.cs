@@ -1,10 +1,12 @@
 ﻿using Dalamud.Game.Command;
 using Dalamud.IoC;
 using Dalamud.Plugin;
+using System;
 using System.IO;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
 using Wardrobe.Windows;
+using Wardrobe.Services;
 
 namespace Wardrobe;
 
@@ -26,9 +28,13 @@ public sealed class Plugin : IDalamudPlugin
     private ConfigWindow ConfigWindow { get; init; }
     private MainWindow MainWindow { get; init; }
 
+    public GlamourerService GlamourerService { get; init; }
+
     public Plugin()
     {
         Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
+
+        GlamourerService = new GlamourerService(PluginInterface);
 
         // You might normally want to embed resources and load them from the manifest stream
         var goatImagePath = Path.Combine(PluginInterface.AssemblyLocation.Directory?.FullName!, "goat.png");
@@ -77,6 +83,16 @@ public sealed class Plugin : IDalamudPlugin
 
     private void OnCommand(string command, string args)
     {
+        try
+        {
+            var designs = GlamourerService.GetDesignList();
+            Log.Information($"Wardrobe found {designs.Count} Glamourer designs.");
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"Glamourer not found or not installed: {ex.Message}");
+        }
+        
         // In response to the slash command, toggle the display status of our main ui
         MainWindow.Toggle();
     }
