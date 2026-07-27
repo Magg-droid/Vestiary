@@ -28,9 +28,11 @@ public sealed class Plugin : IDalamudPlugin
     private ConfigWindow ConfigWindow { get; init; }
     private MainWindow MainWindow { get; init; }
     private CollectionEditorWindow CollectionEditorWindow { get; init; }
+    private DesignEditorWindow DesignEditorWindow { get; init; }
 
     public GlamourerService GlamourerService { get; init; }
     public CollectionService CollectionService { get; init; }
+    public DesignMetadataService DesignMetadataService { get; init; }
 
     public Plugin()
     {
@@ -38,19 +40,25 @@ public sealed class Plugin : IDalamudPlugin
 
         GlamourerService = new GlamourerService(PluginInterface);
         CollectionService = new CollectionService(Configuration, GlamourerService);
+        DesignMetadataService = new DesignMetadataService(Configuration, GlamourerService);
 
-        // You might normally want to embed resources and load them from the manifest stream
-        var goatImagePath = Path.Combine(PluginInterface.AssemblyLocation.Directory?.FullName!, "goat.png");
+        // Load plugin assets
+        var pluginDir = PluginInterface.AssemblyLocation.Directory?.FullName!;
+        var goatImagePath = Path.Combine(pluginDir, "goat.png");
+        var noPreviewImagePath = Path.Combine(pluginDir, "..", "..", "Data", "no-preview.jpg");
 
         ConfigWindow = new ConfigWindow(this);
-        MainWindow = new MainWindow(this, goatImagePath, CollectionService);
+        MainWindow = new MainWindow(this, goatImagePath, CollectionService, DesignMetadataService, noPreviewImagePath);
         CollectionEditorWindow = new CollectionEditorWindow(CollectionService);
+        DesignEditorWindow = new DesignEditorWindow(DesignMetadataService, GlamourerService);
 
         WindowSystem.AddWindow(ConfigWindow);
         WindowSystem.AddWindow(MainWindow);
         WindowSystem.AddWindow(CollectionEditorWindow);
+        WindowSystem.AddWindow(DesignEditorWindow);
         
         MainWindow.SetCollectionEditorWindow(CollectionEditorWindow);
+        MainWindow.SetDesignEditorWindow(DesignEditorWindow);
 
         CommandManager.AddHandler(CommandName, new CommandInfo(OnCommand)
         {

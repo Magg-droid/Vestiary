@@ -13,6 +13,7 @@ public class Configuration : IPluginConfiguration
     public bool IsConfigWindowMovable { get; set; } = true;
     public bool SomePropertyToBeSavedAndWithADefault { get; set; } = true;
     public List<Collection> Collections { get; set; } = new();
+    public List<DesignMetadata> DesignMetadata { get; set; } = new();
 
     // The below exists just to make saving less cumbersome
     public void Save()
