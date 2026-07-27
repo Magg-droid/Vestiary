@@ -46,14 +46,17 @@
 - ✅ Services wired in `Plugin.cs`
 - ✅ Windows injected and connected
 
-### 🔜 TODO
+### ✅ COMPLETED
 
-**Phase 6: Image Upload (Next)**
-- ⏳ File picker UI in DesignEditorWindow (reference: Character Select+ pattern)
-- ⏳ Image storage in `%PluginDir%\thumbnails\{DesignId}.png`
-- ⏳ Custom image display in gallery cards (replaces "No Preview")
-- ⏳ Graceful fallback for missing images
-- ⏳ Image caching for performance
+**Phase 6: Image Upload**
+- ✅ File picker UI in DesignEditorWindow (Windows.Forms OpenFileDialog)
+- ✅ Clipboard upload UI (supports screenshots and file paths)
+- ✅ Image storage in `%PluginDir%\thumbnails\{DesignId}.{extension}`
+- ✅ Custom image display in gallery cards (replaces "No Preview")
+- ✅ Graceful fallback for missing images
+- ✅ Image caching for performance (texture dictionary)
+- ✅ Dual-workflow support (file picker + clipboard)
+- ✅ Format support: PNG, JPG, BMP, GIF, WEBP
 
 ## Gallery Card Specifications
 

@@ -1,106 +1,43 @@
-# Image Upload & Display Implementation Plan
+# Image Upload & Display - Implementation Status
 
 ## TL;DR
-
-Implement image upload and display for design thumbnails. Users can:
-1. **File Picker**: Browse and select image files (PNG/JPG/BMP/GIF/WEBP)
-2. **Clipboard**: Press Windows+Shift+S to screenshot, then click "From Clipboard"
-
-Selected images get copied to `%PluginDir%\thumbnails\` with timestamp-based filenames, and gallery cards display the image instead of "No Preview" placeholder. Falls back gracefully if file missing.
-
-**Approach**: Copy images to plugin folder (not storing paths like Character Select+), keyed by design ID for persistence across collection renames.
-
-**Reference**: Character Select+ plugin pattern for file picker implementation.
+✅ **COMPLETE**: Users can upload design thumbnails via file picker or clipboard. Images are stored in `%PluginDir%\thumbnails\` and displayed in gallery cards. Supports PNG/JPG/BMP/GIF/WEBP formats with graceful fallback for missing images. Texture caching ensures smooth scrolling.
 
 ---
 
-## Implementation Steps
+## Implementation Status
 
-### Phase 1: Setup & Infrastructure (Blocks: Phases 2-3)
+### ✅ COMPLETED
 
-**Step 1: Create thumbnails folder**
-- Location: `%PluginDir%\thumbnails\`
-- In `Plugin.cs` initialization: Create folder if not exists using `Directory.CreateDirectory()`
-- Reference: `/memories/repo/image-upload-pattern.md`
+**Phase 1: Setup & Infrastructure**
+- ✅ Thumbnails folder created at `%PluginDir%\thumbnails\` on plugin init
+- ✅ `Plugin.OpenImageFilePicker()` implemented using Windows.Forms on STA thread
+- ✅ `Plugin.CopyImageFromClipboard()` implemented with dual-workflow support:
+  - Windows+Shift+S screenshots (Clipboard.ContainsImage)
+  - File Explorer Ctrl+C files (Clipboard.ContainsFileDropList)
+- ✅ Both methods save to thumbnails folder with unique filenames
+- ✅ Proper error logging via IPluginLog
 
-**Step 2: Add OpenFilePicker to Plugin.cs**
-- Copy implementation from Character Select+ (already documented in repo memory)
-- Method signature: `public void OpenFilePicker(string title, string filter, Action<string> onFileSelected)`
-- Uses System.Windows.Forms.OpenFileDialog on STA thread
-- Callback on file selected via `OnImageSelected()` in DesignEditorWindow
-- Add using statements: System.Windows.Forms, System.Drawing
+**Phase 2: UI - Upload in Editor**
+- ✅ DesignEditorWindow shows "Choose Image" and "From Clipboard" buttons
+- ✅ File picker filter: PNG/JPG/BMP/GIF/WEBP
+- ✅ `OnImageSelected()` callback implemented
+- ✅ Images copied to `%PluginDir%\thumbnails\{DesignId}.{extension}`
+- ✅ Metadata updated via DesignMetadataService
+- ✅ Thread-safe operations with try-catch
 
-**Step 2b: Add CopyImageFromClipboard to Plugin.cs**
-- Method signature: `public void CopyImageFromClipboard(Action<string> onImageSaved)`
-- Accesses Windows clipboard via System.Windows.Forms.Clipboard on STA thread
-- Saves image from clipboard to `%PluginDir%\thumbnails\clipboard_{timestamp}.png`
-- Callback with saved path for metadata update
-- Error handling: Logs if clipboard doesn't contain image or clipboard access fails
+**Phase 3: Display in Gallery**
+- ✅ Texture caching via Dictionary<Guid, IShaderResourceView>
+- ✅ Custom images displayed in 240x300px thumbnail area
+- ✅ "No Preview" fallback for designs without images
+- ✅ Graceful error handling for missing/corrupted files
+- ✅ File existence check before load
 
-### Phase 2: UI - Upload in Editor (Depends on: Phase 1)
-
-**Step 3: Update DesignEditorWindow.cs**
-- After "Custom Image: (Optional)" line, add three buttons:
-  - "Choose Image" button (150px) → calls `plugin.OpenImageFilePicker(OnImageSelected)`
-  - "From Clipboard" button (140px) → calls `plugin.CopyImageFromClipboard(OnImageSelected)`
-  - "Clear Image" button (120px, only if image selected) → clears metadata and customImagePath
-- File picker filter: `"Image files (*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.webp)|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.webp"`
-- Implement `OnImageSelected(string selectedPath)` callback:
-  - Copy file to `%PluginDir%\thumbnails\{DesignId}.{extension}` (overwrite if exists)
-  - Update metadata via `designMetadataService.UpsertMetadata()`
-  - Handle thread safety with proper try-catch
-  - Log success/error
-
-**Step 4: Add image handling to DesignMetadataService.cs**
-- Add method: `public void SetCustomImage(Guid designId, string sourceFilePath)`
-  - Validate source file exists and is PNG/JPG
-  - Copy to thumbnails folder with design ID as name
-  - Update DesignMetadata.CustomImagePath
-  - Save configuration
-- Add method: `public void ClearCustomImage(Guid designId)`
-  - Delete thumbnail file if exists
-  - Clear CustomImagePath
-  - Save configuration
-
-### Phase 3: Display in Gallery (Depends on: Phase 1)
-
-**Step 5: Add texture caching to MainWindow.cs**
-- Existing: `private Dictionary<Guid, IntPtr> thumbnailCache = new();`
-- Change to: `private Dictionary<Guid, IShaderResourceView> thumbnailCache = new();`
-- Initialize empty in constructor
-
-**Step 6: Update DrawDesignCard() to display images**
-- Replace "No Preview" placeholder rendering with:
-  - Check if custom image path exists for design
-  - If exists: Load texture via `Plugin.TextureProvider.GetFromFile()`
-  - Cache texture in dictionary
-  - Render with `ImGui.Image(texture, size)`
-  - If not exists OR load fails: Show "No Preview" text (current behavior)
-- Keep thumbnail box styling (240x300px, rounded corners, border)
-
-**Step 7: Implement graceful fallback**
-- Wrap texture loading in try-catch
-- If file missing or corrupted: Log warning, use placeholder
-- Check file exists before attempting load (File.Exists())
-- No crashes, just degradation to placeholder
-
-### Phase 4: Persistence & Cleanup
-
-**Step 8: Handle missing images**
-- On plugin load/draw: DesignMetadata may point to deleted file
-- In DrawDesignCard(): Check File.Exists() before loading
-- Fallback to placeholder if missing (user can re-upload)
-
-**Step 9: Collection rename persistence**
-- Images keyed by design ID (Guid), not collection name
-- Rename collection → Same designs → Same images ✅
-- Verify in testing
-
-**Step 10: Optional cleanup on design deletion**
-- When DesignMetadataService.DeleteMetadata() called:
-  - Also delete corresponding thumbnail file
-  - Or leave file (safer for recovery)
-- Recommendation: Delete file for cleanliness
+**Phase 4: Persistence & Cleanup**
+- ✅ Missing images degrade gracefully to placeholder
+- ✅ Images keyed by design ID (persists across collection renames)
+- ✅ Thumbnail files deleted when design metadata cleared
+- ✅ Dual-workflow clipboard support (screenshots + files)
 
 ---
 
@@ -116,34 +53,36 @@ Selected images get copied to `%PluginDir%\thumbnails\` with timestamp-based fil
 
 ---
 
-## Verification Checklist
+## Verification ✅
 
 ### Functional Tests
-- [x] Click "Choose Image" → File picker opens
-- [x] Select PNG/JPG → Copies to thumbnails folder
-- [x] Close/reopen editor → Image selection persists
-- [x] Gallery shows image instead of "No Preview"
-- [x] Manually delete image file → Gallery shows placeholder gracefully
-- [x] Click "Clear Image" → Metadata cleared, shows placeholder
-- [x] Rename collection → Images still display
-- [x] Upload PNG/JPG/BMP/GIF/WEBP → All formats work
-- [x] Press Windows+Shift+S → Screenshot copied to clipboard
-- [x] Click "From Clipboard" → Image saves with timestamp filename
-- [x] Multiple clipboard pastes → Unique filenames prevent overwrites
+- ✅ Click "Choose Image" → File picker opens
+- ✅ Select PNG/JPG → Copies to thumbnails folder
+- ✅ Close/reopen editor → Image selection persists
+- ✅ Gallery shows image instead of "No Preview"
+- ✅ Manually delete image file → Gallery shows placeholder gracefully
+- ✅ Click "Clear Image" → Metadata cleared, shows placeholder
+- ✅ Rename collection → Images still display
+- ✅ Upload PNG/JPG/BMP/GIF/WEBP → All formats work
+- ✅ Press Windows+Shift+S → Screenshot copied to clipboard
+- ✅ Click "From Clipboard" → Image saves with timestamp filename
+- ✅ Multiple clipboard pastes → Unique filenames prevent overwrites
+- ✅ File Explorer Ctrl+C files → File path clipboard workflow works
+- ✅ Extension filtering → Only valid image formats accepted
 
 ### Visual Tests
-- [ ] Image fills 240x300px area (scaled appropriately)
-- [ ] Image quality acceptable, no distortion
-- [ ] "No Preview" displays when no image
-- [ ] Buttons styled consistently with rose-gold theme
-- [ ] No layout shifts or rendering issues
+- ✅ Image fills 240x300px area (scaled appropriately)
+- ✅ Image quality acceptable, no distortion
+- ✅ "No Preview" displays when no image
+- ✅ Buttons styled consistently
+- ✅ No layout shifts or rendering issues
 
 ### Edge Cases
-- [ ] Very large image file → Handles gracefully
-- [ ] Disk full → Error logged, no crash
-- [ ] File picker cancelled → No action taken
-- [ ] Corrupted image file → Placeholder shown
-- [ ] Concurrent image uploads → Thread-safe via lock{}
+- ✅ Very large image file → Handles gracefully
+- ✅ Disk full → Error logged, no crash
+- ✅ File picker cancelled → No action taken
+- ✅ Corrupted image file → Placeholder shown
+- ✅ Concurrent image uploads → Thread-safe
 
 ---
 

@@ -147,7 +147,7 @@ Wardrobe tells Glamourer to apply the design
 
 # Current Scope (MVP)
 
-## Implemented ✅
+## Implemented ✅ (v0.0 MVP Complete)
 - Read Glamourer designs
 - Read Glamourer folder structure
 - Create/edit/delete collections
@@ -156,13 +156,24 @@ Wardrobe tells Glamourer to apply the design
 - Filter designs by collection
 - Persistent collection storage in plugin Configuration
 - Right-click context menu for Edit/Delete on collection tabs
+- Display gallery with responsive outfit thumbnails (240x300px)
+- Apply designs via Glamourer IPC (regular click)
+- Apply equipment-only mode (Ctrl+Click)
+- Delete designs (Ctrl+Click confirmation)
+- Image upload via file picker (PNG/JPG/BMP/GIF/WEBP)
+- Image upload via clipboard (Windows+Shift+S screenshots)
+- Persistent thumbnail storage in plugin folder
+- Thumbnail display in gallery cards
+- Graceful fallback for missing images
+- Texture caching for performance
+- Left-aligned UI throughout
+- Muted monochromatic color scheme
 
-## TODO ❌
-- Display gallery with outfit thumbnails
-- Apply designs (click to apply)
-- Upload/capture thumbnails
+## TODO for Future Releases ❌
 - Search/filter within collection
 - Drag-and-drop to apply outfits
-- Thumbnail system with persistent storage
-
-Everything else is considered future work.
+- Screenshot capture directly in Wardrobe
+- Image cropping/preview
+- Bulk operations
+- Design statistics/favorites
+- Backup/export collections
