@@ -1,10 +1,12 @@
-﻿using Dalamud.Game.Command;
-using Dalamud.IoC;
-using Dalamud.Plugin;
-using System;
+﻿using System;
 using System.Drawing;
 using System.IO;
+using System.Runtime.InteropServices;
+using System.Threading;
 using System.Windows.Forms;
+using Dalamud.Game.Command;
+using Dalamud.IoC;
+using Dalamud.Plugin;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
 using Wardrobe.Windows;
@@ -28,12 +30,51 @@ public sealed class Plugin : IDalamudPlugin
     private MainWindow MainWindow { get; init; }
     private CollectionEditorWindow CollectionEditorWindow { get; init; }
     private DesignEditorWindow DesignEditorWindow { get; init; }
+    private CameraWindow CameraWindow { get; init; }
 
     public GlamourerService GlamourerService { get; init; }
     public CollectionService CollectionService { get; init; }
     public DesignMetadataService DesignMetadataService { get; init; }
     public TextureCache TextureCache { get; init; }
     public string PluginDirectory { get; private set; } = string.Empty;
+
+    /// <summary>Whether the camera overlay is currently active (suppresses other windows).</summary>
+    public bool IsCameraActive { get; private set; }
+
+    // Window state saved before camera opens, restored after camera closes
+    private bool wasMainWindowOpen;
+    private bool wasDesignEditorOpen;
+
+    // ── P/Invoke for SendInput (works with DirectInput games like FFXIV) ──
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern uint SendInput(uint nInputs, INPUT[] pInputs, int cbSize);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct INPUT
+    {
+        public uint type;
+        public INPUTUNION u;
+    }
+
+    [StructLayout(LayoutKind.Explicit)]
+    private struct INPUTUNION
+    {
+        [FieldOffset(0)] public KEYBDINPUT ki;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct KEYBDINPUT
+    {
+        public ushort wVk;
+        public ushort wScan;
+        public uint dwFlags;
+        public uint time;
+        public IntPtr dwExtraInfo;
+    }
+
+    private const uint INPUT_KEYBOARD = 1;
+    private const uint KEYEVENTF_KEYUP = 0x0002;
+    private const ushort VK_SCROLL = 0x91;
 
     public Plugin()
     {
@@ -56,13 +97,15 @@ public sealed class Plugin : IDalamudPlugin
 
         ConfigWindow = new ConfigWindow(this);
         MainWindow = new MainWindow(this, goatImagePath, CollectionService, DesignMetadataService, noPreviewImagePath);
-        CollectionEditorWindow = new CollectionEditorWindow(CollectionService);
+        CollectionEditorWindow = new CollectionEditorWindow(this, CollectionService);
         DesignEditorWindow = new DesignEditorWindow(this, DesignMetadataService, GlamourerService);
+        CameraWindow = new CameraWindow(this);
 
         WindowSystem.AddWindow(ConfigWindow);
         WindowSystem.AddWindow(MainWindow);
         WindowSystem.AddWindow(CollectionEditorWindow);
         WindowSystem.AddWindow(DesignEditorWindow);
+        WindowSystem.AddWindow(CameraWindow);
         
         MainWindow.SetCollectionEditorWindow(CollectionEditorWindow);
         MainWindow.SetDesignEditorWindow(DesignEditorWindow);
@@ -99,6 +142,7 @@ public sealed class Plugin : IDalamudPlugin
 
         ConfigWindow.Dispose();
         MainWindow.Dispose();
+        CameraWindow.Dispose();
         TextureCache.Dispose();
 
         CommandManager.RemoveHandler(CommandName);
@@ -122,6 +166,83 @@ public sealed class Plugin : IDalamudPlugin
     
     public void ToggleConfigUi() => ConfigWindow.Toggle();
     public void ToggleMainUi() => MainWindow.Toggle();
+
+    public void ShowCameraOverlay(Action<string> onImageCaptured)
+    {
+        // Save current window states so we can restore them later
+        wasMainWindowOpen = MainWindow.IsOpen;
+        wasDesignEditorOpen = DesignEditorWindow.IsOpen;
+
+        // Hide all plugin windows
+        MainWindow.IsOpen = false;
+        DesignEditorWindow.IsOpen = false;
+        CollectionEditorWindow.IsOpen = false;
+        ConfigWindow.IsOpen = false;
+
+        // Toggle game UI off
+        ToggleGameUI();
+
+        IsCameraActive = true;
+        CameraWindow.Open(onImageCaptured);
+    }
+
+    /// <summary>Called by CameraWindow when it closes, to restore everything.</summary>
+    public void OnCameraClosed()
+    {
+        // Toggle game UI back on
+        ToggleGameUI();
+
+        IsCameraActive = false;
+
+        // Restore windows that were open before camera
+        if (wasMainWindowOpen)
+            MainWindow.IsOpen = true;
+        if (wasDesignEditorOpen)
+            DesignEditorWindow.IsOpen = true;
+    }
+
+    /// <summary>
+    /// Simulate a Scroll Lock key press using SendInput.
+    /// SendInput works with DirectInput-based games (like FFXIV) where keybd_event may fail.
+    /// </summary>
+    private static void ToggleGameUI()
+    {
+        var press = new INPUT
+        {
+            type = INPUT_KEYBOARD,
+            u = new INPUTUNION
+            {
+                ki = new KEYBDINPUT
+                {
+                    wVk = VK_SCROLL,
+                    wScan = 0,
+                    dwFlags = 0,
+                    time = 0,
+                    dwExtraInfo = IntPtr.Zero
+                }
+            }
+        };
+
+        var release = new INPUT
+        {
+            type = INPUT_KEYBOARD,
+            u = new INPUTUNION
+            {
+                ki = new KEYBDINPUT
+                {
+                    wVk = VK_SCROLL,
+                    wScan = 0,
+                    dwFlags = KEYEVENTF_KEYUP,
+                    time = 0,
+                    dwExtraInfo = IntPtr.Zero
+                }
+            }
+        };
+
+        SendInput(1, new[] { press }, Marshal.SizeOf<INPUT>());
+        Thread.Sleep(30);
+        SendInput(1, new[] { release }, Marshal.SizeOf<INPUT>());
+    }
 
     public void OpenImageFilePicker(Action<string> onFileSelected)
     {

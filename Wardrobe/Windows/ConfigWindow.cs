@@ -7,6 +7,7 @@ namespace Wardrobe.Windows;
 
 public class ConfigWindow : Window, IDisposable
 {
+    private readonly Plugin plugin;
     private readonly Configuration configuration;
 
     // We give this window a constant ID using ###.
@@ -20,6 +21,7 @@ public class ConfigWindow : Window, IDisposable
         Size = new Vector2(232, 90);
         SizeCondition = ImGuiCond.Always;
 
+        this.plugin = plugin;
         configuration = plugin.Configuration;
     }
 
@@ -40,6 +42,10 @@ public class ConfigWindow : Window, IDisposable
 
     public override void Draw()
     {
+        // Don't draw if camera overlay is active
+        if (plugin.IsCameraActive)
+            return;
+
         // Can't ref a property, so use a local copy
         var configValue = configuration.SomePropertyToBeSavedAndWithADefault;
         if (ImGui.Checkbox("Random Config Bool", ref configValue))

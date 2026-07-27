@@ -82,6 +82,10 @@ public class MainWindow : Window, IDisposable
 
     public override void Draw()
     {
+        // Don't draw anything if camera overlay is active
+        if (plugin.IsCameraActive)
+            return;
+
         try
         {
             var collections = collectionService.GetCollections();

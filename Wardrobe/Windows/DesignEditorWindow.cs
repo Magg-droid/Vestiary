@@ -56,7 +56,7 @@ public class DesignEditorWindow : Window, IDisposable
 
     public override void Draw()
     {
-        if (!IsOpen)
+        if (!IsOpen || plugin.IsCameraActive)
             return;
 
         ImGui.SetNextWindowPos(ImGui.GetMainViewport().GetCenter(), ImGuiCond.Appearing, new Vector2(0.5f, 0.5f));
@@ -107,6 +107,12 @@ public class DesignEditorWindow : Window, IDisposable
         if (ImGui.Button("From Clipboard", new Vector2(160, 0)))
         {
             plugin.CopyImageFromClipboard(OnImageSelected);
+        }
+
+        ImGui.SameLine();
+        if (ImGui.Button("Camera", new Vector2(120, 0)))
+        {
+            plugin.ShowCameraOverlay(OnImageSelected);
         }
 
         ImGui.SameLine();
@@ -267,7 +273,8 @@ public class DesignEditorWindow : Window, IDisposable
             var sourceDir = Path.GetFullPath(Path.GetDirectoryName(selectedPath) ?? "");
             var sourceFileName = Path.GetFileName(selectedPath);
             if (string.Equals(sourceDir, thumbnailsDirNorm, StringComparison.OrdinalIgnoreCase) &&
-                sourceFileName.StartsWith("clipboard_", StringComparison.OrdinalIgnoreCase))
+                (sourceFileName.StartsWith("clipboard_", StringComparison.OrdinalIgnoreCase) ||
+                 sourceFileName.StartsWith("camera_", StringComparison.OrdinalIgnoreCase)))
             {
                 try
                 {

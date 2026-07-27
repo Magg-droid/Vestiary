@@ -11,6 +11,7 @@ namespace Wardrobe.Windows;
 
 public class CollectionEditorWindow : Window, IDisposable
 {
+    private readonly Plugin plugin;
     private readonly CollectionService collectionService;
     
     private string collectionName = string.Empty;
@@ -18,9 +19,10 @@ public class CollectionEditorWindow : Window, IDisposable
     private Collection? editingCollection = null;
     private bool isEditing = false;
 
-    public CollectionEditorWindow(CollectionService collectionService)
+    public CollectionEditorWindow(Plugin plugin, CollectionService collectionService)
         : base("Create/Edit Collection##CollectionEditor", ImGuiWindowFlags.None)
     {
+        this.plugin = plugin;
         this.collectionService = collectionService;
         
         IsOpen = false;
@@ -51,7 +53,7 @@ public class CollectionEditorWindow : Window, IDisposable
 
     public override void Draw()
     {
-        if (!IsOpen)
+        if (!IsOpen || plugin.IsCameraActive)
             return;
 
         ImGui.SetNextWindowPos(ImGui.GetMainViewport().GetCenter(), ImGuiCond.Appearing, new Vector2(0.5f, 0.5f));
