@@ -158,7 +158,7 @@ public class DesignEditorWindow : Window, IDisposable
         // Buttons - left aligned
         if (ImGui.Button("Save", new Vector2(100, 0)))
         {
-            var thumbnailsDir = Path.Combine(plugin.PluginDirectory, "thumbnails");
+            var thumbnailsDir = plugin.ThumbnailsDirectory;
             
             if (!string.IsNullOrEmpty(customImagePath) && File.Exists(customImagePath))
             {
@@ -234,7 +234,7 @@ public class DesignEditorWindow : Window, IDisposable
                 return;
 
             var extension = Path.GetExtension(selectedPath);
-            var thumbnailsDir = Path.Combine(plugin.PluginDirectory, "thumbnails");
+            var thumbnailsDir = plugin.ThumbnailsDirectory;
             
             // Create thumbnails directory if it doesn't exist
             Directory.CreateDirectory(thumbnailsDir);

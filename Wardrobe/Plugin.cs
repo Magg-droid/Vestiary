@@ -39,6 +39,9 @@ public sealed class Plugin : IDalamudPlugin
     public TextureCache TextureCache { get; init; }
     public string PluginDirectory { get; private set; } = string.Empty;
 
+    /// <summary>Persistent thumbnails directory in plugin config folder (survives version bumps).</summary>
+    public string ThumbnailsDirectory { get; private set; } = string.Empty;
+
     /// <summary>Whether the camera overlay is currently active (suppresses other windows).</summary>
     public bool IsCameraActive { get; private set; }
 
@@ -89,12 +92,21 @@ public sealed class Plugin : IDalamudPlugin
         // Load plugin assets
         var pluginDir = PluginInterface.AssemblyLocation.Directory?.FullName!;
         PluginDirectory = pluginDir;
+
+        // Persistent thumbnails in plugin config folder (survives version bumps)
+        // Dalamud stores config at: %appdata%/XIVLauncher/pluginConfigs/{PluginName}/
+        var configDir = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "XIVLauncher", "pluginConfigs", PluginInterface.Manifest.Name);
+        ThumbnailsDirectory = Path.Combine(configDir, "thumbnails");
+        Directory.CreateDirectory(ThumbnailsDirectory);
+        Log.Information($"Thumbnails directory: {ThumbnailsDirectory}");
+
+        // Migrate any existing thumbnails from the old versioned folder
+        MigrateThumbnails(pluginDir);
+
         var goatImagePath = Path.Combine(pluginDir, "goat.png");
         var noPreviewImagePath = Path.Combine(pluginDir, "..", "..", "Data", "no-preview.jpg");
-
-        // Create thumbnails folder for design images
-        var thumbnailsDir = Path.Combine(pluginDir, "thumbnails");
-        Directory.CreateDirectory(thumbnailsDir);
 
         ConfigWindow = new ConfigWindow(this);
         MainWindow = new MainWindow(this, goatImagePath, CollectionService, DesignMetadataService, noPreviewImagePath);
@@ -355,11 +367,7 @@ public sealed class Plugin : IDalamudPlugin
                             // Generate unique filename based on timestamp
                             var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss_fff");
                             var filename = $"clipboard_{timestamp}.png";
-                            var thumbnailsDir = Path.Combine(PluginDirectory, "thumbnails");
-                            var savePath = Path.Combine(thumbnailsDir, filename);
-
-                            // Create thumbnails directory if needed
-                            Directory.CreateDirectory(thumbnailsDir);
+                            var savePath = Path.Combine(ThumbnailsDirectory, filename);
 
                             // Save image as PNG
                             image.Save(savePath, System.Drawing.Imaging.ImageFormat.Png);
@@ -382,11 +390,7 @@ public sealed class Plugin : IDalamudPlugin
                         var originalExtension = Path.GetExtension(sourceFilePath);
                         var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss_fff");
                         var filename = $"clipboard_{timestamp}{originalExtension}";
-                        var thumbnailsDir = Path.Combine(PluginDirectory, "thumbnails");
-                        var savePath = Path.Combine(thumbnailsDir, filename);
-
-                        // Create thumbnails directory if needed
-                        Directory.CreateDirectory(thumbnailsDir);
+                        var savePath = Path.Combine(ThumbnailsDirectory, filename);
 
                         // Copy file
                         File.Copy(sourceFilePath, savePath, overwrite: true);
@@ -410,5 +414,49 @@ public sealed class Plugin : IDalamudPlugin
         thread.IsBackground = true;
         thread.Start();
         Log.Information("Clipboard thread started");
+    }
+
+    /// <summary>
+    /// One-time migration: copy thumbnails from the old versioned folder into the persistent config folder,
+    /// and fix up stored metadata paths.
+    /// </summary>
+    private void MigrateThumbnails(string oldVersionDir)
+    {
+        try
+        {
+            var oldDir = Path.Combine(oldVersionDir, "thumbnails");
+            if (!Directory.Exists(oldDir))
+                return;
+
+            var migrated = false;
+            foreach (var file in Directory.GetFiles(oldDir))
+            {
+                var dest = Path.Combine(ThumbnailsDirectory, Path.GetFileName(file));
+                if (!File.Exists(dest))
+                {
+                    File.Copy(file, dest, overwrite: false);
+                    Log.Information($"Migrated thumbnail to config: {Path.GetFileName(file)}");
+                    migrated = true;
+                }
+            }
+
+            if (migrated)
+            {
+                foreach (var meta in Configuration.DesignMetadata)
+                {
+                    if (string.IsNullOrEmpty(meta.CustomImagePath))
+                        continue;
+                    var fileName = Path.GetFileName(meta.CustomImagePath);
+                    var newPath = Path.Combine(ThumbnailsDirectory, fileName);
+                    if (File.Exists(newPath))
+                        meta.CustomImagePath = newPath;
+                }
+                Configuration.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Thumbnail migration error (non-fatal)");
+        }
     }
 }

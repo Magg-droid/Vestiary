@@ -223,7 +223,7 @@ public class CameraWindow : Window, IDisposable
             using var bmp = new Bitmap(sw, sh);
             using var g = Graphics.FromImage(bmp);
             g.CopyFromScreen(sx, sy, 0, 0, new Size(sw, sh), CopyPixelOperation.SourceCopy);
-            var dir = Path.Combine(plugin.PluginDirectory, "thumbnails");
+            var dir = plugin.ThumbnailsDirectory;
             Directory.CreateDirectory(dir);
             var path = Path.Combine(dir, $"camera_{DateTime.Now:yyyyMMdd_HHmmss_fff}.png");
             bmp.Save(path, ImageFormat.Png);
