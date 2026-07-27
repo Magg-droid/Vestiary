@@ -1,14 +1,16 @@
-# Wardrobe v0.1.0 Release
+# Wardrobe v0.1.0 Alpha Release
 
-**Status**: ✅ **READY FOR RELEASE**  
+**Status**: 🔤 **ALPHA RELEASE**  
 **Date**: 2026-07-27  
-**Version**: 0.1.0
+**Version**: 0.1.0-alpha
+
+⚠️ **IMPORTANT**: This is an early alpha release. While all core features are implemented and tested, please report any bugs or issues you encounter.
 
 ---
 
 ## Overview
 
-Wardrobe v0.1.0 is the first release of a visual companion plugin for Glamourer. It provides a gallery-based interface for browsing and applying Glamourer outfit designs with custom thumbnails and collection organization.
+Wardrobe v0.1.0-alpha is the first alpha release of a visual companion plugin for Glamourer. It provides a gallery-based interface for browsing and applying Glamourer outfit designs with custom thumbnails and collection organization.
 
 **Core Vision**: Wardrobe is a visual companion for Glamourer that helps players browse, organise and apply outfit designs through thumbnails and collections instead of scrolling long text lists.
 
@@ -145,19 +147,19 @@ Wardrobe v0.1.0 is the first release of a visual companion plugin for Glamourer.
 
 ---
 
-## Known Limitations (Post-v0.1.0)
+## Known Issues & Limitations
 
-These features are not included in v0.1.0 but could be added in future releases:
+### Known Issues (Please Report)
+- None reported yet - please test thoroughly and report any issues!
+
+### Planned for Future Releases
+These features are not included in v0.1.0-alpha but could be added:
 
 - Search/filter within collection
-- Drag-and-drop to apply outfits
 - Screenshot capture directly in Wardrobe
 - Image cropping/preview
-- Bulk operations
 - Design statistics/favorites
-- Backup/export collections
 - Design tagging
-- Outfit comparison
 - History/recently used
 - Favorites/starred outfits
 
@@ -235,15 +237,39 @@ None - this is the first release.
 
 ---
 
-## Future Roadmap
+## Future Improvements
 
-### v0.2.0
-- Search/filter?
+- Bug fixes from community feedback
+- Performance optimization
+- Search & filtering within collections
+- UI refinements
+- Favorites & outfit history
+- Built-in screenshot capture
+- Additional gallery layouts
+
+---
+
+## Testing This Alpha
+
+To help us improve Wardrobe, please:
+
+1. **Test all features** — Collections, image uploads, applying/deleting designs
+2. **Report bugs** — Include steps to reproduce and any error messages
+3. **Provide feedback** — What works well? What needs improvement?
+4. **Check the logs** — Look for any errors in Dalamud's plugin logs
+
+**Bug Reports**: Please include:
+- What you were doing when the issue occurred
+- Any error messages or unexpected behavior
+- Your system info (Windows version, .NET version if applicable)
+- Steps to reproduce the issue
 
 ---
 
 ## Conclusion
 
-Wardrobe v0.1.0 is ready for initial release and user testing. All core features are implemented, tested, and working as intended. The plugin provides a solid foundation for visual outfit browsing and management.
+Wardrobe v0.1.0-alpha is the first public release. All core MVP features are implemented and tested, but as an alpha release, there may be edge cases or bugs we haven't encountered yet.
 
-**Next Step**: Release to players for feedback and iteration.
+**Thank you for testing!** Your feedback is invaluable in making Wardrobe better.
+
+**Next Step**: Install, test, and report any issues or suggestions.

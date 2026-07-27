@@ -1,11 +1,15 @@
 # Wardrobe
 
+🅰️ **ALPHA RELEASE v0.1.0**
+
 *A visual companion for Glamourer.*
 
 Wardrobe transforms your Glamourer design library into a visual wardrobe with thumbnails, collections, and one-click outfit application.
 
 Instead of scrolling through hundreds of design names, browse your outfits like a gallery.
 
+> **⚠️ ALPHA STATUS**: This is an early release. Expect bugs and please report them.
+> 
 > **Wardrobe does not replace Glamourer.**  
 > It works alongside Glamourer, using your existing designs while providing a visual browsing experience.
 
@@ -105,21 +109,23 @@ Instead it focuses on making large outfit libraries easier to browse and manage 
 
 ---
 
-## Roadmap
+## Roadmap & Planned Features
 
-Planned improvements include:
-
-- Search & filtering
-- Favorites
-- Recently worn outfits
+- Bug fixes from community feedback
+- Performance optimization
+- Search & filtering within collections
+- UI refinements
+- Favorites & outfit history
 - Built-in screenshot capture
 - Additional gallery layouts
 
 ---
 
-## Feedback
+## Feedback & Support
 
-Bug reports, suggestions, and feature requests are always welcome.
+🐛 **Found a bug?** Please report it with steps to reproduce.  
+💡 **Have a suggestion?** We'd love to hear it!  
+❓ **Questions?** Check the troubleshooting section below.
 
 ---
 
