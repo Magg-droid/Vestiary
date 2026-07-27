@@ -114,6 +114,8 @@ public class DesignEditorWindow : Window, IDisposable
         {
             if (ImGui.Button("Clear Image", new Vector2(120, 0)))
             {
+                // Invalidate texture cache before clearing
+                plugin.TextureCache.InvalidateTexture(customImagePath);
                 customImagePath = string.Empty;
             }
         }
@@ -150,6 +152,53 @@ public class DesignEditorWindow : Window, IDisposable
         // Buttons - left aligned
         if (ImGui.Button("Save", new Vector2(100, 0)))
         {
+            var thumbnailsDir = Path.Combine(plugin.PluginDirectory, "thumbnails");
+            
+            if (!string.IsNullOrEmpty(customImagePath) && File.Exists(customImagePath))
+            {
+                // Keep the current image, delete all other old versions
+                var oldFiles = Directory.GetFiles(thumbnailsDir, $"{editingDesignId}_*");
+                foreach (var oldFile in oldFiles)
+                {
+                    if (oldFile != customImagePath)
+                    {
+                        try
+                        {
+                            plugin.TextureCache.InvalidateTexture(oldFile);
+                            File.Delete(oldFile);
+                            Plugin.Log.Information($"Cleaned up old image: {oldFile}");
+                        }
+                        catch (Exception ex)
+                        {
+                            Plugin.Log.Warning(ex, $"Failed to clean up old image: {oldFile}");
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // No custom image selected - delete ALL image files for this design
+                var allFiles = Directory.GetFiles(thumbnailsDir, $"{editingDesignId}*");
+                foreach (var file in allFiles)
+                {
+                    try
+                    {
+                        plugin.TextureCache.InvalidateTexture(file);
+                        File.Delete(file);
+                        Plugin.Log.Information($"Deleted image file: {file}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Plugin.Log.Warning(ex, $"Failed to delete image file: {file}");
+                    }
+                }
+                customImagePath = string.Empty;
+            }
+            
+            // Clear ALL cached textures to ensure fresh load in gallery
+            plugin.TextureCache.ClearAll();
+            
+            // Save metadata with the final image path (or empty string if cleared)
             designMetadataService.UpsertMetadata(editingDesignId, nickname, customImagePath);
             Reset();
             IsOpen = false;
@@ -178,18 +227,42 @@ public class DesignEditorWindow : Window, IDisposable
             if (!File.Exists(selectedPath))
                 return;
 
-            // Copy to thumbnails folder with design ID as filename
             var extension = Path.GetExtension(selectedPath);
             var thumbnailsDir = Path.Combine(plugin.PluginDirectory, "thumbnails");
-            var destinationPath = Path.Combine(thumbnailsDir, $"{editingDesignId}{extension}");
-
+            
             // Create thumbnails directory if it doesn't exist
             Directory.CreateDirectory(thumbnailsDir);
 
-            // Overwrite if already exists
+            // Delete any existing image files for this design (any extension)
+            // This cleans up old images
+            var existingFiles = Directory.GetFiles(thumbnailsDir, $"{editingDesignId}.*");
+            foreach (var existingFile in existingFiles)
+            {
+                try
+                {
+                    // Invalidate from cache first
+                    plugin.TextureCache.InvalidateTexture(existingFile);
+                    
+                    // Then delete the file
+                    File.Delete(existingFile);
+                    Plugin.Log.Information($"Deleted old image: {existingFile}");
+                }
+                catch (Exception deleteEx)
+                {
+                    Plugin.Log.Warning(deleteEx, $"Failed to delete old image: {existingFile}");
+                }
+            }
+
+            // Use a timestamp to create a unique filename each time
+            // This ensures no cached texture conflicts
+            string timestamp = DateTime.Now.Ticks.ToString();
+            var destinationPath = Path.Combine(thumbnailsDir, $"{editingDesignId}_{timestamp}{extension}");
+
+            // Copy the new image with unique name
             File.Copy(selectedPath, destinationPath, overwrite: true);
 
             customImagePath = destinationPath;
+            Plugin.Log.Information($"New image saved with unique name: {destinationPath}");
         }
         catch (Exception ex)
         {

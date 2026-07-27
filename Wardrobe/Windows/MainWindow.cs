@@ -323,12 +323,13 @@ public class MainWindow : Window, IDisposable
 
         // Try to load and display custom image or fallback to placeholder
         var metadata = designMetadataService.GetMetadata(designId);
-        bool hasCustomImage = !string.IsNullOrEmpty(metadata?.CustomImagePath) && File.Exists(metadata.CustomImagePath);
+        string customImagePath = metadata?.CustomImagePath ?? "";
+        bool hasCustomImage = !string.IsNullOrEmpty(customImagePath) && File.Exists(customImagePath);
         
-        if (hasCustomImage && metadata?.CustomImagePath != null)
+        if (hasCustomImage)
         {
             // Try to load the texture
-            var wrap = plugin.TextureCache.GetOrLoadTexture(metadata.CustomImagePath)?.GetWrapOrDefault();
+            var wrap = plugin.TextureCache.GetOrLoadTexture(customImagePath)?.GetWrapOrDefault();
             
             if (wrap != null)
             {
