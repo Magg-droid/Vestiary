@@ -65,6 +65,22 @@ public class CollectionService
     }
 
     /// <summary>
+    /// Swap the order of two collections by their indices in the sorted list.
+    /// </summary>
+    public void SwapOrder(int indexA, int indexB)
+    {
+        var sorted = configuration.Collections.OrderBy(c => c.Order).ToList();
+        if (indexA < 0 || indexA >= sorted.Count || indexB < 0 || indexB >= sorted.Count)
+            return;
+
+        // Swap in the underlying list
+        var a = sorted[indexA];
+        var b = sorted[indexB];
+        (a.Order, b.Order) = (b.Order, a.Order);
+        configuration.Save();
+    }
+
+    /// <summary>
     /// Get all designs that match the collection's folder paths.
     /// - If the collection has paths: returns designs matching any of those paths (prefix matching)
     /// - If the collection has NO paths: returns designs not in any other collection ("Uncategorized")

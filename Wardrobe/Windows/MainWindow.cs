@@ -24,6 +24,7 @@ public class MainWindow : Window, IDisposable
     private CollectionEditorWindow? collectionEditorWindow;
     private DesignEditorWindow? designEditorWindow;
     private Guid selectedCollectionId = Guid.Empty;
+    private int dragTabIndex = -1;
 
     // We give this window a hidden ID using ##.
     // The user will see "My Amazing Window" as window title,
@@ -103,50 +104,91 @@ public class MainWindow : Window, IDisposable
                 selectedCollectionId = collections.Count > 0 ? collections[0].Id : Guid.Empty;
             }
 
-            // Draw tab bar with spacing
+            // Draw custom tab bar with drag-to-reorder
             ImGui.Spacing();
-            if (ImGui.BeginTabBar("##CollectionsTabBar"))
+            var sortedCollections = collections.OrderBy(c => c.Order).ToList();
+
+            for (int i = 0; i < sortedCollections.Count; i++)
             {
-                foreach (var collection in collections)
+                var collection = sortedCollections[i];
+                bool isSelected = selectedCollectionId == collection.Id;
+
+                // Tab styling
+                if (isSelected)
                 {
-                    bool isSelected = selectedCollectionId == collection.Id;
-                    if (ImGui.BeginTabItem($"{collection.Name}##tab_{collection.Id}"))
-                    {
-                        selectedCollectionId = collection.Id;
-                        ImGui.EndTabItem();
-                    }
-
-                    // Right-click context menu for tab
-                    if (ImGui.BeginPopupContextItem($"##tab_context_{collection.Id}"))
-                    {
-                        if (ImGui.MenuItem("Edit"))
-                        {
-                            collectionEditorWindow?.OpenEdit(collection);
-                            ImGui.CloseCurrentPopup();
-                        }
-
-                        if (ImGui.MenuItem("Delete"))
-                        {
-                            collectionService.DeleteCollection(collection.Id);
-                            if (selectedCollectionId == collection.Id)
-                            {
-                                selectedCollectionId = Guid.Empty;
-                            }
-                            ImGui.CloseCurrentPopup();
-                        }
-
-                        ImGui.EndPopup();
-                    }
+                    ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.25f, 0.35f, 0.45f, 1f));
+                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.9f, 0.8f, 0.7f, 1f));
+                }
+                else
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.12f, 0.12f, 0.18f, 0.8f));
                 }
 
-                // "+" button to create new collection
-                if (ImGui.TabItemButton("+", ImGuiTabItemFlags.Trailing))
+                ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 4f);
+                ImGui.Button($"{collection.Name}##tab_{collection.Id}");
+                ImGui.PopStyleVar();
+
+                if (isSelected)
+                    ImGui.PopStyleColor(2);
+                else
+                    ImGui.PopStyleColor();
+
+                // Click to select
+                if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
+                    selectedCollectionId = collection.Id;
+
+                // Right-click context menu
+                if (ImGui.BeginPopupContextItem($"##tab_context_{collection.Id}"))
                 {
-                    collectionEditorWindow?.OpenCreate();
+                    if (ImGui.MenuItem("Edit"))
+                    {
+                        collectionEditorWindow?.OpenEdit(collection);
+                        ImGui.CloseCurrentPopup();
+                    }
+                    if (ImGui.MenuItem("Delete"))
+                    {
+                        collectionService.DeleteCollection(collection.Id);
+                        if (selectedCollectionId == collection.Id)
+                            selectedCollectionId = Guid.Empty;
+                        ImGui.CloseCurrentPopup();
+                    }
+                    ImGui.EndPopup();
                 }
 
-                ImGui.EndTabBar();
+                // Drag source: start dragging this tab
+                if (ImGui.BeginDragDropSource())
+                {
+                    dragTabIndex = i;
+                    ImGui.SetDragDropPayload("COLLECTION_TAB", ReadOnlySpan<byte>.Empty);
+                    ImGui.Text(collection.Name);
+                    ImGui.EndDragDropSource();
+                }
+
+                // Drop target: accept a dragged tab here
+                if (ImGui.BeginDragDropTarget())
+                {
+                    ImGui.AcceptDragDropPayload("COLLECTION_TAB");
+                    if (dragTabIndex >= 0 && dragTabIndex != i)
+                    {
+                        collectionService.SwapOrder(dragTabIndex, i);
+                        dragTabIndex = -1;
+                    }
+                    ImGui.EndDragDropTarget();
+                }
+
+                ImGui.SameLine(0, 4f);
             }
+
+            // "+" button to create new collection
+            ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 4f);
+            ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.2f, 0.5f, 0.2f, 0.8f));
+            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.25f, 0.6f, 0.25f, 1f));
+            if (ImGui.Button("+##new_collection", new Vector2(30, 0)))
+                collectionEditorWindow?.OpenCreate();
+            ImGui.PopStyleColor(2);
+            ImGui.PopStyleVar();
+
+            ImGui.NewLine();
 
             // Display design count at top right
             if (selectedCollectionId != Guid.Empty)
@@ -434,6 +476,7 @@ public class MainWindow : Window, IDisposable
 
         if (ImGui.Button($"Apply##btn_apply_{designId}", new Vector2(btnWidth, btnHeight)))
         {
+            plugin.CloseSubWindows();
             bool equipmentOnly = ImGui.GetIO().KeyCtrl;
             plugin.GlamourerService.ApplyDesign(designId, equipmentOnly);
         }
@@ -456,6 +499,7 @@ public class MainWindow : Window, IDisposable
 
         if (ImGui.Button($"Edit##btn_edit_{designId}", new Vector2(btnWidth, btnHeight)))
         {
+            plugin.CloseSubWindows();
             designEditorWindow?.OpenEdit(designId);
         }
 
@@ -478,6 +522,7 @@ public class MainWindow : Window, IDisposable
         {
             if (ImGui.GetIO().KeyCtrl)
             {
+                plugin.CloseSubWindows();
                 plugin.GlamourerService.DeleteDesign(designId);
             }
         }

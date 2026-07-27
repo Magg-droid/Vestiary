@@ -173,6 +173,14 @@ public sealed class Plugin : IDalamudPlugin
     public void ToggleConfigUi() => ConfigWindow.Toggle();
     public void ToggleMainUi() => MainWindow.Toggle();
 
+    /// <summary>Close all sub-windows (editor, config) — keeps main window open.</summary>
+    public void CloseSubWindows()
+    {
+        DesignEditorWindow.IsOpen = false;
+        CollectionEditorWindow.IsOpen = false;
+        ConfigWindow.IsOpen = false;
+    }
+
     public void ShowCameraOverlay(Action<string> onImageCaptured)
     {
         // Save current window states so we can restore them later
