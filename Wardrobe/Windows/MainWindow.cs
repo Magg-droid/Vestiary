@@ -113,10 +113,9 @@ public class MainWindow : Window, IDisposable
             const float tabPadY = 6f;
             const float tabRounding = 6f;
             const float tabSpacing = 3f;
-            const float tabBarLineYOff = 28f; // Y offset from cursor for the bottom line
-
             var tabBarStart = ImGui.GetCursorScreenPos();
             float cursorX = tabBarStart.X;
+            float maxTabH = 0f;
 
             for (int i = 0; i < sortedCollections.Count; i++)
             {
@@ -126,6 +125,7 @@ public class MainWindow : Window, IDisposable
                 var textSize = ImGui.CalcTextSize(collection.Name);
                 float tabW = textSize.X + tabPadX * 2;
                 float tabH = textSize.Y + tabPadY * 2;
+                if (tabH > maxTabH) maxTabH = tabH;
 
                 var tabMin = new Vector2(cursorX, tabBarStart.Y);
                 var tabMax = new Vector2(cursorX + tabW, tabBarStart.Y + tabH + (isSelected ? 2f : 0f));
@@ -197,8 +197,8 @@ public class MainWindow : Window, IDisposable
                 cursorX += tabW + tabSpacing;
             }
 
-            // Bottom line across the full tab bar
-            float lineY = tabBarStart.Y + tabBarLineYOff;
+            // Bottom line right below the tallest tab
+            float lineY = tabBarStart.Y + maxTabH + 3f;
             var lineEnd = new Vector2(tabBarStart.X + ImGui.GetContentRegionAvail().X, lineY);
             dl.AddLine(new Vector2(tabBarStart.X, lineY), lineEnd,
                 ImGui.GetColorU32(new Vector4(0.3f, 0.3f, 0.38f, 0.8f)), 1.5f);
@@ -206,7 +206,7 @@ public class MainWindow : Window, IDisposable
             // "+" button at end of tab bar
             float plusW = 28f;
             var plusMin = new Vector2(cursorX + 4f, tabBarStart.Y + 2f);
-            var plusMax = new Vector2(plusMin.X + plusW, tabBarStart.Y + tabBarLineYOff - 2f);
+            var plusMax = new Vector2(plusMin.X + plusW, tabBarStart.Y + maxTabH);
             bool plusHover = ImGui.IsMouseHoveringRect(plusMin, plusMax);
             uint plusBg = ImGui.GetColorU32(plusHover
                 ? new Vector4(0.2f, 0.5f, 0.2f, 1f)
@@ -229,15 +229,12 @@ public class MainWindow : Window, IDisposable
                 string countText = $"{designs.Count} designs";
                 Vector2 countSize = ImGui.CalcTextSize(countText);
                 float countX = tabBarStart.X + ImGui.GetWindowWidth() - countSize.X - 15f;
-                float countY = tabBarStart.Y + (tabBarLineYOff - countSize.Y) / 2f;
+                float countY = tabBarStart.Y + (maxTabH + 3f - countSize.Y) / 2f;
                 dl.AddText(new Vector2(countX, countY),
                     ImGui.GetColorU32(new Vector4(0.8f, 0.75f, 0.7f, 0.8f)), countText);
             }
 
-            ImGui.Spacing();
-            ImGui.Separator();
-
-            ImGui.Dummy(new Vector2(0, 20f));
+            ImGui.Dummy(new Vector2(0, 8f));
 
             // Display designs from selected collection
             if (selectedCollectionId != Guid.Empty)

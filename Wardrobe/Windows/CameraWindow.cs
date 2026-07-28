@@ -115,7 +115,7 @@ public class CameraWindow : Window, IDisposable
 
         // Clamp
         framePos.X = Math.Clamp(framePos.X, vp.Pos.X + 10, vp.Pos.X + vp.Size.X - frameSize.X - 10);
-        framePos.Y = Math.Clamp(framePos.Y, vp.Pos.Y + 35, vp.Pos.Y + vp.Size.Y - frameSize.Y - 80);
+        framePos.Y = Math.Clamp(framePos.Y, vp.Pos.Y + 35, Math.Max(vp.Pos.Y + 35, vp.Pos.Y + vp.Size.Y - frameSize.Y - 80));
 
         // Cursor
         if (resizeCorner >= 0 || hovered >= 0 || isDragging || InDragZone(mouse))
@@ -209,6 +209,9 @@ public class CameraWindow : Window, IDisposable
         nw = Math.Clamp(nw, MinW, vp.Size.X - 20f);
         nh = Math.Clamp(nh, MinH, vp.Size.Y - 115f);
         if (nw / nh > Ratio) nh = nw / Ratio; else nw = nh * Ratio;
+        // Re-clamp: ratio adjustment can push dimensions past bounds
+        nw = Math.Clamp(nw, MinW, vp.Size.X - 20f);
+        nh = Math.Clamp(nh, MinH, vp.Size.Y - 115f);
         framePos = new Vector2(mouse.X > anchor.X ? anchor.X : anchor.X - nw,
                                mouse.Y > anchor.Y ? anchor.Y : anchor.Y - nh);
         frameSize = new Vector2(nw, nh);
