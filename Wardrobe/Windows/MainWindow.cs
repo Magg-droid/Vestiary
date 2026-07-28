@@ -18,6 +18,9 @@ public class MainWindow : Window, IDisposable
 {
     private readonly string goatImagePath;
     private readonly string noPreviewImagePath;
+    private readonly string cameraIconPath;
+    private readonly string uploadIconPath;
+    private readonly string clipboardIconPath;
     private readonly Plugin plugin;
     private readonly CollectionService collectionService;
     private readonly DesignMetadataService designMetadataService;
@@ -34,7 +37,10 @@ public class MainWindow : Window, IDisposable
         string goatImagePath,
         CollectionService collectionService,
         DesignMetadataService designMetadataService,
-        string noPreviewImagePath
+        string noPreviewImagePath,
+        string cameraIconPath,
+        string uploadIconPath,
+        string clipboardIconPath
     )
         : base("Wardrobe##With a hidden ID", ImGuiWindowFlags.None)
     {
@@ -46,6 +52,9 @@ public class MainWindow : Window, IDisposable
 
         this.goatImagePath = goatImagePath;
         this.noPreviewImagePath = noPreviewImagePath;
+        this.cameraIconPath = cameraIconPath;
+        this.uploadIconPath = uploadIconPath;
+        this.clipboardIconPath = clipboardIconPath;
         this.plugin = plugin;
         this.collectionService = collectionService;
         this.designMetadataService = designMetadataService;
@@ -370,8 +379,7 @@ public class MainWindow : Window, IDisposable
             ImGuiWindowFlags.None
         );
 
-        // Padding around image - small top padding
-        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 10f);
+        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5f);
 
         // Large thumbnail area (220x300px) - takes most of card space
         const float thumbWidth = 240f;
@@ -444,6 +452,87 @@ public class MainWindow : Window, IDisposable
             ImGui.GetWindowDrawList().AddText(textPos, ImGui.GetColorU32(thumbTextColor), thumbText);
         }
 
+        // ── Camera icon in top-right corner of thumbnail ──
+        const float iconSize = 28f;
+        const float iconPadX = 8f;
+        const float iconPadY = -3f;
+        var iconMin = new Vector2(thumbEndPos.X - iconSize - iconPadX, thumbStartPos.Y + iconPadY);
+        var iconMax = new Vector2(thumbEndPos.X - iconPadX, thumbStartPos.Y + iconPadY + iconSize);
+        bool isIconHovered = ImGui.IsMouseHoveringRect(iconMin, iconMax);
+
+        var cdl = ImGui.GetWindowDrawList();
+        uint iconTint = ImGui.GetColorU32(isIconHovered
+            ? new Vector4(1f, 1f, 1f, 0.95f)
+            : new Vector4(1f, 1f, 1f, 0.6f));
+
+        // Load and draw camera icon texture
+        var camTex = plugin.TextureCache.GetOrLoadTexture(cameraIconPath)?.GetWrapOrDefault();
+        if (camTex != null)
+            cdl.AddImage(camTex.Handle, iconMin, iconMax, Vector2.Zero, Vector2.One, iconTint);
+
+        // Tooltip on hover
+        if (isIconHovered)
+            ImGui.SetTooltip("Take snapshot");
+
+        // Click detection without touching cursor (avoids layout shift)
+        if (isIconHovered && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+        {
+            var capturedDesignId = designId;
+            plugin.CloseSubWindows();
+            plugin.ShowCameraOverlay(path =>
+            {
+                designMetadataService.UpsertMetadata(capturedDesignId, customImagePath: path);
+                plugin.TextureCache.InvalidateTexture(path);
+            });
+        }
+
+        // ── Upload icon (file picker) ──
+        const float iconGap = 4f;
+        var uploadMin = new Vector2(iconMin.X, iconMax.Y + iconGap);
+        var uploadMax = new Vector2(iconMax.X, uploadMin.Y + iconSize);
+        bool isUploadHovered = ImGui.IsMouseHoveringRect(uploadMin, uploadMax);
+        uint uploadTint = ImGui.GetColorU32(isUploadHovered
+            ? new Vector4(1f, 1f, 1f, 0.95f)
+            : new Vector4(1f, 1f, 1f, 0.6f));
+        var uploadTex = plugin.TextureCache.GetOrLoadTexture(uploadIconPath)?.GetWrapOrDefault();
+        if (uploadTex != null)
+            cdl.AddImage(uploadTex.Handle, uploadMin, uploadMax, Vector2.Zero, Vector2.One, uploadTint);
+        if (isUploadHovered)
+            ImGui.SetTooltip("Upload from file");
+        if (isUploadHovered && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+        {
+            var capturedDesignId = designId;
+            plugin.CloseSubWindows();
+            plugin.OpenImageFilePicker(path =>
+            {
+                designMetadataService.UpsertMetadata(capturedDesignId, customImagePath: path);
+                plugin.TextureCache.InvalidateTexture(path);
+            });
+        }
+
+        // ── Clipboard icon ──
+        var clipMin = new Vector2(iconMin.X, uploadMax.Y + iconGap);
+        var clipMax = new Vector2(iconMax.X, clipMin.Y + iconSize);
+        bool isClipHovered = ImGui.IsMouseHoveringRect(clipMin, clipMax);
+        uint clipTint = ImGui.GetColorU32(isClipHovered
+            ? new Vector4(1f, 1f, 1f, 0.95f)
+            : new Vector4(1f, 1f, 1f, 0.6f));
+        var clipTex = plugin.TextureCache.GetOrLoadTexture(clipboardIconPath)?.GetWrapOrDefault();
+        if (clipTex != null)
+            cdl.AddImage(clipTex.Handle, clipMin, clipMax, Vector2.Zero, Vector2.One, clipTint);
+        if (isClipHovered)
+            ImGui.SetTooltip("Paste from clipboard");
+        if (isClipHovered && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+        {
+            var capturedDesignId = designId;
+            plugin.CloseSubWindows();
+            plugin.CopyImageFromClipboard(path =>
+            {
+                designMetadataService.UpsertMetadata(capturedDesignId, customImagePath: path);
+                plugin.TextureCache.InvalidateTexture(path);
+            });
+        }
+
         ImGui.Dummy(new Vector2(thumbWidth, thumbHeight));
 
         // Draw border line below image
@@ -478,7 +567,7 @@ public class MainWindow : Window, IDisposable
 
         // Fancy rose-gold color for name
         ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.9f, 0.8f, 0.7f, 1f));
-        ImGui.TextWrapped(displayedName);
+        ImGui.Text(displayedName);
         ImGui.PopStyleColor();
 
         // Tooltip with full name on hover if truncated
