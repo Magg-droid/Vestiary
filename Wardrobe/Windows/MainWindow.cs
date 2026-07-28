@@ -107,38 +107,56 @@ public class MainWindow : Window, IDisposable
             // Draw custom tab bar with drag-to-reorder
             ImGui.Spacing();
             var sortedCollections = collections.OrderBy(c => c.Order).ToList();
+            var dl = ImGui.GetWindowDrawList();
+
+            const float tabPadX = 14f;
+            const float tabPadY = 6f;
+            const float tabRounding = 6f;
+            const float tabSpacing = 3f;
+            const float tabBarLineYOff = 28f; // Y offset from cursor for the bottom line
+
+            var tabBarStart = ImGui.GetCursorScreenPos();
+            float cursorX = tabBarStart.X;
 
             for (int i = 0; i < sortedCollections.Count; i++)
             {
                 var collection = sortedCollections[i];
                 bool isSelected = selectedCollectionId == collection.Id;
 
-                // Tab styling
+                var textSize = ImGui.CalcTextSize(collection.Name);
+                float tabW = textSize.X + tabPadX * 2;
+                float tabH = textSize.Y + tabPadY * 2;
+
+                var tabMin = new Vector2(cursorX, tabBarStart.Y);
+                var tabMax = new Vector2(cursorX + tabW, tabBarStart.Y + tabH + (isSelected ? 2f : 0f));
+
+                // Tab background with only top corners rounded, flat bottom
+                uint tabBg;
                 if (isSelected)
-                {
-                    ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.25f, 0.35f, 0.45f, 1f));
-                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.9f, 0.8f, 0.7f, 1f));
-                }
+                    tabBg = ImGui.GetColorU32(new Vector4(0.20f, 0.28f, 0.38f, 1f));
+                else if (ImGui.IsMouseHoveringRect(tabMin, tabMax))
+                    tabBg = ImGui.GetColorU32(new Vector4(0.18f, 0.18f, 0.24f, 0.8f));
                 else
-                {
-                    ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.12f, 0.12f, 0.18f, 0.8f));
-                }
+                    tabBg = ImGui.GetColorU32(new Vector4(0.12f, 0.12f, 0.18f, 0.6f));
 
-                ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 4f);
-                ImGui.Button($"{collection.Name}##tab_{collection.Id}");
-                ImGui.PopStyleVar();
+                dl.AddRectFilled(tabMin, tabMax, tabBg, tabRounding, ImDrawFlags.RoundCornersTop);
 
-                if (isSelected)
-                    ImGui.PopStyleColor(2);
-                else
-                    ImGui.PopStyleColor();
+                // Tab text
+                uint textCol = ImGui.GetColorU32(isSelected
+                    ? new Vector4(0.95f, 0.85f, 0.75f, 1f)
+                    : new Vector4(0.7f, 0.7f, 0.7f, 0.9f));
+                var textPos = new Vector2(cursorX + tabPadX, tabBarStart.Y + tabPadY);
+                dl.AddText(textPos, textCol, collection.Name);
 
-                // Click to select
+                // Invisible button for interaction
+                ImGui.SetCursorScreenPos(tabMin);
+                ImGui.InvisibleButton($"##tab_{collection.Id}", new Vector2(tabW, tabH));
+
                 if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
                     selectedCollectionId = collection.Id;
 
                 // Right-click context menu
-                if (ImGui.BeginPopupContextItem($"##tab_context_{collection.Id}"))
+                if (ImGui.BeginPopupContextItem($"##tabctx_{collection.Id}"))
                 {
                     if (ImGui.MenuItem("Edit"))
                     {
@@ -155,7 +173,7 @@ public class MainWindow : Window, IDisposable
                     ImGui.EndPopup();
                 }
 
-                // Drag source: start dragging this tab
+                // Drag source
                 if (ImGui.BeginDragDropSource())
                 {
                     dragTabIndex = i;
@@ -164,7 +182,7 @@ public class MainWindow : Window, IDisposable
                     ImGui.EndDragDropSource();
                 }
 
-                // Drop target: accept a dragged tab here
+                // Drop target
                 if (ImGui.BeginDragDropTarget())
                 {
                     ImGui.AcceptDragDropPayload("COLLECTION_TAB");
@@ -176,29 +194,44 @@ public class MainWindow : Window, IDisposable
                     ImGui.EndDragDropTarget();
                 }
 
-                ImGui.SameLine(0, 4f);
+                cursorX += tabW + tabSpacing;
             }
 
-            // "+" button to create new collection
-            ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 4f);
-            ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.2f, 0.5f, 0.2f, 0.8f));
-            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.25f, 0.6f, 0.25f, 1f));
-            if (ImGui.Button("+##new_collection", new Vector2(30, 0)))
+            // Bottom line across the full tab bar
+            float lineY = tabBarStart.Y + tabBarLineYOff;
+            var lineEnd = new Vector2(tabBarStart.X + ImGui.GetContentRegionAvail().X, lineY);
+            dl.AddLine(new Vector2(tabBarStart.X, lineY), lineEnd,
+                ImGui.GetColorU32(new Vector4(0.3f, 0.3f, 0.38f, 0.8f)), 1.5f);
+
+            // "+" button at end of tab bar
+            float plusW = 28f;
+            var plusMin = new Vector2(cursorX + 4f, tabBarStart.Y + 2f);
+            var plusMax = new Vector2(plusMin.X + plusW, tabBarStart.Y + tabBarLineYOff - 2f);
+            bool plusHover = ImGui.IsMouseHoveringRect(plusMin, plusMax);
+            uint plusBg = ImGui.GetColorU32(plusHover
+                ? new Vector4(0.2f, 0.5f, 0.2f, 1f)
+                : new Vector4(0.15f, 0.35f, 0.15f, 0.6f));
+            dl.AddRectFilled(plusMin, plusMax, plusBg, tabRounding, ImDrawFlags.RoundCornersTop);
+            var plusTextSize = ImGui.CalcTextSize("+");
+            dl.AddText(new Vector2(plusMin.X + (plusW - plusTextSize.X) / 2f, plusMin.Y + 4f),
+                ImGui.GetColorU32(new Vector4(0.9f, 0.9f, 0.9f, 1f)), "+");
+            ImGui.SetCursorScreenPos(plusMin);
+            ImGui.InvisibleButton("##new_collection", new Vector2(plusW, plusMax.Y - plusMin.Y));
+            if (ImGui.IsItemClicked())
                 collectionEditorWindow?.OpenCreate();
-            ImGui.PopStyleColor(2);
-            ImGui.PopStyleVar();
 
             ImGui.NewLine();
 
-            // Display design count at top right
+            // Display design count at top right, aligned with tabs
             if (selectedCollectionId != Guid.Empty)
             {
                 var designs = collectionService.GetDesignsByCollection(selectedCollectionId);
                 string countText = $"{designs.Count} designs";
                 Vector2 countSize = ImGui.CalcTextSize(countText);
-                ImGui.SetCursorPosX(ImGui.GetWindowWidth() - countSize.X - 15f);
-                ImGui.SetCursorPosY(ImGui.GetCursorPosY() - 30f);
-                ImGui.TextColored(new Vector4(0.9f, 0.8f, 0.7f, 1f), countText);
+                float countX = tabBarStart.X + ImGui.GetWindowWidth() - countSize.X - 15f;
+                float countY = tabBarStart.Y + (tabBarLineYOff - countSize.Y) / 2f;
+                dl.AddText(new Vector2(countX, countY),
+                    ImGui.GetColorU32(new Vector4(0.8f, 0.75f, 0.7f, 0.8f)), countText);
             }
 
             ImGui.Spacing();
@@ -307,13 +340,16 @@ public class MainWindow : Window, IDisposable
         // Draw card background and border with rounded corners
         Vector2 cardStartPos = ImGui.GetCursorScreenPos();
         Vector2 cardEndPos = cardStartPos + new Vector2(width, height);
+        bool isCardHovered = ImGui.IsMouseHoveringRect(cardStartPos, cardEndPos);
 
         ImGui
             .GetWindowDrawList()
             .AddRectFilled(
                 cardStartPos,
                 cardEndPos,
-                ImGui.GetColorU32(new Vector4(0.08f, 0.08f, 0.12f, 0.95f)),
+                ImGui.GetColorU32(isCardHovered
+                    ? new Vector4(0.12f, 0.12f, 0.16f, 0.95f)
+                    : new Vector4(0.08f, 0.08f, 0.12f, 0.95f)),
                 cornerRounding
             );
         ImGui
@@ -321,7 +357,9 @@ public class MainWindow : Window, IDisposable
             .AddRect(
                 cardStartPos,
                 cardEndPos,
-                ImGui.GetColorU32(new Vector4(0.4f, 0.4f, 0.45f, 0.7f)),
+                ImGui.GetColorU32(isCardHovered
+                    ? new Vector4(0.55f, 0.5f, 0.48f, 0.9f)
+                    : new Vector4(0.4f, 0.4f, 0.45f, 0.7f)),
                 cornerRounding,
                 0,
                 borderThickness

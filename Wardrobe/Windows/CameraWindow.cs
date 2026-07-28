@@ -207,7 +207,7 @@ public class CameraWindow : Window, IDisposable
         if (rw / rh > Ratio) { nh = rh; nw = nh * Ratio; }
         else { nw = rw; nh = nw / Ratio; }
         nw = Math.Clamp(nw, MinW, vp.Size.X - 20f);
-        nh = Math.Clamp(nh, MinH, vp.Size.Y - 100f);
+        nh = Math.Clamp(nh, MinH, vp.Size.Y - 115f);
         if (nw / nh > Ratio) nh = nw / Ratio; else nw = nh * Ratio;
         framePos = new Vector2(mouse.X > anchor.X ? anchor.X : anchor.X - nw,
                                mouse.Y > anchor.Y ? anchor.Y : anchor.Y - nh);
