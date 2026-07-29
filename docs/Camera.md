@@ -1,24 +1,19 @@
 # Camera Overlay
 
+> 📁 **Context:** [Architecture.md](Architecture.md) | [CodingStandards.md](CodingStandards.md)
+
 The camera overlay lets users capture a cropped screenshot of the game through a **4:5 aspect-ratio viewfinder**. It is triggered from the Design Editor window and returns the captured image to be used as a custom thumbnail for a design.
 
 ---
 
 ## How It's Triggered
 
-1. User opens **Design Editor** (`DesignEditorWindow.cs`) for a design.
-2. Clicks the **"Camera"** button.
-3. `Plugin.ShowCameraOverlay(onImageCaptured)` is called, passing a callback that:
-   - Updates the design's metadata with the saved image path.
-   - Re-opens the Design Editor window.
+Two ways to open the camera overlay:
 
-```csharp
-// DesignEditorWindow.cs (line ~115)
-if (ImGui.Button("Camera", new Vector2(120, 0)))
-{
-    plugin.ShowCameraOverlay(OnImageSelected);
-}
-```
+1. **From the Design Editor** — Click the **"Camera"** button in `DesignEditorWindow.cs`.
+2. **From the gallery card** — Click the camera icon (📷) in the top-right corner of any design card in `MainWindow.cs`.
+
+Both paths call `Plugin.ShowCameraOverlay(onImageCaptured)` with a callback that updates the design's metadata with the saved image path.
 
 ---
 

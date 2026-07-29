@@ -1,4 +1,6 @@
-# Design Thumbnail Gallery - Implementation Status
+# Design Thumbnail Gallery
+
+> 📁 **Context:** [Architecture.md](Architecture.md) | [CodingStandards.md](CodingStandards.md)
 
 ## TL;DR
 ✅ **COMPLETE**: Thumbnail gallery displaying Glamourer designs with responsive grid layout, design names, and metadata editing. Each card shows: placeholder thumbnail (240x300px), design name (centered, truncated), and Edit button. Clicking Edit opens a modal window to edit Nickname. Data persisted in Configuration.
@@ -34,13 +36,14 @@
 - ✅ `Windows/MainWindow.cs` — Fully implemented responsive gallery
   - **Layout**: Center-aligned cards in responsive grid
   - **Card size**: 260x400px with 12px corner rounding
-  - **Thumbnail**: 240x300px placeholder ("No Preview" text)
+  - **Thumbnail**: 240x300px with custom image, "No Preview" fallback, camera/upload/clipboard action icons
   - **Separator**: Full-width grey line below thumbnail image
   - **Design name**: Centered, truncated at 24 chars, rose-gold color, tooltip on hover
-  - **Edit button**: Rose-gold styled (base/hover/active colors), centered, 85x30px
+  - **Buttons**: Apply (steel blue), Edit (warm grey), Delete (red-grey) — centered three-button layout
   - **Spacing**: 25px horizontal gap between cards, 25px vertical gap between rows
   - **Design count**: Displayed top-right ("57 designs")
-  - **Collections**: Tab-based navigation with right-click context menu (Edit/Delete)
+  - **Collections**: Tab-based navigation with right-click context menu (Edit/Delete) and hover tooltip
+  - **Empty state**: Centered call-to-action with "Create Your First Collection" button for new users
 
 **Phase 5: Integration**
 - ✅ Services wired in `Plugin.cs`
@@ -82,15 +85,14 @@
 - **Tooltip**: Full name on hover if truncated
 - **Positioning**: 12px below separator line
 
-### Edit Button
-- **Label**: "Edit"
-- **Size**: 85w x 30h px
-- **Colors**: 
-  - Base: Rose (0.65, 0.4, 0.4, 1f)
-  - Hover: Lighter rose (0.8, 0.5, 0.5, 1f)
-  - Active: Even lighter (0.9, 0.6, 0.6, 1f)
+### Action Buttons
+- **Layout**: Three buttons — Apply (steel blue), Edit (warm grey), Delete (muted red)
+- **Sizes**: Apply 62px, Edit 62px, Delete 70px — all 28px height
+- **Spacing**: 12px between buttons, centered as a group
+- **Colors**: See `RoseGoldTheme.cs` for actual values
 - **Rounding**: 4px
-- **Positioning**: Centered, 4px below name
+- **Positioning**: Centered, below design name
+- **Tooltips**: Each button has contextual tooltip with keyboard modifier hints
 
 ### Grid Layout
 - **Spacing**: 25px horizontal gap between cards, 25px vertical gap between rows

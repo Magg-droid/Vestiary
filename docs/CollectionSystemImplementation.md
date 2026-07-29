@@ -1,6 +1,6 @@
 # Plan: Collections System Implementation for Wardrobe
 
-> ✅ **NOTE**: This document describes the planned implementation. For the **current completion status**, see [CollectionSystem.md](CollectionSystem.md). All 8 tasks have been completed and the system is fully functional.
+> ⚠️ **ARCHIVED**: This was the original implementation plan. All tasks are now complete. See [CollectionSystem.md](CollectionSystem.md) for current status. Kept for historical reference.
 
 ## TL;DR
 

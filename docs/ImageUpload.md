@@ -1,4 +1,6 @@
-# Image Upload & Display - Implementation Status
+# Image Upload & Display
+
+> 📁 **Context:** [Architecture.md](Architecture.md) | [CodingStandards.md](CodingStandards.md)
 
 ## TL;DR
 ✅ **COMPLETE**: Users can upload design thumbnails via file picker or clipboard. Images are stored in `%PluginDir%\thumbnails\` and displayed in gallery cards. Supports PNG/JPG/BMP/GIF/WEBP formats with graceful fallback for missing images. Texture caching ensures smooth scrolling.
@@ -10,7 +12,7 @@
 ### ✅ COMPLETED
 
 **Phase 1: Setup & Infrastructure**
-- ✅ Thumbnails folder created at `%PluginDir%\thumbnails\` on plugin init
+- ✅ Thumbnails folder created at persistent config path (`%appdata%/XIVLauncher/pluginConfigs/Wardrobe/thumbnails/`) on plugin init
 - ✅ `Plugin.OpenImageFilePicker()` implemented using Windows.Forms on STA thread
 - ✅ `Plugin.CopyImageFromClipboard()` implemented with dual-workflow support:
   - Windows+Shift+S screenshots (Clipboard.ContainsImage)
@@ -22,7 +24,7 @@
 - ✅ DesignEditorWindow shows "Choose Image" and "From Clipboard" buttons
 - ✅ File picker filter: PNG/JPG/BMP/GIF/WEBP
 - ✅ `OnImageSelected()` callback implemented
-- ✅ Images copied to `%PluginDir%\thumbnails\{DesignId}.{extension}`
+- ✅ Images copied to persistent config folder (`pluginConfigs/Wardrobe/thumbnails/`)
 - ✅ Metadata updated via DesignMetadataService
 - ✅ Thread-safe operations with try-catch
 
@@ -100,7 +102,7 @@
 
 | Decision | Rationale |
 |----------|-----------|
-| Copy files to plugin folder | More durable than storing paths (survives plugin relocation) |
+| Copy files to plugin config folder | Survives version bumps and plugin relocation |
 | Key by Design ID, not collection name | Images persist when collections renamed ✅ |
 | Native Windows file dialog | Reliable, user-friendly (from Character Select+ pattern) |
 | Texture caching | Essential for smooth scrolling through many designs |

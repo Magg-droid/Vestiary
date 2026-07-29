@@ -1,5 +1,7 @@
 # Wardrobe Coding Standards
 
+> 📁 **Context:** [Architecture.md](Architecture.md)
+
 > These standards are lightweight and practical — they exist to keep the codebase maintainable as it grows, not to add ceremony.
 
 ---

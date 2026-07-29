@@ -1,4 +1,6 @@
-# Apply & Delete Buttons - Implementation Status
+# Apply & Delete Buttons
+
+> 📁 **Context:** [Architecture.md](Architecture.md) | [CodingStandards.md](CodingStandards.md)
 
 ## TL;DR
 ✅ **COMPLETE**: Three-button layout on each gallery card (Apply | Edit | Delete) with keyboard modifiers for safety. Apply uses Glamourer IPC with equipment-only mode (Ctrl+Click). Delete requires Ctrl+Click confirmation. All buttons styled with muted monochromatic color scheme.
@@ -19,7 +21,7 @@
 - ✅ Three-button layout (Apply | Edit | Delete)
 - ✅ 62px width, 28px height per button
 - ✅ 12px spacing between buttons
-- ✅ Horizontally left-aligned on card
+- ✅ Horizontally centered on card
 - ✅ Total width fits within 260px card
 
 **Phase 3: Apply Button**

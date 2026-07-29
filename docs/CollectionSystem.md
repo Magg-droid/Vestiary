@@ -1,4 +1,6 @@
-# Collections System - Implementation Status
+# Collections System
+
+> 📁 **Context:** [Architecture.md](Architecture.md) | [CodingStandards.md](CodingStandards.md)
 
 ## TL;DR
 
@@ -137,7 +139,7 @@
 - Input for collection name
 - Multi-line text input for folder paths (one per line)
 - **Status: ✅ COMPLETED**
-- Implementation: CollectionEditorWindow.cs created with text-based UI (not checkboxes). Users enter collection name and paste/type folder paths as newline-separated list. Window is movable and maintains fixed 500x350 size
+- Implementation: CollectionEditorWindow.cs created with text-based UI. Users enter collection name and folder paths as newline-separated list. Window uses 550x400 size with live design count feedback.
 
 ### TASK 7: Filter Gallery by Collection (depends on Task 5)
 **Objective**: Show only designs in selected collection  
@@ -146,7 +148,7 @@
 - Call CollectionService.GetDesignsByCollection()
 - Display filtered results
 - **Status: ✅ COMPLETED**
-- Implementation: MainWindow displays design count for selected collection. Gallery rendering (thumbnails) marked as TODO in UI
+- Implementation: MainWindow displays design count for selected collection with full gallery rendering.
 
 ### TASK 8: Error Handling (depends on all)
 **Objective**: Handle edge cases gracefully  
