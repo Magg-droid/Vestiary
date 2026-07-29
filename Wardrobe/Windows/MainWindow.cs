@@ -124,7 +124,8 @@ public class MainWindow : Window, IDisposable
             const float tabSpacing = 3f;
             var tabBarStart = ImGui.GetCursorScreenPos();
             float cursorX = tabBarStart.X;
-            float maxTabH = 0f;
+            // Fallback height so "+" button and line render correctly even with zero tabs
+            float maxTabH = ImGui.CalcTextSize("+").Y + tabPadY * 2;
 
             for (int i = 0; i < sortedCollections.Count; i++)
             {
@@ -142,18 +143,18 @@ public class MainWindow : Window, IDisposable
                 // Tab background with only top corners rounded, flat bottom
                 uint tabBg;
                 if (isSelected)
-                    tabBg = ImGui.GetColorU32(new Vector4(0.20f, 0.28f, 0.38f, 1f));
+                    tabBg = ImGui.GetColorU32(RoseGoldTheme.TabSelected);
                 else if (ImGui.IsMouseHoveringRect(tabMin, tabMax))
-                    tabBg = ImGui.GetColorU32(new Vector4(0.18f, 0.18f, 0.24f, 0.8f));
+                    tabBg = ImGui.GetColorU32(RoseGoldTheme.TabHovered);
                 else
-                    tabBg = ImGui.GetColorU32(new Vector4(0.12f, 0.12f, 0.18f, 0.6f));
+                    tabBg = ImGui.GetColorU32(RoseGoldTheme.TabDefault);
 
                 dl.AddRectFilled(tabMin, tabMax, tabBg, tabRounding, ImDrawFlags.RoundCornersTop);
 
                 // Tab text
                 uint textCol = ImGui.GetColorU32(isSelected
-                    ? new Vector4(0.95f, 0.85f, 0.75f, 1f)
-                    : new Vector4(0.7f, 0.7f, 0.7f, 0.9f));
+                    ? RoseGoldTheme.TabTextActive
+                    : RoseGoldTheme.TabTextIdle);
                 var textPos = new Vector2(cursorX + tabPadX, tabBarStart.Y + tabPadY);
                 dl.AddText(textPos, textCol, collection.Name);
 
@@ -164,15 +165,18 @@ public class MainWindow : Window, IDisposable
                 if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
                     selectedCollectionId = collection.Id;
 
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip(Strings.TabRightClickTooltip);
+
                 // Right-click context menu
                 if (ImGui.BeginPopupContextItem($"##tabctx_{collection.Id}"))
                 {
-                    if (ImGui.MenuItem("Edit"))
+                    if (ImGui.MenuItem(Strings.Edit))
                     {
                         collectionEditorWindow?.OpenEdit(collection);
                         ImGui.CloseCurrentPopup();
                     }
-                    if (ImGui.MenuItem("Delete"))
+                    if (ImGui.MenuItem(Strings.Delete))
                     {
                         collectionService.DeleteCollection(collection.Id);
                         if (selectedCollectionId == collection.Id)
@@ -210,7 +214,7 @@ public class MainWindow : Window, IDisposable
             float lineY = tabBarStart.Y + maxTabH + 3f;
             var lineEnd = new Vector2(tabBarStart.X + ImGui.GetContentRegionAvail().X, lineY);
             dl.AddLine(new Vector2(tabBarStart.X, lineY), lineEnd,
-                ImGui.GetColorU32(new Vector4(0.3f, 0.3f, 0.38f, 0.8f)), 1.5f);
+                ImGui.GetColorU32(RoseGoldTheme.TabBorderLine), 1.5f);
 
             // "+" button at end of tab bar
             float plusW = 28f;
@@ -218,12 +222,12 @@ public class MainWindow : Window, IDisposable
             var plusMax = new Vector2(plusMin.X + plusW, tabBarStart.Y + maxTabH);
             bool plusHover = ImGui.IsMouseHoveringRect(plusMin, plusMax);
             uint plusBg = ImGui.GetColorU32(plusHover
-                ? new Vector4(0.2f, 0.5f, 0.2f, 1f)
-                : new Vector4(0.15f, 0.35f, 0.15f, 0.6f));
+                ? RoseGoldTheme.PlusBtn
+                : RoseGoldTheme.PlusBtnInactive);
             dl.AddRectFilled(plusMin, plusMax, plusBg, tabRounding, ImDrawFlags.RoundCornersTop);
             var plusTextSize = ImGui.CalcTextSize("+");
             dl.AddText(new Vector2(plusMin.X + (plusW - plusTextSize.X) / 2f, plusMin.Y + 4f),
-                ImGui.GetColorU32(new Vector4(0.9f, 0.9f, 0.9f, 1f)), "+");
+                ImGui.GetColorU32(RoseGoldTheme.TabPlusIcon), "+");
             ImGui.SetCursorScreenPos(plusMin);
             ImGui.InvisibleButton("##new_collection", new Vector2(plusW, plusMax.Y - plusMin.Y));
             if (ImGui.IsItemClicked())
@@ -240,7 +244,7 @@ public class MainWindow : Window, IDisposable
                 float countX = tabBarStart.X + ImGui.GetWindowWidth() - countSize.X - 15f;
                 float countY = tabBarStart.Y + (maxTabH + 3f - countSize.Y) / 2f;
                 dl.AddText(new Vector2(countX, countY),
-                    ImGui.GetColorU32(new Vector4(0.8f, 0.75f, 0.7f, 0.8f)), countText);
+                    ImGui.GetColorU32(RoseGoldTheme.CountText), countText);
             }
 
             ImGui.Dummy(new Vector2(0, 8f));
@@ -267,8 +271,8 @@ public class MainWindow : Window, IDisposable
                 else
                 {
                     ImGui.TextColored(
-                        new Vector4(0.6f, 0.6f, 0.6f, 1f),
-                        "No designs in this collection."
+                        RoseGoldTheme.TextMuted,
+                        Strings.NoDesigns
                     );
                 }
             }
@@ -276,15 +280,70 @@ public class MainWindow : Window, IDisposable
             {
                 ImGui.Spacing();
                 ImGui.Spacing();
-                ImGui.TextColored(new Vector4(0.9f, 0.8f, 0.7f, 1f), "No collections yet");
-                ImGui.TextWrapped(
-                    "Click the '+' tab to create your first collection and organize your designs!"
-                );
+                ImGui.Spacing();
+
+                float availW = ImGui.GetContentRegionAvail().X;
+
+                // Centered icon (upload icon looks like a folder)
+                const float iconSize = 48f;
+                var iconTex = plugin.TextureCache.GetOrLoadTexture(uploadIconPath)?.GetWrapOrDefault();
+                ImGui.SetCursorPosX(Math.Max(0, (availW - iconSize) / 2f));
+                if (iconTex != null)
+                    ImGui.Image(iconTex.Handle, new Vector2(iconSize, iconSize));
+                else
+                    ImGui.Dummy(new Vector2(iconSize, iconSize));
+
+                ImGui.Spacing();
+
+                // Centered heading
+                ImGui.PushStyleColor(ImGuiCol.Text, RoseGoldTheme.TextHeading);
+                var headingSize = ImGui.CalcTextSize(Strings.EmptyHeading);
+                ImGui.SetCursorPosX(Math.Max(0, (availW - headingSize.X) / 2f));
+                ImGui.Text(Strings.EmptyHeading);
+                ImGui.PopStyleColor();
+
+                ImGui.Spacing();
+
+                // Centered description
+                ImGui.PushStyleColor(ImGuiCol.Text, RoseGoldTheme.TextMuted);
+                var descText = Strings.EmptyDescription;
+                var descSize = ImGui.CalcTextSize(descText);
+                ImGui.SetCursorPosX(Math.Max(0, (availW - descSize.X) / 2f));
+                ImGui.Text(descText);
+                ImGui.PopStyleColor();
+
+                ImGui.Spacing();
+                ImGui.Spacing();
+
+                // CTA button — wide with generous internal padding
+                float btnWidth = 325f;
+                ImGui.SetCursorPosX(Math.Max(0, (availW - btnWidth) / 2f));
+
+                ImGui.PushStyleColor(ImGuiCol.Button, RoseGoldTheme.CtaBtn);
+                ImGui.PushStyleColor(ImGuiCol.ButtonHovered, RoseGoldTheme.CtaBtnHover);
+                ImGui.PushStyleColor(ImGuiCol.ButtonActive, RoseGoldTheme.CtaBtnActive);
+                ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 8f);
+                ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(28f, 10f));
+
+                if (ImGui.Button(Strings.EmptyCtaButton, new Vector2(btnWidth, 0)))
+                    collectionEditorWindow?.OpenCreate();
+
+                ImGui.PopStyleVar(2);
+                ImGui.PopStyleColor(3);
+
+                ImGui.Spacing();
+
+                // Subtle hint
+                ImGui.PushStyleColor(ImGuiCol.Text, RoseGoldTheme.TextSubtle);
+                var hintSize = ImGui.CalcTextSize(Strings.EmptyHint);
+                ImGui.SetCursorPosX(Math.Max(0, (availW - hintSize.X) / 2f));
+                ImGui.Text(Strings.EmptyHint);
+                ImGui.PopStyleColor();
             }
         }
         catch (Exception)
         {
-            ImGui.TextColored(new Vector4(1, 0, 0, 1), "Glamourer not found or not installed");
+            ImGui.TextColored(RoseGoldTheme.TextError, Strings.GlamourerNotFound);
         }
     }
 
@@ -354,8 +413,8 @@ public class MainWindow : Window, IDisposable
                 cardStartPos,
                 cardEndPos,
                 ImGui.GetColorU32(isCardHovered
-                    ? new Vector4(0.12f, 0.12f, 0.16f, 0.95f)
-                    : new Vector4(0.08f, 0.08f, 0.12f, 0.95f)),
+                    ? RoseGoldTheme.CardBgHovered
+                    : RoseGoldTheme.CardBg),
                 cornerRounding
             );
         ImGui
@@ -364,8 +423,8 @@ public class MainWindow : Window, IDisposable
                 cardStartPos,
                 cardEndPos,
                 ImGui.GetColorU32(isCardHovered
-                    ? new Vector4(0.55f, 0.5f, 0.48f, 0.9f)
-                    : new Vector4(0.4f, 0.4f, 0.45f, 0.7f)),
+                    ? RoseGoldTheme.CardBorder
+                    : RoseGoldTheme.CardBorderIdle),
                 cornerRounding,
                 0,
                 borderThickness
@@ -396,7 +455,7 @@ public class MainWindow : Window, IDisposable
             .AddRectFilled(
                 thumbStartPos,
                 thumbEndPos,
-                ImGui.GetColorU32(new Vector4(0.1f, 0.1f, 0.15f, 1f)),
+                ImGui.GetColorU32(RoseGoldTheme.ThumbBg),
                 4f
             );
         ImGui
@@ -404,7 +463,7 @@ public class MainWindow : Window, IDisposable
             .AddRect(
                 thumbStartPos,
                 thumbEndPos,
-                ImGui.GetColorU32(new Vector4(0.3f, 0.3f, 0.35f, 0.4f)),
+                ImGui.GetColorU32(RoseGoldTheme.ThumbBorder),
                 4f,
                 0,
                 1f
@@ -436,7 +495,7 @@ public class MainWindow : Window, IDisposable
             {
                 // Fallback: show placeholder with custom image indicator
                 string thumbText = "✓ Custom Image";
-                Vector4 thumbTextColor = new Vector4(0.6f, 0.85f, 0.6f, 0.9f);
+                Vector4 thumbTextColor = RoseGoldTheme.ThumbCustomImg;
                 Vector2 textSize = ImGui.CalcTextSize(thumbText);
                 Vector2 textPos = thumbStartPos + new Vector2((thumbWidth - textSize.X) / 2, (thumbHeight - textSize.Y) / 2);
                 ImGui.GetWindowDrawList().AddText(textPos, ImGui.GetColorU32(thumbTextColor), thumbText);
@@ -446,7 +505,7 @@ public class MainWindow : Window, IDisposable
         {
             // No custom image - show placeholder
             string thumbText = "No Preview";
-            Vector4 thumbTextColor = new Vector4(0.5f, 0.5f, 0.55f, 0.7f);
+            Vector4 thumbTextColor = RoseGoldTheme.ThumbNoPreview;
             Vector2 textSize = ImGui.CalcTextSize(thumbText);
             Vector2 textPos = thumbStartPos + new Vector2((thumbWidth - textSize.X) / 2, (thumbHeight - textSize.Y) / 2);
             ImGui.GetWindowDrawList().AddText(textPos, ImGui.GetColorU32(thumbTextColor), thumbText);
@@ -462,8 +521,8 @@ public class MainWindow : Window, IDisposable
 
         var cdl = ImGui.GetWindowDrawList();
         uint iconTint = ImGui.GetColorU32(isIconHovered
-            ? new Vector4(1f, 1f, 1f, 0.95f)
-            : new Vector4(1f, 1f, 1f, 0.6f));
+            ? RoseGoldTheme.IconHovered
+            : RoseGoldTheme.IconDefault);
 
         // Load and draw camera icon texture
         var camTex = plugin.TextureCache.GetOrLoadTexture(cameraIconPath)?.GetWrapOrDefault();
@@ -472,7 +531,7 @@ public class MainWindow : Window, IDisposable
 
         // Tooltip on hover
         if (isIconHovered)
-            ImGui.SetTooltip("Take snapshot");
+            ImGui.SetTooltip(Strings.TooltipCamera);
 
         // Click detection without touching cursor (avoids layout shift)
         if (isIconHovered && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
@@ -492,13 +551,13 @@ public class MainWindow : Window, IDisposable
         var uploadMax = new Vector2(iconMax.X, uploadMin.Y + iconSize);
         bool isUploadHovered = ImGui.IsMouseHoveringRect(uploadMin, uploadMax);
         uint uploadTint = ImGui.GetColorU32(isUploadHovered
-            ? new Vector4(1f, 1f, 1f, 0.95f)
-            : new Vector4(1f, 1f, 1f, 0.6f));
+            ? RoseGoldTheme.IconHovered
+            : RoseGoldTheme.IconDefault);
         var uploadTex = plugin.TextureCache.GetOrLoadTexture(uploadIconPath)?.GetWrapOrDefault();
         if (uploadTex != null)
             cdl.AddImage(uploadTex.Handle, uploadMin, uploadMax, Vector2.Zero, Vector2.One, uploadTint);
         if (isUploadHovered)
-            ImGui.SetTooltip("Upload from file");
+            ImGui.SetTooltip(Strings.TooltipUpload);
         if (isUploadHovered && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
         {
             var capturedDesignId = designId;
@@ -515,13 +574,13 @@ public class MainWindow : Window, IDisposable
         var clipMax = new Vector2(iconMax.X, clipMin.Y + iconSize);
         bool isClipHovered = ImGui.IsMouseHoveringRect(clipMin, clipMax);
         uint clipTint = ImGui.GetColorU32(isClipHovered
-            ? new Vector4(1f, 1f, 1f, 0.95f)
-            : new Vector4(1f, 1f, 1f, 0.6f));
+            ? RoseGoldTheme.IconHovered
+            : RoseGoldTheme.IconDefault);
         var clipTex = plugin.TextureCache.GetOrLoadTexture(clipboardIconPath)?.GetWrapOrDefault();
         if (clipTex != null)
             cdl.AddImage(clipTex.Handle, clipMin, clipMax, Vector2.Zero, Vector2.One, clipTint);
         if (isClipHovered)
-            ImGui.SetTooltip("Paste from clipboard");
+            ImGui.SetTooltip(Strings.TooltipClipboard);
         if (isClipHovered && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
         {
             var capturedDesignId = designId;
@@ -541,7 +600,7 @@ public class MainWindow : Window, IDisposable
             .AddLine(
                 new Vector2(cardStartPos.X, thumbEndPos.Y + 8f),
                 new Vector2(cardEndPos.X, thumbEndPos.Y + 8f),
-                ImGui.GetColorU32(new Vector4(0.4f, 0.4f, 0.45f, 0.6f)),
+                ImGui.GetColorU32(RoseGoldTheme.CardLine),
                 1.5f
             );
 
@@ -566,7 +625,7 @@ public class MainWindow : Window, IDisposable
         ImGui.SetCursorPosX(nameX);
 
         // Fancy rose-gold color for name
-        ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.9f, 0.8f, 0.7f, 1f));
+        ImGui.PushStyleColor(ImGuiCol.Text, RoseGoldTheme.TextHeading);
         ImGui.Text(displayedName);
         ImGui.PopStyleColor();
 
@@ -594,11 +653,11 @@ public class MainWindow : Window, IDisposable
         ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 4f);
 
         // Apply button - Muted Steel Blue
-        ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.45f, 0.55f, 0.65f, 1f));
-        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.55f, 0.65f, 0.75f, 1f));
-        ImGui.PushStyleColor(ImGuiCol.ButtonActive, new Vector4(0.60f, 0.70f, 0.80f, 1f));
+        ImGui.PushStyleColor(ImGuiCol.Button, RoseGoldTheme.ApplyBtn);
+        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, RoseGoldTheme.ApplyBtnHover);
+        ImGui.PushStyleColor(ImGuiCol.ButtonActive, RoseGoldTheme.ApplyBtnActive);
 
-        if (ImGui.Button($"Apply##btn_apply_{designId}", new Vector2(btnWidth, btnHeight)))
+        if (ImGui.Button(Strings.CardApply + $"##btn_apply_{designId}", new Vector2(btnWidth, btnHeight)))
         {
             plugin.CloseSubWindows();
             bool equipmentOnly = ImGui.GetIO().KeyCtrl;
@@ -608,8 +667,8 @@ public class MainWindow : Window, IDisposable
         if (ImGui.IsItemHovered())
         {
             ImGui.BeginTooltip();
-            ImGui.Text("Apply this design");
-            ImGui.TextDisabled("Ctrl+Click: Equipment only");
+            ImGui.Text(Strings.TooltipApply);
+            ImGui.TextDisabled(Strings.TooltipApplyCtrl);
             ImGui.EndTooltip();
         }
 
@@ -617,11 +676,11 @@ public class MainWindow : Window, IDisposable
 
         // Edit button - Muted Warm Grey
         ImGui.SameLine(btnStartX + btnWidth + btnSpacing);
-        ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.55f, 0.50f, 0.45f, 1f));
-        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.65f, 0.60f, 0.55f, 1f));
-        ImGui.PushStyleColor(ImGuiCol.ButtonActive, new Vector4(0.70f, 0.65f, 0.60f, 1f));
+        ImGui.PushStyleColor(ImGuiCol.Button, RoseGoldTheme.EditBtn);
+        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, RoseGoldTheme.EditBtnHover);
+        ImGui.PushStyleColor(ImGuiCol.ButtonActive, RoseGoldTheme.EditBtnActive);
 
-        if (ImGui.Button($"Edit##btn_edit_{designId}", new Vector2(btnWidth, btnHeight)))
+        if (ImGui.Button(Strings.CardEdit + $"##btn_edit_{designId}", new Vector2(btnWidth, btnHeight)))
         {
             plugin.CloseSubWindows();
             designEditorWindow?.OpenEdit(designId);
@@ -630,7 +689,7 @@ public class MainWindow : Window, IDisposable
         if (ImGui.IsItemHovered())
         {
             ImGui.BeginTooltip();
-            ImGui.Text("Edit configuration");
+            ImGui.Text(Strings.TooltipEdit);
             ImGui.EndTooltip();
         }
 
@@ -638,11 +697,11 @@ public class MainWindow : Window, IDisposable
 
         // Delete button - Muted Red-Grey
         ImGui.SameLine(btnStartX + (btnWidth * 2) + (btnSpacing * 2));
-        ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.60f, 0.40f, 0.40f, 1f));
-        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.70f, 0.50f, 0.50f, 1f));
-        ImGui.PushStyleColor(ImGuiCol.ButtonActive, new Vector4(0.75f, 0.55f, 0.55f, 1f));
+        ImGui.PushStyleColor(ImGuiCol.Button, RoseGoldTheme.DeleteBtn);
+        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, RoseGoldTheme.DeleteBtnHover);
+        ImGui.PushStyleColor(ImGuiCol.ButtonActive, RoseGoldTheme.DeleteBtnActive);
 
-        if (ImGui.Button($"Delete##btn_delete_{designId}", new Vector2(deleteBtnWidth, btnHeight)))
+        if (ImGui.Button(Strings.CardDelete + $"##btn_delete_{designId}", new Vector2(deleteBtnWidth, btnHeight)))
         {
             if (ImGui.GetIO().KeyCtrl)
             {
@@ -654,8 +713,8 @@ public class MainWindow : Window, IDisposable
         if (ImGui.IsItemHovered())
         {
             ImGui.BeginTooltip();
-            ImGui.Text("Delete the design from Glamourer");
-            ImGui.TextDisabled("Ctrl+Click to confirm");
+            ImGui.Text(Strings.TooltipDelete);
+            ImGui.TextDisabled(Strings.TooltipDeleteCtrl);
             ImGui.EndTooltip();
         }
 

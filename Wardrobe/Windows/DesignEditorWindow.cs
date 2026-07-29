@@ -66,51 +66,51 @@ public class DesignEditorWindow : Window, IDisposable
         ImGui.Spacing();
 
         // Title - left aligned
-        ImGui.TextColored(new Vector4(0.9f, 0.8f, 0.7f, 1f), "Edit Design Metadata");
+        ImGui.TextColored(RoseGoldTheme.TextHeading, Strings.DesignEditTitle);
 
         ImGui.Spacing();
         ImGui.Separator();
         ImGui.Spacing();
 
         // Design Name (Read-only)
-        ImGui.Text("Design Name:");
+        ImGui.Text(Strings.DesignNameLabel);
         ImGui.SameLine();
-        ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1f), designName);
+        ImGui.TextColored(RoseGoldTheme.TextNormal, designName);
 
         ImGui.Spacing();
         ImGui.Spacing();
 
         // Nickname Section
-        ImGui.Text("Nickname:");
+        ImGui.Text(Strings.DesignNicknameLabel);
         ImGui.SameLine();
         ImGui.TextDisabled("(Optional)");
-        ImGui.InputTextWithHint("##Nickname", "e.g., My Casual Look", ref nickname, 100);
+        ImGui.InputTextWithHint("##Nickname", Strings.DesignNicknameHint, ref nickname, 100);
 
         ImGui.Spacing();
-        ImGui.TextWrapped("Leave empty to display the original design name from Glamourer.");
+        ImGui.TextWrapped(Strings.DesignNicknameEmpty);
 
         ImGui.Spacing();
         ImGui.Spacing();
 
         // Custom Image Upload section
-        ImGui.Text("Custom Image:");
+        ImGui.Text(Strings.DesignImageLabel);
         ImGui.SameLine();
         ImGui.TextDisabled("(Optional)");
 
         ImGui.Spacing();
-        if (ImGui.Button("Choose Image", new Vector2(150, 0)))
+        if (ImGui.Button(Strings.DesignChooseImage, new Vector2(150, 0)))
         {
             plugin.OpenImageFilePicker(OnImageSelected);
         }
 
         ImGui.SameLine();
-        if (ImGui.Button("From Clipboard", new Vector2(160, 0)))
+        if (ImGui.Button(Strings.DesignFromClipboard, new Vector2(160, 0)))
         {
             plugin.CopyImageFromClipboard(OnImageSelected);
         }
 
         ImGui.SameLine();
-        if (ImGui.Button("Camera", new Vector2(120, 0)))
+        if (ImGui.Button(Strings.DesignCamera, new Vector2(120, 0)))
         {
             plugin.ShowCameraOverlay(OnImageSelected);
         }
@@ -118,7 +118,7 @@ public class DesignEditorWindow : Window, IDisposable
         ImGui.SameLine();
         if (!string.IsNullOrEmpty(customImagePath))
         {
-            if (ImGui.Button("Clear Image", new Vector2(120, 0)))
+            if (ImGui.Button(Strings.DesignClearImage, new Vector2(120, 0)))
             {
                 // Invalidate texture cache before clearing
                 plugin.TextureCache.InvalidateTexture(customImagePath);
@@ -142,13 +142,13 @@ public class DesignEditorWindow : Window, IDisposable
             }
             else
             {
-                ImGui.TextDisabled("Image preview not available");
+                ImGui.TextDisabled(Strings.DesignImagePreviewNo);
             }
         }
         else
         {
             ImGui.Spacing();
-            ImGui.TextDisabled("No image selected");
+            ImGui.TextDisabled(Strings.DesignNoImage);
         }
 
         ImGui.Spacing();
@@ -156,7 +156,7 @@ public class DesignEditorWindow : Window, IDisposable
         ImGui.Spacing();
 
         // Buttons - left aligned
-        if (ImGui.Button("Save", new Vector2(100, 0)))
+        if (ImGui.Button(Strings.Save, new Vector2(100, 0)))
         {
             var thumbnailsDir = plugin.ThumbnailsDirectory;
             
@@ -211,7 +211,7 @@ public class DesignEditorWindow : Window, IDisposable
         }
 
         ImGui.SameLine();
-        if (ImGui.Button("Cancel", new Vector2(100, 0)))
+        if (ImGui.Button(Strings.Cancel, new Vector2(100, 0)))
         {
             Reset();
             IsOpen = false;

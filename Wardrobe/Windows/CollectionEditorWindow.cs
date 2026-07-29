@@ -64,8 +64,8 @@ public class CollectionEditorWindow : Window, IDisposable
         ImGui.Spacing();
         
         // Title - left aligned
-        string windowTitle = isEditing ? "Edit Collection" : "Create New Collection";
-        ImGui.TextColored(new Vector4(0.9f, 0.8f, 0.7f, 1f), windowTitle);
+        string windowTitle = isEditing ? Strings.ColEditTitle : Strings.ColCreateTitle;
+        ImGui.TextColored(RoseGoldTheme.TextHeading, windowTitle);
         
         ImGui.Spacing();
         ImGui.Separator();
@@ -73,19 +73,72 @@ public class CollectionEditorWindow : Window, IDisposable
 
         // Collection Name Section
         ImGui.AlignTextToFramePadding();
-        ImGui.Text("Collection Name:");
+        ImGui.Text(Strings.ColNameLabel);
         ImGui.SameLine();
         ImGui.TextDisabled("*");
-        ImGui.InputTextWithHint("##CollectionName", "e.g., Dresses, Casual, Formal", ref collectionName, 100);
+        ImGui.SameLine();
+        ImGui.TextDisabled("(?)");
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.BeginTooltip();
+            ImGui.PushStyleColor(ImGuiCol.Text, RoseGoldTheme.TextNormal);
+            ImGui.Text(Strings.ColNameTooltip1);
+            ImGui.Text(Strings.ColNameTooltip2);
+            ImGui.Text(Strings.ColNameTooltip3);
+            ImGui.PopStyleColor();
+            ImGui.EndTooltip();
+        }
+        ImGui.InputTextWithHint("##CollectionName", Strings.ColNameHint, ref collectionName, 100);
 
         ImGui.Spacing();
         ImGui.Spacing();
 
         // Folder Paths Section
         ImGui.AlignTextToFramePadding();
-        ImGui.Text("Folder Paths:");
-        ImGui.TextWrapped("(Optional) Enter paths one per line. Leave empty for uncategorized designs.");
-        ImGui.InputTextMultiline("##FolderPaths", ref folderPathsText, 500, new Vector2(ImGui.GetWindowWidth() - 30, 120));
+        ImGui.Text(Strings.ColFoldersLabel);
+        ImGui.SameLine();
+        ImGui.TextDisabled("(?)");
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.BeginTooltip();
+            ImGui.PushStyleColor(ImGuiCol.Text, RoseGoldTheme.TextNormal);
+            ImGui.Text(Strings.ColFoldersTooltip1);
+            ImGui.Text(Strings.ColFoldersTooltip2);
+            ImGui.Spacing();
+            ImGui.Text(Strings.ColFoldersTooltip3);
+            ImGui.PopStyleColor();
+            ImGui.EndTooltip();
+        }
+
+        ImGui.InputTextMultiline("##FolderPaths", ref folderPathsText, 500, new Vector2(ImGui.GetWindowWidth() - 30, 100));
+
+        // Live design count
+        try
+        {
+            var paths = folderPathsText
+                .Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(p => p.Trim())
+                .Where(p => !string.IsNullOrEmpty(p))
+                .ToList();
+
+            if (paths.Count > 0)
+            {
+                var allDesigns = plugin.GlamourerService.GetDesignList();
+                int matchCount = allDesigns.Count(kvp =>
+                    paths.Any(path => kvp.Value.FullPath.StartsWith(path, StringComparison.OrdinalIgnoreCase)));
+                ImGui.TextColored(RoseGoldTheme.TextSuccess, Strings.ColDesignsMatch(matchCount));
+            }
+            else
+            {
+                var allDesigns = plugin.GlamourerService.GetDesignList();
+                int uncatCount = allDesigns.Count(kvp => !kvp.Value.FullPath.Contains("/"));
+                ImGui.TextColored(RoseGoldTheme.TextGreyHint, Strings.ColUncategorizedHint(uncatCount));
+            }
+        }
+        catch
+        {
+            // Glamourer might not be available; silently ignore
+        }
 
         ImGui.Spacing();
         ImGui.Separator();
@@ -94,7 +147,7 @@ public class CollectionEditorWindow : Window, IDisposable
         // Buttons - left aligned
         float buttonWidth = 100;
 
-        if (ImGui.Button("Save", new Vector2(buttonWidth, 0)))
+        if (ImGui.Button(Strings.Save, new Vector2(buttonWidth, 0)))
         {
             if (string.IsNullOrWhiteSpace(collectionName))
             {
@@ -123,7 +176,7 @@ public class CollectionEditorWindow : Window, IDisposable
         }
 
         ImGui.SameLine();
-        if (ImGui.Button("Cancel", new Vector2(buttonWidth, 0)))
+        if (ImGui.Button(Strings.Cancel, new Vector2(buttonWidth, 0)))
         {
             Reset();
             IsOpen = false;
@@ -140,13 +193,13 @@ public class CollectionEditorWindow : Window, IDisposable
         if (ImGui.BeginPopupModal("ErrorPopup##EmptyName", ref showEmptyNameError, ImGuiWindowFlags.AlwaysAutoResize))
         {
             ImGui.Spacing();
-            ImGui.TextColored(new Vector4(1f, 0.3f, 0.3f, 1f), "⚠ Collection name is required");
+            ImGui.TextColored(RoseGoldTheme.TextError, Strings.ColErrorEmptyName);
             ImGui.Spacing();
             ImGui.Separator();
             ImGui.Spacing();
             
             float buttonWidth = 100;
-            if (ImGui.Button("OK##EmptyName", new Vector2(buttonWidth, 0)))
+            if (ImGui.Button(Strings.ColErrorOk + "##EmptyName", new Vector2(buttonWidth, 0)))
             {
                 ImGui.CloseCurrentPopup();
             }

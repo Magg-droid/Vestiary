@@ -122,7 +122,7 @@ public class CameraWindow : Window, IDisposable
             ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeAll);
 
         // ═══════════ VIGNETTE ═══════════
-        uint vig = ImGui.GetColorU32(new Vector4(0f, 0f, 0f, 0.4f));
+        uint vig = ImGui.GetColorU32(RoseGoldTheme.CameraVignette);
         dl.AddRectFilled(vp.Pos, new(vp.Pos.X + vp.Size.X, framePos.Y), vig);
         dl.AddRectFilled(new(vp.Pos.X, framePos.Y + frameSize.Y), new(vp.Pos.X + vp.Size.X, vp.Pos.Y + vp.Size.Y), vig);
         dl.AddRectFilled(new(vp.Pos.X, framePos.Y), new(framePos.X, framePos.Y + frameSize.Y), vig);
@@ -130,31 +130,31 @@ public class CameraWindow : Window, IDisposable
 
         // ═══════════ FRAME ═══════════
         dl.AddRect(framePos, framePos + frameSize,
-            ImGui.GetColorU32(new Vector4(0.9f, 0.8f, 0.7f, 0.45f)), 0f, 0, 1.5f);
+            ImGui.GetColorU32(RoseGoldTheme.CameraBorder), 0f, 0, 1.5f);
 
         Vector2 ip = framePos + new Vector2(Inset);
         dl.AddRect(ip, framePos + frameSize - new Vector2(Inset),
-            ImGui.GetColorU32(new Vector4(1f, 1f, 1f, 0.12f)), 2f, 0, 1f);
+            ImGui.GetColorU32(RoseGoldTheme.CameraGrid), 2f, 0, 1f);
 
         // Corner dots
         bool hov = hovered >= 0 || resizeCorner >= 0;
         uint dCol = ImGui.GetColorU32(hov
-            ? new Vector4(1f, 0.9f, 0.8f, 1f) : new Vector4(0.9f, 0.8f, 0.7f, 0.7f));
+            ? RoseGoldTheme.CameraTextHov : RoseGoldTheme.CameraText);
         float dR = hov ? 6f : 5f;
         void D(Vector2 c) => dl.AddCircleFilled(c, dR, dCol, 8);
         D(framePos); D(new(framePos.X + frameSize.X, framePos.Y));
         D(new(framePos.X, framePos.Y + frameSize.Y)); D(framePos + frameSize);
 
         // ── Hint text (single line, centered) ──
-        uint hintCol = ImGui.GetColorU32(new Vector4(0.9f, 0.8f, 0.7f, 0.7f));
+        uint hintCol = ImGui.GetColorU32(RoseGoldTheme.CameraText);
 
         string t;
         if (resizeCorner >= 0)
-            t = $"{(frameSize.X - Inset * 2):F0} × {(frameSize.Y - Inset * 2):F0}";
+            t = Strings.CameraDimensions(frameSize.X - Inset * 2, frameSize.Y - Inset * 2);
         else if (isDragging)
-            t = "Release to place";
+            t = Strings.CameraReleaseToPlace;
         else
-            t = "Drag to move  ·  Corners to resize  ·  Hold Shift+right click to rotate";
+            t = Strings.CameraHint;
 
         var ts = ImGui.CalcTextSize(t);
         dl.AddText(new(framePos.X + (frameSize.X - ts.X) / 2f, framePos.Y - 22f), hintCol, t);
@@ -166,19 +166,19 @@ public class CameraWindow : Window, IDisposable
         float btnY = framePos.Y + frameSize.Y + 15f;
         ImGui.SetCursorScreenPos(new Vector2(btnX, btnY));
 
-        ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.25f, 0.55f, 0.25f, 0.9f));
-        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.35f, 0.65f, 0.35f, 1f));
-        ImGui.PushStyleColor(ImGuiCol.ButtonActive, new Vector4(0.45f, 0.75f, 0.45f, 1f));
+        ImGui.PushStyleColor(ImGuiCol.Button, RoseGoldTheme.CamCaptureBtn);
+        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, RoseGoldTheme.CamCaptureHov);
+        ImGui.PushStyleColor(ImGuiCol.ButtonActive, RoseGoldTheme.CamCaptureAct);
         ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 6f);
-        if (ImGui.Button("Capture", new Vector2(bw, bh))) Capture();
+        if (ImGui.Button(Strings.CameraCapture, new Vector2(bw, bh))) Capture();
         ImGui.PopStyleVar(); ImGui.PopStyleColor(3);
 
         ImGui.SameLine(0, gap);
-        ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.50f, 0.25f, 0.25f, 0.9f));
-        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.60f, 0.35f, 0.35f, 1f));
-        ImGui.PushStyleColor(ImGuiCol.ButtonActive, new Vector4(0.70f, 0.45f, 0.45f, 1f));
+        ImGui.PushStyleColor(ImGuiCol.Button, RoseGoldTheme.CamCancelBtn);
+        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, RoseGoldTheme.CamCancelHov);
+        ImGui.PushStyleColor(ImGuiCol.ButtonActive, RoseGoldTheme.CamCancelAct);
         ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 6f);
-        if (ImGui.Button("Cancel", new Vector2(bw, bh))) Close();
+        if (ImGui.Button(Strings.CameraCancel, new Vector2(bw, bh))) Close();
         ImGui.PopStyleVar(); ImGui.PopStyleColor(3);
 
         // Keyboard
