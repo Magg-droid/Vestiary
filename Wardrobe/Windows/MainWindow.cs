@@ -235,16 +235,40 @@ public class MainWindow : Window, IDisposable
 
             ImGui.NewLine();
 
-            // Display design count at top right, aligned with tabs
+            // Display design count + settings button at top right
             if (selectedCollectionId != Guid.Empty)
             {
                 var designs = collectionService.GetDesignsByCollection(selectedCollectionId);
                 string countText = $"{designs.Count} designs";
                 Vector2 countSize = ImGui.CalcTextSize(countText);
-                float countX = tabBarStart.X + ImGui.GetWindowWidth() - countSize.X - 15f;
+                float btnW = 90f;
+                float btnH = 26f;
+                float rightMargin = 28f;
+                float totalW = countSize.X + 12f + btnW + rightMargin;
+                float countX = tabBarStart.X + ImGui.GetWindowWidth() - totalW;
                 float countY = tabBarStart.Y + (maxTabH + 3f - countSize.Y) / 2f;
+                float btnY = tabBarStart.Y + (maxTabH + 3f - btnH) / 2f;
+                float btnX = countX + countSize.X + 12f;
+
+                // Count text
                 dl.AddText(new Vector2(countX, countY),
                     ImGui.GetColorU32(RoseGoldTheme.CountText), countText);
+
+                // Settings button (save/restore cursor so layout isn't affected)
+                var savedCursor = ImGui.GetCursorScreenPos();
+                ImGui.SetCursorScreenPos(new Vector2(btnX, btnY));
+                ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 4f);
+                ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(8f, 1f));
+                ImGui.PushStyleColor(ImGuiCol.Button, RoseGoldTheme.EditBtn);
+                ImGui.PushStyleColor(ImGuiCol.ButtonHovered, RoseGoldTheme.EditBtnHover);
+                ImGui.PushStyleColor(ImGuiCol.ButtonActive, RoseGoldTheme.EditBtnActive);
+                if (ImGui.Button("Settings", new Vector2(btnW, btnH)))
+                    plugin.ToggleConfigUi();
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Open Settings");
+                ImGui.PopStyleColor(3);
+                ImGui.PopStyleVar(2);
+                ImGui.SetCursorScreenPos(savedCursor);
             }
 
             ImGui.Dummy(new Vector2(0, 8f));
@@ -592,6 +616,19 @@ public class MainWindow : Window, IDisposable
             });
         }
 
+        // ── Double-click thumbnail to apply (only if no action icon is hovered) ──
+        bool anyIconHovered = isIconHovered || isUploadHovered || isClipHovered;
+        bool thumbHovered = ImGui.IsMouseHoveringRect(thumbStartPos, thumbEndPos);
+        if (thumbHovered && !anyIconHovered)
+        {
+            ImGui.SetTooltip(Strings.TooltipThumbnail);
+            if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
+            {
+                plugin.CloseSubWindows();
+                plugin.GlamourerService.ApplyDesign(designId, plugin.Configuration.ApplyEquipmentOnly || ImGui.GetIO().KeyCtrl);
+            }
+        }
+
         ImGui.Dummy(new Vector2(thumbWidth, thumbHeight));
 
         // Draw border line below image
@@ -660,7 +697,7 @@ public class MainWindow : Window, IDisposable
         if (ImGui.Button(Strings.CardApply + $"##btn_apply_{designId}", new Vector2(btnWidth, btnHeight)))
         {
             plugin.CloseSubWindows();
-            bool equipmentOnly = ImGui.GetIO().KeyCtrl;
+            bool equipmentOnly = plugin.Configuration.ApplyEquipmentOnly || ImGui.GetIO().KeyCtrl;
             plugin.GlamourerService.ApplyDesign(designId, equipmentOnly);
         }
 

@@ -37,6 +37,7 @@ public static class Strings
     public const string TooltipCamera      = "Take snapshot";
     public const string TooltipUpload      = "Upload from file";
     public const string TooltipClipboard   = "Paste from clipboard";
+    public const string TooltipThumbnail   = "Double-click to apply";
 
     // ── Collection editor window ────────────────────
     public const string ColCreateTitle     = "Create New Collection";

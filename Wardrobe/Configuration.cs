@@ -11,6 +11,7 @@ public class Configuration : IPluginConfiguration
     public int Version { get; set; } = 1;
 
     public bool IsConfigWindowMovable { get; set; } = true;
+    public bool ApplyEquipmentOnly { get; set; }
     public List<Collection> Collections { get; set; } = new();
     public List<DesignMetadata> DesignMetadata { get; set; } = new();
 
