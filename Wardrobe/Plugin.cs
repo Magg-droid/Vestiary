@@ -61,11 +61,12 @@ public sealed class Plugin : IDalamudPlugin
         var clipboardIconPath = Path.Combine(pluginDir, "clipboard_icon.png");
         var viewIconPath = Path.Combine(pluginDir, "view.png");
         var hiddenIconPath = Path.Combine(pluginDir, "hidden.png");
+        var lockIconPath = Path.Combine(pluginDir, "lock_icon.png");
 
         ConfigWindow = new ConfigWindow(this);
         MainWindow = new MainWindow(this, UtilityService, goatImagePath, CollectionService,
             DesignMetadataService, HiddenDesignService, noPreviewImagePath,
-            cameraIconPath, uploadIconPath, clipboardIconPath, viewIconPath, hiddenIconPath);
+            cameraIconPath, uploadIconPath, clipboardIconPath, viewIconPath, hiddenIconPath, lockIconPath);
         CollectionEditorWindow = new CollectionEditorWindow(this, CollectionService);
         DesignEditorWindow = new DesignEditorWindow(this, UtilityService, DesignMetadataService, GlamourerService);
         CameraWindow = new CameraWindow(this, UtilityService);

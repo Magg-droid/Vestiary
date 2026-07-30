@@ -166,6 +166,12 @@ public partial class MainWindow
                 designMetadataService.SetCustomImage(designId, p);
                 plugin.TextureCache.InvalidateTexture(p);
             }));
+
+        // Lock
+        var lockMin = new Vector2(iconMin.X, clipMax.Y + iconGap);
+        var lockMax = new Vector2(iconMax.X, lockMin.Y + iconSize);
+        DrawActionIcon(lockMin, lockMax, lockIconPath, "Lock", windowHovered,
+            _ => { /* TODO: quickshot feature */ });
     }
 
     private void DrawActionIcon(Vector2 min, Vector2 max, string iconPath, string tooltip,

@@ -16,6 +16,7 @@ public partial class MainWindow : Window, IDisposable
     private readonly string clipboardIconPath;
     private readonly string viewIconPath;
     private readonly string hiddenIconPath;
+    private readonly string lockIconPath;
     private readonly Plugin plugin;
     private readonly UtilityService utility;
     private readonly CollectionService collectionService;
@@ -39,7 +40,8 @@ public partial class MainWindow : Window, IDisposable
         string uploadIconPath,
         string clipboardIconPath,
         string viewIconPath,
-        string hiddenIconPath
+        string hiddenIconPath,
+        string lockIconPath
     )
         : base("Wardrobe##With a hidden ID", ImGuiWindowFlags.None)
     {
@@ -56,6 +58,7 @@ public partial class MainWindow : Window, IDisposable
         this.clipboardIconPath = clipboardIconPath;
         this.viewIconPath = viewIconPath;
         this.hiddenIconPath = hiddenIconPath;
+        this.lockIconPath = lockIconPath;
         this.plugin = plugin;
         this.utility = utility;
         this.collectionService = collectionService;
