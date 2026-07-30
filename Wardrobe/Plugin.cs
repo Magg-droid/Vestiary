@@ -43,6 +43,7 @@ public sealed class Plugin : IDalamudPlugin
     public Plugin()
     {
         Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
+        ThemeManager.SetTheme(Configuration.ThemeName);
 
         var pluginDir = PluginInterface.AssemblyLocation.Directory?.FullName!;
 

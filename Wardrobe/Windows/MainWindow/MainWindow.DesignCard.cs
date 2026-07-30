@@ -55,10 +55,10 @@ public partial class MainWindow
 
         var drawList = ImGui.GetWindowDrawList();
         drawList.AddRectFilled(cardStartPos, cardEndPos,
-            ImGui.GetColorU32(isCardHovered ? RoseGoldTheme.CardBgHovered : RoseGoldTheme.CardBg),
+            ImGui.GetColorU32(isCardHovered ? ThemeManager.Current.CardBgHovered : ThemeManager.Current.CardBg),
             cornerRounding);
         drawList.AddRect(cardStartPos, cardEndPos,
-            ImGui.GetColorU32(isCardHovered ? RoseGoldTheme.CardBorder : RoseGoldTheme.CardBorderIdle),
+            ImGui.GetColorU32(isCardHovered ? ThemeManager.Current.CardBorder : ThemeManager.Current.CardBorderIdle),
             cornerRounding, 0, borderThickness);
 
         ImGui.BeginChild($"##DesignCard_{designId}", new Vector2(width, height), false, ImGuiWindowFlags.None);
@@ -73,9 +73,9 @@ public partial class MainWindow
         var thumbEndPos = thumbStartPos + new Vector2(thumbWidth, thumbHeight);
 
         drawList.AddRectFilled(thumbStartPos, thumbEndPos,
-            ImGui.GetColorU32(RoseGoldTheme.ThumbBg), 4f);
+            ImGui.GetColorU32(ThemeManager.Current.ThumbBg), 4f);
         drawList.AddRect(thumbStartPos, thumbEndPos,
-            ImGui.GetColorU32(RoseGoldTheme.ThumbBorder), 4f, 0, 1f);
+            ImGui.GetColorU32(ThemeManager.Current.ThumbBorder), 4f, 0, 1f);
 
         DrawThumbnailImage(designId, thumbStartPos, thumbEndPos, thumbWidth, thumbHeight);
         DrawThumbnailIcons(designId, thumbStartPos, thumbEndPos);
@@ -87,7 +87,7 @@ public partial class MainWindow
         drawList.AddLine(
             new Vector2(cardStartPos.X, thumbEndPos.Y + 8f),
             new Vector2(cardEndPos.X, thumbEndPos.Y + 8f),
-            ImGui.GetColorU32(RoseGoldTheme.CardLine), 1.5f);
+            ImGui.GetColorU32(ThemeManager.Current.CardLine), 1.5f);
 
         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 12f);
 
@@ -117,14 +117,14 @@ public partial class MainWindow
             {
                 var textSize = ImGui.CalcTextSize("✓ Custom Image");
                 var textPos = thumbStartPos + new Vector2((thumbWidth - textSize.X) / 2, (thumbHeight - textSize.Y) / 2);
-                ImGui.GetWindowDrawList().AddText(textPos, ImGui.GetColorU32(RoseGoldTheme.ThumbCustomImg), "✓ Custom Image");
+                ImGui.GetWindowDrawList().AddText(textPos, ImGui.GetColorU32(ThemeManager.Current.ThumbCustomImg), "✓ Custom Image");
             }
         }
         else
         {
             var textSize = ImGui.CalcTextSize("No Preview");
             var textPos = thumbStartPos + new Vector2((thumbWidth - textSize.X) / 2, (thumbHeight - textSize.Y) / 2);
-            ImGui.GetWindowDrawList().AddText(textPos, ImGui.GetColorU32(RoseGoldTheme.ThumbNoPreview), "No Preview");
+            ImGui.GetWindowDrawList().AddText(textPos, ImGui.GetColorU32(ThemeManager.Current.ThumbNoPreview), "No Preview");
         }
     }
 
@@ -172,7 +172,7 @@ public partial class MainWindow
         bool windowHovered, Action<string> onClick)
     {
         bool hovered = windowHovered && ImGui.IsMouseHoveringRect(min, max);
-        uint tint = ImGui.GetColorU32(hovered ? RoseGoldTheme.IconHovered : RoseGoldTheme.IconDefault);
+        uint tint = ImGui.GetColorU32(hovered ? ThemeManager.Current.IconHovered : ThemeManager.Current.IconDefault);
         var tex = plugin.TextureCache.GetOrLoadTexture(iconPath)?.GetWrapOrDefault();
         if (tex != null)
             ImGui.GetWindowDrawList().AddImage(tex.Handle, min, max, Vector2.Zero, Vector2.One, tint);
@@ -233,7 +233,7 @@ public partial class MainWindow
             float nameX = Math.Max(8f, (width - nameSize.X) / 2);
             ImGui.SetCursorPosX(nameX);
 
-            ImGui.PushStyleColor(ImGuiCol.Text, RoseGoldTheme.TextHeading);
+            ImGui.PushStyleColor(ImGuiCol.Text, ThemeManager.Current.TextHeading);
             ImGui.Text(truncated);
             ImGui.PopStyleColor();
 
@@ -263,9 +263,9 @@ public partial class MainWindow
         ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 4f);
 
         // Apply
-        ImGui.PushStyleColor(ImGuiCol.Button, RoseGoldTheme.ApplyBtn);
-        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, RoseGoldTheme.ApplyBtnHover);
-        ImGui.PushStyleColor(ImGuiCol.ButtonActive, RoseGoldTheme.ApplyBtnActive);
+        ImGui.PushStyleColor(ImGuiCol.Button, ThemeManager.Current.ApplyBtn);
+        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ThemeManager.Current.ApplyBtnHover);
+        ImGui.PushStyleColor(ImGuiCol.ButtonActive, ThemeManager.Current.ApplyBtnActive);
         if (ImGui.Button(Strings.CardApply + $"##btn_apply_{designId}", new Vector2(btnW, btnHeight)))
         {
             plugin.CloseSubWindows();
@@ -286,9 +286,9 @@ public partial class MainWindow
         bool alreadyHidden = hiddenDesignService.IsHidden(designId);
         if (alreadyHidden)
         {
-            ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.35f, 0.55f, 0.35f, 1f));
-            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.45f, 0.65f, 0.45f, 1f));
-            ImGui.PushStyleColor(ImGuiCol.ButtonActive, new Vector4(0.50f, 0.70f, 0.50f, 1f));
+            ImGui.PushStyleColor(ImGuiCol.Button, ThemeManager.Current.UnhideBtn);
+            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ThemeManager.Current.UnhideBtnHover);
+            ImGui.PushStyleColor(ImGuiCol.ButtonActive, ThemeManager.Current.UnhideBtnActive);
             if (ImGui.Button(Strings.CardUnhide + $"##btn_unhide_{designId}", new Vector2(btnW, btnHeight)))
                 hiddenDesignService.ShowDesign(designId);
             if (ImGui.IsItemHovered())
@@ -296,9 +296,9 @@ public partial class MainWindow
         }
         else
         {
-            ImGui.PushStyleColor(ImGuiCol.Button, RoseGoldTheme.DeleteBtn);
-            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, RoseGoldTheme.DeleteBtnHover);
-            ImGui.PushStyleColor(ImGuiCol.ButtonActive, RoseGoldTheme.DeleteBtnActive);
+            ImGui.PushStyleColor(ImGuiCol.Button, ThemeManager.Current.DeleteBtn);
+            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ThemeManager.Current.DeleteBtnHover);
+            ImGui.PushStyleColor(ImGuiCol.ButtonActive, ThemeManager.Current.DeleteBtnActive);
             if (ImGui.Button(Strings.CardHide + $"##btn_hide_{designId}", new Vector2(btnW, btnHeight)))
                 hiddenDesignService.HideDesign(designId);
             if (ImGui.IsItemHovered())
@@ -312,9 +312,9 @@ public partial class MainWindow
         {
             ImGui.PopStyleVar(); // pop Alpha
             ImGui.SameLine(btnStartX + btnW * 2 + btnSpacing * 2);
-            ImGui.PushStyleColor(ImGuiCol.Button, RoseGoldTheme.DeleteBtn);
-            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, RoseGoldTheme.DeleteBtnHover);
-            ImGui.PushStyleColor(ImGuiCol.ButtonActive, RoseGoldTheme.DeleteBtnActive);
+            ImGui.PushStyleColor(ImGuiCol.Button, ThemeManager.Current.DeleteBtn);
+            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ThemeManager.Current.DeleteBtnHover);
+            ImGui.PushStyleColor(ImGuiCol.ButtonActive, ThemeManager.Current.DeleteBtnActive);
             if (ImGui.Button(Strings.CardDelete + $"##btn_delete_{designId}", new Vector2(btnW, btnHeight)))
             {
                 if (ImGui.GetIO().KeyCtrl)

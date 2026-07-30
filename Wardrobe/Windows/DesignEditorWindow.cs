@@ -68,7 +68,7 @@ public class DesignEditorWindow : Window, IDisposable
         ImGui.Spacing();
 
         // Title - left aligned
-        ImGui.TextColored(RoseGoldTheme.TextHeading, Strings.DesignEditTitle);
+        ImGui.TextColored(ThemeManager.Current.TextHeading, Strings.DesignEditTitle);
 
         ImGui.Spacing();
         ImGui.Separator();
@@ -77,7 +77,7 @@ public class DesignEditorWindow : Window, IDisposable
         // Design Name (Read-only)
         ImGui.Text(Strings.DesignNameLabel);
         ImGui.SameLine();
-        ImGui.TextColored(RoseGoldTheme.TextNormal, designName);
+        ImGui.TextColored(ThemeManager.Current.TextNormal, designName);
 
         ImGui.Spacing();
         ImGui.Spacing();

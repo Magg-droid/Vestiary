@@ -125,7 +125,7 @@ public class CameraWindow : Window, IDisposable
             ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeAll);
 
         // ═══════════ VIGNETTE ═══════════
-        uint vig = ImGui.GetColorU32(RoseGoldTheme.CameraVignette);
+        uint vig = ImGui.GetColorU32(ThemeManager.Current.CameraVignette);
         dl.AddRectFilled(vp.Pos, new(vp.Pos.X + vp.Size.X, framePos.Y), vig);
         dl.AddRectFilled(new(vp.Pos.X, framePos.Y + frameSize.Y), new(vp.Pos.X + vp.Size.X, vp.Pos.Y + vp.Size.Y), vig);
         dl.AddRectFilled(new(vp.Pos.X, framePos.Y), new(framePos.X, framePos.Y + frameSize.Y), vig);
@@ -133,23 +133,23 @@ public class CameraWindow : Window, IDisposable
 
         // ═══════════ FRAME ═══════════
         dl.AddRect(framePos, framePos + frameSize,
-            ImGui.GetColorU32(RoseGoldTheme.CameraBorder), 0f, 0, 1.5f);
+            ImGui.GetColorU32(ThemeManager.Current.CameraBorder), 0f, 0, 1.5f);
 
         Vector2 ip = framePos + new Vector2(Inset);
         dl.AddRect(ip, framePos + frameSize - new Vector2(Inset),
-            ImGui.GetColorU32(RoseGoldTheme.CameraGrid), 2f, 0, 1f);
+            ImGui.GetColorU32(ThemeManager.Current.CameraGrid), 2f, 0, 1f);
 
         // Corner dots
         bool hov = hovered >= 0 || resizeCorner >= 0;
         uint dCol = ImGui.GetColorU32(hov
-            ? RoseGoldTheme.CameraTextHov : RoseGoldTheme.CameraText);
+            ? ThemeManager.Current.CameraTextHov : ThemeManager.Current.CameraText);
         float dR = hov ? 6f : 5f;
         void D(Vector2 c) => dl.AddCircleFilled(c, dR, dCol, 8);
         D(framePos); D(new(framePos.X + frameSize.X, framePos.Y));
         D(new(framePos.X, framePos.Y + frameSize.Y)); D(framePos + frameSize);
 
         // ── Hint text (single line, centered) ──
-        uint hintCol = ImGui.GetColorU32(RoseGoldTheme.CameraText);
+        uint hintCol = ImGui.GetColorU32(ThemeManager.Current.CameraText);
 
         string t;
         if (resizeCorner >= 0)
@@ -169,17 +169,17 @@ public class CameraWindow : Window, IDisposable
         float btnY = framePos.Y + frameSize.Y + 15f;
         ImGui.SetCursorScreenPos(new Vector2(btnX, btnY));
 
-        ImGui.PushStyleColor(ImGuiCol.Button, RoseGoldTheme.CamCaptureBtn);
-        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, RoseGoldTheme.CamCaptureHov);
-        ImGui.PushStyleColor(ImGuiCol.ButtonActive, RoseGoldTheme.CamCaptureAct);
+        ImGui.PushStyleColor(ImGuiCol.Button, ThemeManager.Current.CamCaptureBtn);
+        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ThemeManager.Current.CamCaptureHov);
+        ImGui.PushStyleColor(ImGuiCol.ButtonActive, ThemeManager.Current.CamCaptureAct);
         ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 6f);
         if (ImGui.Button(Strings.CameraCapture, new Vector2(bw, bh))) Capture();
         ImGui.PopStyleVar(); ImGui.PopStyleColor(3);
 
         ImGui.SameLine(0, gap);
-        ImGui.PushStyleColor(ImGuiCol.Button, RoseGoldTheme.CamCancelBtn);
-        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, RoseGoldTheme.CamCancelHov);
-        ImGui.PushStyleColor(ImGuiCol.ButtonActive, RoseGoldTheme.CamCancelAct);
+        ImGui.PushStyleColor(ImGuiCol.Button, ThemeManager.Current.CamCancelBtn);
+        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ThemeManager.Current.CamCancelHov);
+        ImGui.PushStyleColor(ImGuiCol.ButtonActive, ThemeManager.Current.CamCancelAct);
         ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 6f);
         if (ImGui.Button(Strings.CameraCancel, new Vector2(bw, bh))) Close();
         ImGui.PopStyleVar(); ImGui.PopStyleColor(3);

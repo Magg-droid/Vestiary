@@ -36,7 +36,7 @@ public partial class MainWindow
                 ? "No hidden designs"
                 : Strings.NoDesigns;
             ImGui.SetWindowFontScale(1.5f);
-            ImGui.PushStyleColor(ImGuiCol.Text, RoseGoldTheme.TextHeading);
+            ImGui.PushStyleColor(ImGuiCol.Text, ThemeManager.Current.TextHeading);
             var size = ImGui.CalcTextSize(msg);
             ImGui.SetCursorPosX(Math.Max(0, (availW - size.X) / 2f));
             ImGui.Text(msg);
@@ -63,7 +63,7 @@ public partial class MainWindow
 
         ImGui.Spacing();
 
-        ImGui.PushStyleColor(ImGuiCol.Text, RoseGoldTheme.TextHeading);
+        ImGui.PushStyleColor(ImGuiCol.Text, ThemeManager.Current.TextHeading);
         var headingSize = ImGui.CalcTextSize(Strings.EmptyHeading);
         ImGui.SetCursorPosX(Math.Max(0, (availW - headingSize.X) / 2f));
         ImGui.Text(Strings.EmptyHeading);
@@ -71,7 +71,7 @@ public partial class MainWindow
 
         ImGui.Spacing();
 
-        ImGui.PushStyleColor(ImGuiCol.Text, RoseGoldTheme.TextMuted);
+        ImGui.PushStyleColor(ImGuiCol.Text, ThemeManager.Current.TextMuted);
         var descSize = ImGui.CalcTextSize(Strings.EmptyDescription);
         ImGui.SetCursorPosX(Math.Max(0, (availW - descSize.X) / 2f));
         ImGui.Text(Strings.EmptyDescription);
@@ -82,9 +82,9 @@ public partial class MainWindow
 
         float btnWidth = 325f;
         ImGui.SetCursorPosX(Math.Max(0, (availW - btnWidth) / 2f));
-        ImGui.PushStyleColor(ImGuiCol.Button, RoseGoldTheme.CtaBtn);
-        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, RoseGoldTheme.CtaBtnHover);
-        ImGui.PushStyleColor(ImGuiCol.ButtonActive, RoseGoldTheme.CtaBtnActive);
+        ImGui.PushStyleColor(ImGuiCol.Button, ThemeManager.Current.CtaBtn);
+        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ThemeManager.Current.CtaBtnHover);
+        ImGui.PushStyleColor(ImGuiCol.ButtonActive, ThemeManager.Current.CtaBtnActive);
         ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 8f);
         ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(28f, 10f));
         if (ImGui.Button(Strings.EmptyCtaButton, new Vector2(btnWidth, 0)))
@@ -94,7 +94,7 @@ public partial class MainWindow
 
         ImGui.Spacing();
 
-        ImGui.PushStyleColor(ImGuiCol.Text, RoseGoldTheme.TextSubtle);
+        ImGui.PushStyleColor(ImGuiCol.Text, ThemeManager.Current.TextSubtle);
         var hintSize = ImGui.CalcTextSize(Strings.EmptyHint);
         ImGui.SetCursorPosX(Math.Max(0, (availW - hintSize.X) / 2f));
         ImGui.Text(Strings.EmptyHint);

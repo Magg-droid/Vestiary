@@ -41,7 +41,7 @@ public partial class MainWindow
 
         // Count text
         dl.AddText(new Vector2(countX, rowY - countSize.Y / 2f),
-            ImGui.GetColorU32(RoseGoldTheme.CountText), countText);
+            ImGui.GetColorU32(ThemeManager.Current.CountText), countText);
         float curX = countX + countSize.X + gap;
 
         float sepTextH = ImGui.CalcTextSize("|").Y;
@@ -61,7 +61,7 @@ public partial class MainWindow
                 new Vector2(curX, rowY - eyeS / 2f),
                 new Vector2(curX + eyeS, rowY + eyeS / 2f),
                 Vector2.Zero, Vector2.One,
-                ImGui.GetColorU32(RoseGoldTheme.IconDefault));
+                ImGui.GetColorU32(ThemeManager.Current.IconDefault));
             ImGui.SetCursorScreenPos(new Vector2(curX, rowY - eyeS / 2f));
             if (ImGui.InvisibleButton("##eyeToggle", new Vector2(eyeS, eyeS)))
                 hiddenDesignService.ShowHidden = !hiddenDesignService.ShowHidden;
@@ -79,9 +79,9 @@ public partial class MainWindow
         ImGui.SetCursorScreenPos(new Vector2(curX, btnY));
         ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 4f);
         ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(8f, 1f));
-        ImGui.PushStyleColor(ImGuiCol.Button, RoseGoldTheme.EditBtn);
-        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, RoseGoldTheme.EditBtnHover);
-        ImGui.PushStyleColor(ImGuiCol.ButtonActive, RoseGoldTheme.EditBtnActive);
+        ImGui.PushStyleColor(ImGuiCol.Button, ThemeManager.Current.EditBtn);
+        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ThemeManager.Current.EditBtnHover);
+        ImGui.PushStyleColor(ImGuiCol.ButtonActive, ThemeManager.Current.EditBtnActive);
         if (ImGui.Button("Settings", new Vector2(btnW, btnH)))
             plugin.ToggleConfigUi();
         if (ImGui.IsItemHovered())

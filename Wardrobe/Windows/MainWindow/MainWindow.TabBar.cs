@@ -37,16 +37,16 @@ public partial class MainWindow
             var tabMax = new Vector2(cursorX + tabW, tabBarStart.Y + tabH + (isSelected ? 2f : 0f));
 
             uint tabBg = isSelected
-                ? ImGui.GetColorU32(RoseGoldTheme.TabSelected)
+                ? ImGui.GetColorU32(ThemeManager.Current.TabSelected)
                 : ImGui.IsMouseHoveringRect(tabMin, tabMax)
-                    ? ImGui.GetColorU32(RoseGoldTheme.TabHovered)
-                    : ImGui.GetColorU32(RoseGoldTheme.TabDefault);
+                    ? ImGui.GetColorU32(ThemeManager.Current.TabHovered)
+                    : ImGui.GetColorU32(ThemeManager.Current.TabDefault);
 
             dl.AddRectFilled(tabMin, tabMax, tabBg, tabRounding, ImDrawFlags.RoundCornersTop);
 
             uint textCol = ImGui.GetColorU32(isSelected
-                ? RoseGoldTheme.TabTextActive
-                : RoseGoldTheme.TabTextIdle);
+                ? ThemeManager.Current.TabTextActive
+                : ThemeManager.Current.TabTextIdle);
             dl.AddText(new Vector2(cursorX + tabPadX, tabBarStart.Y + tabPadY), textCol, collection.Name);
 
             ImGui.SetCursorScreenPos(tabMin);
@@ -101,18 +101,18 @@ public partial class MainWindow
         float lineY = tabBarStart.Y + maxTabH + 3f;
         var lineEnd = new Vector2(tabBarStart.X + ImGui.GetContentRegionAvail().X, lineY);
         dl.AddLine(new Vector2(tabBarStart.X, lineY), lineEnd,
-            ImGui.GetColorU32(RoseGoldTheme.TabBorderLine), 1.5f);
+            ImGui.GetColorU32(ThemeManager.Current.TabBorderLine), 1.5f);
 
         // "+" button
         float plusW = 28f;
         var plusMin = new Vector2(cursorX + 4f, tabBarStart.Y + 2f);
         var plusMax = new Vector2(plusMin.X + plusW, tabBarStart.Y + maxTabH);
         bool plusHover = ImGui.IsMouseHoveringRect(plusMin, plusMax);
-        uint plusBg = ImGui.GetColorU32(plusHover ? RoseGoldTheme.PlusBtn : RoseGoldTheme.PlusBtnInactive);
+        uint plusBg = ImGui.GetColorU32(plusHover ? ThemeManager.Current.PlusBtn : ThemeManager.Current.PlusBtnInactive);
         dl.AddRectFilled(plusMin, plusMax, plusBg, tabRounding, ImDrawFlags.RoundCornersTop);
         var plusTextSize = ImGui.CalcTextSize("+");
         dl.AddText(new Vector2(plusMin.X + (plusW - plusTextSize.X) / 2f, plusMin.Y + 4f),
-            ImGui.GetColorU32(RoseGoldTheme.TabPlusIcon), "+");
+            ImGui.GetColorU32(ThemeManager.Current.TabPlusIcon), "+");
         ImGui.SetCursorScreenPos(plusMin);
         ImGui.InvisibleButton("##new_collection", new Vector2(plusW, plusMax.Y - plusMin.Y));
         if (ImGui.IsItemClicked())

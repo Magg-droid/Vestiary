@@ -71,7 +71,7 @@ public class CollectionEditorWindow : Window, IDisposable
         if (ImGui.IsItemHovered())
         {
             ImGui.BeginTooltip();
-            ImGui.PushStyleColor(ImGuiCol.Text, RoseGoldTheme.TextNormal);
+            ImGui.PushStyleColor(ImGuiCol.Text, ThemeManager.Current.TextNormal);
             ImGui.Text(Strings.ColNameTooltip1);
             ImGui.Text(Strings.ColNameTooltip2);
             ImGui.Text(Strings.ColNameTooltip3);
@@ -91,7 +91,7 @@ public class CollectionEditorWindow : Window, IDisposable
         if (ImGui.IsItemHovered())
         {
             ImGui.BeginTooltip();
-            ImGui.PushStyleColor(ImGuiCol.Text, RoseGoldTheme.TextNormal);
+            ImGui.PushStyleColor(ImGuiCol.Text, ThemeManager.Current.TextNormal);
             ImGui.Text(Strings.ColFoldersTooltip1);
             ImGui.Text(Strings.ColFoldersTooltip2);
             ImGui.Spacing();
@@ -116,13 +116,13 @@ public class CollectionEditorWindow : Window, IDisposable
                 var allDesigns = plugin.GlamourerService.GetDesignList();
                 int matchCount = allDesigns.Count(kvp =>
                     paths.Any(path => kvp.Value.FullPath.StartsWith(path, StringComparison.OrdinalIgnoreCase)));
-                ImGui.TextColored(RoseGoldTheme.TextSuccess, Strings.ColDesignsMatch(matchCount));
+                ImGui.TextColored(ThemeManager.Current.TextSuccess, Strings.ColDesignsMatch(matchCount));
             }
             else
             {
                 var allDesigns = plugin.GlamourerService.GetDesignList();
                 int uncatCount = allDesigns.Count(kvp => !kvp.Value.FullPath.Contains("/"));
-                ImGui.TextColored(RoseGoldTheme.TextGreyHint, Strings.ColUncategorizedHint(uncatCount));
+                ImGui.TextColored(ThemeManager.Current.TextGreyHint, Strings.ColUncategorizedHint(uncatCount));
             }
         }
         catch
@@ -183,7 +183,7 @@ public class CollectionEditorWindow : Window, IDisposable
         if (ImGui.BeginPopupModal("ErrorPopup##EmptyName", ref showEmptyNameError, ImGuiWindowFlags.AlwaysAutoResize))
         {
             ImGui.Spacing();
-            ImGui.TextColored(RoseGoldTheme.TextError, Strings.ColErrorEmptyName);
+            ImGui.TextColored(ThemeManager.Current.TextError, Strings.ColErrorEmptyName);
             ImGui.Spacing();
             ImGui.Separator();
             ImGui.Spacing();

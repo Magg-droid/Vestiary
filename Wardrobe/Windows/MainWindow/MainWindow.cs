@@ -98,7 +98,7 @@ public partial class MainWindow : Window, IDisposable
         }
         catch (Exception)
         {
-            ImGui.TextColored(RoseGoldTheme.TextError, Strings.GlamourerNotFound);
+            ImGui.TextColored(ThemeManager.Current.TextError, Strings.GlamourerNotFound);
         }
     }
 }
