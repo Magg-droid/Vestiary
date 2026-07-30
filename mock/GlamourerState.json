@@ -1,0 +1,45 @@
+{
+  "comment": "Glamourer IPC response: Glamourer.GetStateBase64(0, 0) — decompressed JSON",
+  "type": "JObject",
+  "sample": {
+    "Equipment": {
+      "Head": { "ItemId": 12345, "Stain": 0 },
+      "Body": { "ItemId": 23456, "Stain": 5 },
+      "Hands": { "ItemId": 34567, "Stain": 0 },
+      "Legs": { "ItemId": 45678, "Stain": 5 },
+      "Feet": { "ItemId": 56789, "Stain": 0 }
+    },
+    "Customize": {
+      "Race": 4,
+      "Gender": 1,
+      "BodyType": 1,
+      "Height": 50,
+      "HairStyle": 12,
+      "SkinColor": { "R": 0.8, "G": 0.6, "B": 0.5 },
+      "HairColor": { "R": 0.3, "G": 0.2, "B": 0.4 }
+    },
+    "Mods": [
+      {
+        "Name": "Bikini Armor Mod",
+        "Directory": "bikini_armor_v2",
+        "Enabled": true
+      },
+      {
+        "Name": "Hair Texture HD",
+        "Directory": "hair_hd_mod",
+        "Enabled": true
+      },
+      {
+        "Name": "Conflicting Body Mod",
+        "Directory": "other_body_mod",
+        "Remove": true
+      }
+    ]
+  },
+  "notes": {
+    "Equipment": "Each slot has ItemId + Stain (dye). Empty slots = not equipped.",
+    "Customize": "Character appearance data. Varies by race/gender.",
+    "Mods": "Glamourer's mod association. Enabled mods are turned ON when design is applied. Remove=true mods are turned OFF (to prevent conflicts).",
+    "Stain": "0 = no dye, 1-128 = dye color IDs from FFXIV"
+  }
+}

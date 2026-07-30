@@ -9,6 +9,7 @@
 - Browse Glamourer designs as visual cards with thumbnails
 - Apply a design — double-click the thumbnail or click the Apply button
 - Equipment-only mode: toggle in Settings, or hold Ctrl while applying
+- Search bar — filter designs in the current tab by nickname or name
 - `/wardrobe` and `/wr` slash commands to open the plugin
 
 ---
@@ -44,7 +45,8 @@
 ## Design Cards
 
 - Inline rename — double-click the design name to set a nickname (clear to reset)
-- Action icons on every card: camera snapshot, file upload, clipboard paste
+- Action icons: camera snapshot, file upload, clipboard paste, favourite star
+- **Favourites** — star icon (top-left), golden when favourited, auto-creates "Favorites" collection tab
 - Tooltips on all actions
 - Card hover highlights and icon highlights with interaction gating (no bleed-through from overlaying windows)
 
@@ -56,4 +58,6 @@
 - Live theme switching via radio buttons in Settings — no reload
 - Empty-state wizard for new users (icon + heading + call-to-action button)
 - Centered "No designs" / "No hidden designs" headings when galleries are empty
+- Favorites collection — appears on first favourite, removed when empty, always last tab
 - Settings window with toggles: Apply Equipment Only, Show Hidden, Theme
+- Search bar — magnifying glass icon inside input, live filtering, theme-styled
