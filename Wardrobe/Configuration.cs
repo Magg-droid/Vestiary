@@ -13,7 +13,7 @@ public class Configuration : IPluginConfiguration
     public bool IsConfigWindowMovable { get; set; } = true;
     public bool ApplyEquipmentOnly { get; set; }
     public bool ShowHidden { get; set; }
-    public string ThemeName { get; set; } = "Rose Gold";
+    public string ThemeName { get; set; } = "Classic";
     public List<Guid> HiddenDesignIds { get; set; } = new();
     public List<Collection> Collections { get; set; } = new();
     public List<DesignMetadata> DesignMetadata { get; set; } = new();

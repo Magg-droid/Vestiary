@@ -63,11 +63,11 @@ public class ConfigWindow : Window, IDisposable
             "Forest" => 3,
             _ => 0,
         };
-        if (ImGui.RadioButton("Rose Gold", ref selectedTheme, 0))
+        if (ImGui.RadioButton("Classic", ref selectedTheme, 0))
         {
-            configuration.ThemeName = "Rose Gold";
+            configuration.ThemeName = "Classic";
             configuration.Save();
-            ThemeManager.SetTheme("Rose Gold");
+            ThemeManager.SetTheme("Classic");
         }
         if (ImGui.RadioButton("Ocean", ref selectedTheme, 1))
         {

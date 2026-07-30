@@ -6,16 +6,17 @@ namespace Wardrobe;
 /// </summary>
 public static class ThemeManager
 {
-    public static ITheme Current { get; private set; } = new RoseGoldTheme();
+    public static ITheme Current { get; private set; } = new ClassicTheme();
 
     public static void SetTheme(string themeName)
     {
         Current = themeName switch
         {
+            "Classic" => new ClassicTheme(),
             "Ocean" => new OceanTheme(),
             "Midnight Purple" => new MidnightPurpleTheme(),
             "Forest" => new ForestTheme(),
-            _ => new RoseGoldTheme(),
+            _ => new ClassicTheme(),
         };
     }
 }
