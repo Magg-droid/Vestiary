@@ -76,6 +76,10 @@ public class ClassicTheme : ITheme
     public Vector4 CtaBtnActive   => new(0.18f, 0.25f, 0.20f, 1f);
 
     // ── Camera overlay ──────────────────────────────
+    public Vector4 SeparatorColor => new(0.35f, 0.35f, 0.35f, 0.5f);
+
+    public Vector4 SearchBg => new(0.16f, 0.16f, 0.18f, 0.85f);
+
     public Vector4 CameraVignette => new(0f,    0f,    0f,    0.4f);
     public Vector4 CameraBorder   => new(0.70f, 0.67f, 0.64f, 0.45f);
     public Vector4 CameraGrid     => new(1f,    1f,    1f,    0.12f);

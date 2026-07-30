@@ -62,6 +62,10 @@ public class MidnightPurpleTheme : ITheme
     public Vector4 CtaBtnHover    => new(0.30f, 0.22f, 0.38f, 1f);
     public Vector4 CtaBtnActive   => new(0.18f, 0.12f, 0.24f, 1f);
 
+    public Vector4 SeparatorColor => new(0.32f, 0.28f, 0.38f, 0.5f);
+
+    public Vector4 SearchBg => new(0.15f, 0.12f, 0.20f, 0.85f);
+
     public Vector4 CameraVignette => new(0f,    0f,    0f,    0.4f);
     public Vector4 CameraBorder   => new(0.64f, 0.58f, 0.68f, 0.45f);
     public Vector4 CameraGrid     => new(1f,    1f,    1f,    0.12f);

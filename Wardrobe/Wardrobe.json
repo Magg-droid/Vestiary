@@ -2,7 +2,7 @@
   "Author": "Maggie",
   "Name": "Wardrobe",
   "InternalName": "Wardrobe",
-  "AssemblyVersion": "0.7.0.0",
+  "AssemblyVersion": "0.7.1.0",
   "Description": "A visual companion for Glamourer. Browse, organize, and apply outfit designs through custom thumbnails and collections.",
   "ApplicableVersion": "any",
   "RepoUrl": "https://github.com/Magg-droid/Wardrobe",

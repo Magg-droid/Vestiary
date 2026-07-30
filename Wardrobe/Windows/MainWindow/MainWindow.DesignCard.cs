@@ -62,7 +62,7 @@ public partial class MainWindow
             cornerRounding, 0, borderThickness);
 
         ImGui.BeginChild($"##DesignCard_{designId}", new Vector2(width, height), false, ImGuiWindowFlags.None);
-        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5f);
+        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 8f);
 
         // Thumbnail
         const float thumbWidth = 240f;
@@ -254,7 +254,7 @@ public partial class MainWindow
             if (truncated.EndsWith("...") && ImGui.IsItemHovered())
                 ImGui.SetTooltip(displayName);
             if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("Double-click to rename");
+                ImGui.SetTooltip(Strings.TooltipRename);
             if (ImGui.IsItemClicked(ImGuiMouseButton.Left)
                 && ImGui.GetIO().MouseClickedCount[(int)ImGuiMouseButton.Left] == 2)
             {
@@ -345,17 +345,17 @@ public partial class MainWindow
 
             if (ImGui.BeginPopup($"##confirm_delete_{designId}"))
             {
-                ImGui.Text("Are you sure you want to delete");
-                ImGui.Text("this design from Glamourer?");
+                ImGui.Text(Strings.ConfirmDeleteTitle);
+                ImGui.Text(Strings.ConfirmDeleteBody);
                 ImGui.Spacing();
-                if (ImGui.Button("Yes##del_yes"))
+                if (ImGui.Button($"{Strings.Yes}##del_yes"))
                 {
                     plugin.CloseSubWindows();
                     plugin.GlamourerService.DeleteDesign(designId);
                     ImGui.CloseCurrentPopup();
                 }
                 ImGui.SameLine();
-                if (ImGui.Button("No##del_no"))
+                if (ImGui.Button($"{Strings.No}##del_no"))
                     ImGui.CloseCurrentPopup();
                 ImGui.EndPopup();
             }

@@ -17,7 +17,9 @@ public partial class MainWindow
         var allDesigns = GetDesignsForCollection(selectedCollectionId);
         var visibleDesigns = hiddenDesignService.GetVisibleDesigns(allDesigns);
         var hiddenDesigns = hiddenDesignService.GetHiddenDesigns(allDesigns);
-        var designsToShow = hiddenDesignService.ShowHidden ? hiddenDesigns : visibleDesigns;
+        var visibleFiltered = FilterBySearch(visibleDesigns);
+        var hiddenFiltered = FilterBySearch(hiddenDesigns);
+        var designsToShow = hiddenDesignService.ShowHidden ? hiddenFiltered : visibleFiltered;
 
         ImGui.Spacing();
 

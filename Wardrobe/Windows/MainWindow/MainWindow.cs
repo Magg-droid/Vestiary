@@ -19,6 +19,7 @@ public partial class MainWindow : Window, IDisposable
     private readonly string hiddenIconPath;
     private readonly string starEmptyPath;
     private readonly string starFilledPath;
+    private readonly string searchIconPath;
     private readonly Plugin plugin;
     private readonly UtilityService utility;
     private readonly CollectionService collectionService;
@@ -30,6 +31,7 @@ public partial class MainWindow : Window, IDisposable
     private int dragTabIndex = -1;
     private Guid editingDesignId = Guid.Empty;
     private string editingDesignName = string.Empty;
+    private string searchText = string.Empty;
 
     public MainWindow(
         Plugin plugin,
@@ -46,7 +48,8 @@ public partial class MainWindow : Window, IDisposable
         string viewIconPath,
         string hiddenIconPath,
         string starEmptyPath,
-        string starFilledPath
+        string starFilledPath,
+        string searchIconPath
     )
         : base("Wardrobe##With a hidden ID", ImGuiWindowFlags.None)
     {
@@ -65,6 +68,7 @@ public partial class MainWindow : Window, IDisposable
         this.hiddenIconPath = hiddenIconPath;
         this.starEmptyPath = starEmptyPath;
         this.starFilledPath = starFilledPath;
+        this.searchIconPath = searchIconPath;
         this.plugin = plugin;
         this.utility = utility;
         this.collectionService = collectionService;
@@ -89,6 +93,23 @@ public partial class MainWindow : Window, IDisposable
     }
 
     public void Dispose() { }
+
+    /// <summary>
+    /// Filters designs by search text. Matches nickname first, then Glamourer display name. Case-insensitive.
+    /// </summary>
+    private Dictionary<Guid, (string, string, uint, bool)> FilterBySearch(
+        Dictionary<Guid, (string DisplayName, string FullPath, uint DisplayColor, bool ShownInQdb)> designs)
+    {
+        if (string.IsNullOrWhiteSpace(searchText))
+            return designs;
+
+        var q = searchText.Trim().ToLower();
+        return designs.Where(d =>
+        {
+            var nick = designMetadataService.GetDisplayName(d.Key);
+            return nick.ToLower().Contains(q) || d.Value.DisplayName.ToLower().Contains(q);
+        }).ToDictionary(d => d.Key, d => d.Value);
+    }
 
     public override void Draw()
     {

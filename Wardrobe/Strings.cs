@@ -11,9 +11,16 @@ public static class Strings
     public const string Cancel = "Cancel";
     public const string Edit   = "Edit";
     public const string Delete = "Delete";
+    public const string Settings = "Settings";
+    public const string Yes    = "Yes";
+    public const string No     = "No";
 
     // ── Main window · Tab bar ───────────────────────
+    public const string SearchHint        = "Search...";
     public const string TabRightClickTooltip = "Right-click for options";
+    public const string TooltipSettings     = "Open Settings";
+    public const string TooltipEyeShowHidden  = "Show hidden designs";
+    public const string TooltipEyeShowVisible = "Show visible designs";
 
     // ── Main window · Empty state ───────────────────
     public const string EmptyHeading       = "No collections yet";
@@ -42,8 +49,11 @@ public static class Strings
     public const string TooltipUpload      = "Upload from file";
     public const string TooltipClipboard   = "Paste from clipboard";
     public const string TooltipThumbnail   = "Double-click to apply";
-    public const string TooltipFavAdd      = "Add to favourites";
-    public const string TooltipFavRemove   = "Remove from favourites";
+    public const string TooltipRename        = "Double-click to rename";
+    public const string TooltipFavAdd        = "Add to favourites";
+    public const string TooltipFavRemove     = "Remove from favourites";
+    public const string ConfirmDeleteTitle = "Are you sure you want to delete";
+    public const string ConfirmDeleteBody  = "this design from Glamourer?";
 
     // ── Collection editor window ────────────────────
     public const string ColCreateTitle     = "Create New Collection";
@@ -80,6 +90,17 @@ public static class Strings
     public const string DesignImagePreviewNo  = "Image preview not available";
     public const string DesignNoImage         = "No image selected";
     public const string DesignSelectedPrefix  = "Selected: ";   // followed by filename
+
+    // ── Settings window ─────────────────────────────
+    public const string SettingsApplyEquipmentOnly = "Apply Equipment Only";
+    public const string SettingsApplyEquipmentTooltip = "When enabled, design apply will only change gear, not character appearance";
+    public const string SettingsShowHidden = "Show Hidden";
+    public const string SettingsShowHiddenTooltip = "Show hidden designs instead of visible ones";
+    public const string SettingsThemeHeading = "Theme";
+    public const string SettingsThemeClassic = "Classic";
+    public const string SettingsThemeOcean   = "Ocean";
+    public const string SettingsThemePurple  = "Midnight Purple";
+    public const string SettingsThemeForest  = "Forest";
 
     // ── Camera window ───────────────────────────────
     public const string CameraCapture       = "Capture";
