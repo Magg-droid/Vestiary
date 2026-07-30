@@ -33,6 +33,8 @@ public sealed class Plugin : IDalamudPlugin
     public CollectionService CollectionService { get; init; }
     public DesignMetadataService DesignMetadataService { get; init; }
     public HiddenDesignService HiddenDesignService { get; init; }
+    public PenumbraService PenumbraService { get; init; }
+    public ModStateService ModStateService { get; init; }
     public UtilityService UtilityService { get; init; }
     public TextureCache TextureCache { get; init; }
 
@@ -51,6 +53,8 @@ public sealed class Plugin : IDalamudPlugin
         CollectionService = new CollectionService(Configuration, GlamourerService);
         DesignMetadataService = new DesignMetadataService(Configuration, GlamourerService);
         HiddenDesignService = new HiddenDesignService(Configuration);
+        PenumbraService = new PenumbraService(PluginInterface, Log);
+        ModStateService = new ModStateService(Configuration, PenumbraService, GlamourerService);
         UtilityService = new UtilityService(pluginDir, Log, Configuration);
         TextureCache = new TextureCache(TextureProvider);
 
