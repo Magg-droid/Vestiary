@@ -33,6 +33,7 @@ public sealed class Plugin : IDalamudPlugin
     public CollectionService CollectionService { get; init; }
     public DesignMetadataService DesignMetadataService { get; init; }
     public HiddenDesignService HiddenDesignService { get; init; }
+    public FavoriteService FavoriteService { get; init; }
     public UtilityService UtilityService { get; init; }
     public TextureCache TextureCache { get; init; }
 
@@ -51,6 +52,7 @@ public sealed class Plugin : IDalamudPlugin
         CollectionService = new CollectionService(Configuration, GlamourerService);
         DesignMetadataService = new DesignMetadataService(Configuration, GlamourerService);
         HiddenDesignService = new HiddenDesignService(Configuration);
+        FavoriteService = new FavoriteService(Configuration, CollectionService);
         UtilityService = new UtilityService(pluginDir, Log, Configuration);
         TextureCache = new TextureCache(TextureProvider);
 
@@ -61,11 +63,14 @@ public sealed class Plugin : IDalamudPlugin
         var clipboardIconPath = Path.Combine(pluginDir, "clipboard_icon.png");
         var viewIconPath = Path.Combine(pluginDir, "view.png");
         var hiddenIconPath = Path.Combine(pluginDir, "hidden.png");
+        var starEmptyPath = Path.Combine(pluginDir, "star_empty.png");
+        var starFilledPath = Path.Combine(pluginDir, "star_filled.png");
 
         ConfigWindow = new ConfigWindow(this);
         MainWindow = new MainWindow(this, UtilityService, goatImagePath, CollectionService,
-            DesignMetadataService, HiddenDesignService, noPreviewImagePath,
-            cameraIconPath, uploadIconPath, clipboardIconPath, viewIconPath, hiddenIconPath);
+            DesignMetadataService, HiddenDesignService, FavoriteService, noPreviewImagePath,
+            cameraIconPath, uploadIconPath, clipboardIconPath, viewIconPath, hiddenIconPath,
+            starEmptyPath, starFilledPath);
         CollectionEditorWindow = new CollectionEditorWindow(this, CollectionService);
         DesignEditorWindow = new DesignEditorWindow(this, UtilityService, DesignMetadataService, GlamourerService);
         CameraWindow = new CameraWindow(this, UtilityService);

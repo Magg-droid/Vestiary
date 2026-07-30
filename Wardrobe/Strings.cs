@@ -42,6 +42,8 @@ public static class Strings
     public const string TooltipUpload      = "Upload from file";
     public const string TooltipClipboard   = "Paste from clipboard";
     public const string TooltipThumbnail   = "Double-click to apply";
+    public const string TooltipFavAdd      = "Add to favourites";
+    public const string TooltipFavRemove   = "Remove from favourites";
 
     // ── Collection editor window ────────────────────
     public const string ColCreateTitle     = "Create New Collection";

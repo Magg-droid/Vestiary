@@ -14,7 +14,7 @@ public partial class MainWindow
             return;
         }
 
-        var allDesigns = collectionService.GetDesignsByCollection(selectedCollectionId);
+        var allDesigns = GetDesignsForCollection(selectedCollectionId);
         var visibleDesigns = hiddenDesignService.GetVisibleDesigns(allDesigns);
         var hiddenDesigns = hiddenDesignService.GetHiddenDesigns(allDesigns);
         var designsToShow = hiddenDesignService.ShowHidden ? hiddenDesigns : visibleDesigns;

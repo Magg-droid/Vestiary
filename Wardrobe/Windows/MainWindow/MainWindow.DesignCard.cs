@@ -166,6 +166,17 @@ public partial class MainWindow
                 designMetadataService.SetCustomImage(designId, p);
                 plugin.TextureCache.InvalidateTexture(p);
             }));
+
+        // Favourite — top-left corner of thumbnail
+        var favMin = new Vector2(thumbStartPos.X + 4f, thumbStartPos.Y + 4f);
+        var favMax = new Vector2(favMin.X + iconSize, favMin.Y + iconSize);
+        bool isFav = favoriteService.IsFavorite(designId);
+        string favPath = isFav ? starFilledPath : starEmptyPath;
+        string favTooltip = isFav ? Strings.TooltipFavRemove : Strings.TooltipFavAdd;
+        DrawActionIcon(favMin, favMax, favPath, favTooltip, windowHovered, _ =>
+        {
+            favoriteService.Toggle(designId);
+        });
     }
 
     private void DrawActionIcon(Vector2 min, Vector2 max, string iconPath, string tooltip,
@@ -190,7 +201,10 @@ public partial class MainWindow
         if (!ImGui.IsWindowHovered(ImGuiHoveredFlags.ChildWindows))
             return;
 
-        bool thumbHovered = ImGui.IsMouseHoveringRect(thumbStartPos, thumbEndPos);
+        bool starHovered = ImGui.IsMouseHoveringRect(
+            new Vector2(thumbStartPos.X + 4f, thumbStartPos.Y + 4f),
+            new Vector2(thumbStartPos.X + 4f + 28f, thumbStartPos.Y + 4f + 28f));
+        bool thumbHovered = ImGui.IsMouseHoveringRect(thumbStartPos, thumbEndPos) && !starHovered;
         if (thumbHovered)
         {
             ImGui.SetTooltip(Strings.TooltipThumbnail);

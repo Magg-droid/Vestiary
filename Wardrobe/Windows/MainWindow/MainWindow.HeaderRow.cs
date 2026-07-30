@@ -14,7 +14,7 @@ public partial class MainWindow
         if (selectedCollectionId == Guid.Empty)
             return;
 
-        var allDesigns = collectionService.GetDesignsByCollection(selectedCollectionId);
+        var allDesigns = GetDesignsForCollection(selectedCollectionId);
         var visibleDesigns = hiddenDesignService.GetVisibleDesigns(allDesigns);
         var hiddenDesigns = hiddenDesignService.GetHiddenDesigns(allDesigns);
 
