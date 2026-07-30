@@ -52,7 +52,8 @@
 
 ## UI & Experience
 
-- Rose-gold dark theme
+- Four themes: Rose Gold, Ocean (grey-blue), Midnight Purple (grey-lavender), Forest (grey-sage)
+- Live theme switching via radio buttons in Settings — no reload
 - Empty-state wizard for new users (icon + heading + call-to-action button)
 - Centered "No designs" / "No hidden designs" headings when galleries are empty
-- Settings window with two toggles: Apply Equipment Only, Show Hidden
+- Settings window with toggles: Apply Equipment Only, Show Hidden, Theme
