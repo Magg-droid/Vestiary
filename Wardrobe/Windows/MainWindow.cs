@@ -21,6 +21,8 @@ public class MainWindow : Window, IDisposable
     private readonly string cameraIconPath;
     private readonly string uploadIconPath;
     private readonly string clipboardIconPath;
+    private readonly string viewIconPath;
+    private readonly string hiddenIconPath;
     private readonly Plugin plugin;
     private readonly CollectionService collectionService;
     private readonly DesignMetadataService designMetadataService;
@@ -28,6 +30,8 @@ public class MainWindow : Window, IDisposable
     private DesignEditorWindow? designEditorWindow;
     private Guid selectedCollectionId = Guid.Empty;
     private int dragTabIndex = -1;
+    private Guid editingDesignId = Guid.Empty;
+    private string editingDesignName = string.Empty;
 
     // We give this window a hidden ID using ##.
     // The user will see "My Amazing Window" as window title,
@@ -40,7 +44,9 @@ public class MainWindow : Window, IDisposable
         string noPreviewImagePath,
         string cameraIconPath,
         string uploadIconPath,
-        string clipboardIconPath
+        string clipboardIconPath,
+        string viewIconPath,
+        string hiddenIconPath
     )
         : base("Wardrobe##With a hidden ID", ImGuiWindowFlags.None)
     {
@@ -55,6 +61,8 @@ public class MainWindow : Window, IDisposable
         this.cameraIconPath = cameraIconPath;
         this.uploadIconPath = uploadIconPath;
         this.clipboardIconPath = clipboardIconPath;
+        this.viewIconPath = viewIconPath;
+        this.hiddenIconPath = hiddenIconPath;
         this.plugin = plugin;
         this.collectionService = collectionService;
         this.designMetadataService = designMetadataService;
@@ -238,25 +246,72 @@ public class MainWindow : Window, IDisposable
             // Display design count + settings button at top right
             if (selectedCollectionId != Guid.Empty)
             {
-                var designs = collectionService.GetDesignsByCollection(selectedCollectionId);
-                string countText = $"{designs.Count} designs";
+                var allDesigns = collectionService.GetDesignsByCollection(selectedCollectionId);
+                var hiddenIds = plugin.Configuration.HiddenDesignIds;
+                var visibleDesigns = allDesigns
+                    .Where(d => !hiddenIds.Contains(d.Key))
+                    .ToDictionary(d => d.Key, d => d.Value);
+                var hiddenDesigns = allDesigns
+                    .Where(d => hiddenIds.Contains(d.Key))
+                    .ToDictionary(d => d.Key, d => d.Value);
+
+                string countText;
+                if (plugin.Configuration.ShowHidden)
+                    countText = $"Hidden designs ({hiddenDesigns.Count})";
+                else if (hiddenDesigns.Count > 0)
+                    countText = $"{visibleDesigns.Count} designs ({hiddenDesigns.Count} hidden)";
+                else
+                    countText = $"{visibleDesigns.Count} designs";
                 Vector2 countSize = ImGui.CalcTextSize(countText);
+                float eyeS = 18f;
                 float btnW = 90f;
                 float btnH = 26f;
-                float rightMargin = 28f;
-                float totalW = countSize.X + 12f + btnW + rightMargin;
+                float gap = 8f;
+                float sepW = ImGui.CalcTextSize("|").X;
+                float rightMargin = 16f;
+                // Layout: countText | [eye] | [Settings]
+                float totalW = countSize.X + gap + sepW + gap + eyeS + gap + sepW + gap + btnW + rightMargin;
                 float countX = tabBarStart.X + ImGui.GetWindowWidth() - totalW;
-                float countY = tabBarStart.Y + (maxTabH + 3f - countSize.Y) / 2f;
+                float rowY = tabBarStart.Y + (maxTabH + 3f) / 2f;
                 float btnY = tabBarStart.Y + (maxTabH + 3f - btnH) / 2f;
-                float btnX = countX + countSize.X + 12f;
+                Vector4 sepColor = new(0.35f, 0.35f, 0.35f, 0.5f);
 
                 // Count text
-                dl.AddText(new Vector2(countX, countY),
+                dl.AddText(new Vector2(countX, rowY - countSize.Y / 2f),
                     ImGui.GetColorU32(RoseGoldTheme.CountText), countText);
+                float curX = countX + countSize.X + gap;
 
-                // Settings button (save/restore cursor so layout isn't affected)
+                float sepTextH = ImGui.CalcTextSize("|").Y;
+
+                // Separator
+                dl.AddText(new Vector2(curX, rowY - sepTextH / 2f), ImGui.GetColorU32(sepColor), "|");
+                curX += sepW + gap;
+
+                // Eye icon
+                var eyeTex = plugin.TextureCache.GetOrLoadTexture(
+                    plugin.Configuration.ShowHidden ? hiddenIconPath : viewIconPath)?.GetWrapOrDefault();
                 var savedCursor = ImGui.GetCursorScreenPos();
-                ImGui.SetCursorScreenPos(new Vector2(btnX, btnY));
+                ImGui.SetCursorScreenPos(new Vector2(curX, rowY - eyeS / 2f));
+                if (eyeTex != null)
+                {
+                    dl.AddImage(eyeTex.Handle, new Vector2(curX, rowY - eyeS / 2f), new Vector2(curX + eyeS, rowY + eyeS / 2f), Vector2.Zero, Vector2.One, ImGui.GetColorU32(RoseGoldTheme.IconDefault));
+                    ImGui.SetCursorScreenPos(new Vector2(curX, rowY - eyeS / 2f));
+                    if (ImGui.InvisibleButton("##eyeToggle", new Vector2(eyeS, eyeS)))
+                    {
+                        plugin.Configuration.ShowHidden = !plugin.Configuration.ShowHidden;
+                        plugin.Configuration.Save();
+                    }
+                    if (ImGui.IsItemHovered())
+                        ImGui.SetTooltip(plugin.Configuration.ShowHidden ? "Show visible designs" : "Show hidden designs");
+                }
+                curX += eyeS + gap;
+
+                // Separator
+                dl.AddText(new Vector2(curX, rowY - sepTextH / 2f), ImGui.GetColorU32(sepColor), "|");
+                curX += sepW + gap;
+
+                // Settings button
+                ImGui.SetCursorScreenPos(new Vector2(curX, btnY));
                 ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 4f);
                 ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(8f, 1f));
                 ImGui.PushStyleColor(ImGuiCol.Button, RoseGoldTheme.EditBtn);
@@ -269,35 +324,37 @@ public class MainWindow : Window, IDisposable
                 ImGui.PopStyleColor(3);
                 ImGui.PopStyleVar(2);
                 ImGui.SetCursorScreenPos(savedCursor);
-            }
 
-            ImGui.Dummy(new Vector2(0, 8f));
+                ImGui.Dummy(new Vector2(0, 8f));
 
-            // Display designs from selected collection
-            if (selectedCollectionId != Guid.Empty)
-            {
-                var designs = collectionService.GetDesignsByCollection(selectedCollectionId);
-
+                // Gallery
+                var designsToShow = plugin.Configuration.ShowHidden ? hiddenDesigns : visibleDesigns;
                 ImGui.Spacing();
 
-                if (designs.Count > 0)
+                if (designsToShow.Count > 0)
                 {
-                    // Scrollable gallery area
                     ImGui.BeginChild(
                         "##DesignGalleryScroll",
                         new Vector2(-1, -1),
                         false,
                         ImGuiWindowFlags.None
                     );
-                    DrawDesignGallery(designs);
+                    DrawDesignGallery(designsToShow, plugin.Configuration.ShowHidden);
                     ImGui.EndChild();
                 }
                 else
                 {
-                    ImGui.TextColored(
-                        RoseGoldTheme.TextMuted,
-                        Strings.NoDesigns
-                    );
+                    ImGui.Spacing();
+                    ImGui.Spacing();
+                    float availW = ImGui.GetContentRegionAvail().X;
+                    string msg = plugin.Configuration.ShowHidden ? "No hidden designs" : Strings.NoDesigns;
+                    ImGui.SetWindowFontScale(1.5f);
+                    ImGui.PushStyleColor(ImGuiCol.Text, RoseGoldTheme.TextHeading);
+                    var size = ImGui.CalcTextSize(msg);
+                    ImGui.SetCursorPosX(Math.Max(0, (availW - size.X) / 2f));
+                    ImGui.Text(msg);
+                    ImGui.PopStyleColor();
+                    ImGui.SetWindowFontScale(1f);
                 }
             }
             else if (collections.Count == 0)
@@ -375,7 +432,8 @@ public class MainWindow : Window, IDisposable
         Dictionary<
             Guid,
             (string DisplayName, string FullPath, uint DisplayColor, bool ShownInQdb)
-        > designs
+        > designs,
+        bool isHidden = false
     )
     {
         const float cardWidth = 260f;
@@ -406,7 +464,7 @@ public class MainWindow : Window, IDisposable
                 ImGui.SetCursorPosX(ImGui.GetCursorPosX() + centerOffset);
             }
 
-            DrawDesignCard(designId, design.DisplayName, cardWidth, cardHeight);
+            DrawDesignCard(designId, design.DisplayName, cardWidth, cardHeight, isHidden);
 
             if (columnIndex < columnsPerRow - 1 && designIndex < designs.Count - 1)
             {
@@ -421,15 +479,18 @@ public class MainWindow : Window, IDisposable
         }
     }
 
-    private void DrawDesignCard(Guid designId, string glamourerName, float width, float height)
+    private void DrawDesignCard(Guid designId, string glamourerName, float width, float height, bool isHidden = false)
     {
+        if (isHidden)
+            ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 0.5f);
+
         const float cornerRounding = 12f;
         const float borderThickness = 1.5f;
 
         // Draw card background and border with rounded corners
         Vector2 cardStartPos = ImGui.GetCursorScreenPos();
         Vector2 cardEndPos = cardStartPos + new Vector2(width, height);
-        bool isCardHovered = ImGui.IsMouseHoveringRect(cardStartPos, cardEndPos);
+        bool isCardHovered = ImGui.IsWindowHovered(ImGuiHoveredFlags.ChildWindows) && ImGui.IsMouseHoveringRect(cardStartPos, cardEndPos);
 
         ImGui
             .GetWindowDrawList()
@@ -535,13 +596,16 @@ public class MainWindow : Window, IDisposable
             ImGui.GetWindowDrawList().AddText(textPos, ImGui.GetColorU32(thumbTextColor), thumbText);
         }
 
+        // Only allow interactions when main window is hovered
+        bool windowHovered = ImGui.IsWindowHovered(ImGuiHoveredFlags.ChildWindows);
+
         // ── Camera icon in top-right corner of thumbnail ──
         const float iconSize = 28f;
         const float iconPadX = 8f;
         const float iconPadY = -3f;
         var iconMin = new Vector2(thumbEndPos.X - iconSize - iconPadX, thumbStartPos.Y + iconPadY);
         var iconMax = new Vector2(thumbEndPos.X - iconPadX, thumbStartPos.Y + iconPadY + iconSize);
-        bool isIconHovered = ImGui.IsMouseHoveringRect(iconMin, iconMax);
+        bool isIconHovered = windowHovered && ImGui.IsMouseHoveringRect(iconMin, iconMax);
 
         var cdl = ImGui.GetWindowDrawList();
         uint iconTint = ImGui.GetColorU32(isIconHovered
@@ -564,7 +628,8 @@ public class MainWindow : Window, IDisposable
             plugin.CloseSubWindows();
             plugin.ShowCameraOverlay(path =>
             {
-                designMetadataService.UpsertMetadata(capturedDesignId, customImagePath: path);
+                var meta = designMetadataService.GetMetadata(capturedDesignId);
+                designMetadataService.UpsertMetadata(capturedDesignId, nickname: meta?.Nickname ?? "", customImagePath: path);
                 plugin.TextureCache.InvalidateTexture(path);
             });
         }
@@ -573,7 +638,7 @@ public class MainWindow : Window, IDisposable
         const float iconGap = 4f;
         var uploadMin = new Vector2(iconMin.X, iconMax.Y + iconGap);
         var uploadMax = new Vector2(iconMax.X, uploadMin.Y + iconSize);
-        bool isUploadHovered = ImGui.IsMouseHoveringRect(uploadMin, uploadMax);
+        bool isUploadHovered = windowHovered && ImGui.IsMouseHoveringRect(uploadMin, uploadMax);
         uint uploadTint = ImGui.GetColorU32(isUploadHovered
             ? RoseGoldTheme.IconHovered
             : RoseGoldTheme.IconDefault);
@@ -588,7 +653,8 @@ public class MainWindow : Window, IDisposable
             plugin.CloseSubWindows();
             plugin.OpenImageFilePicker(path =>
             {
-                designMetadataService.UpsertMetadata(capturedDesignId, customImagePath: path);
+                var meta = designMetadataService.GetMetadata(capturedDesignId);
+                designMetadataService.UpsertMetadata(capturedDesignId, nickname: meta?.Nickname ?? "", customImagePath: path);
                 plugin.TextureCache.InvalidateTexture(path);
             });
         }
@@ -596,7 +662,7 @@ public class MainWindow : Window, IDisposable
         // ── Clipboard icon ──
         var clipMin = new Vector2(iconMin.X, uploadMax.Y + iconGap);
         var clipMax = new Vector2(iconMax.X, clipMin.Y + iconSize);
-        bool isClipHovered = ImGui.IsMouseHoveringRect(clipMin, clipMax);
+        bool isClipHovered = windowHovered && ImGui.IsMouseHoveringRect(clipMin, clipMax);
         uint clipTint = ImGui.GetColorU32(isClipHovered
             ? RoseGoldTheme.IconHovered
             : RoseGoldTheme.IconDefault);
@@ -611,21 +677,25 @@ public class MainWindow : Window, IDisposable
             plugin.CloseSubWindows();
             plugin.CopyImageFromClipboard(path =>
             {
-                designMetadataService.UpsertMetadata(capturedDesignId, customImagePath: path);
+                var meta = designMetadataService.GetMetadata(capturedDesignId);
+                designMetadataService.UpsertMetadata(capturedDesignId, nickname: meta?.Nickname ?? "", customImagePath: path);
                 plugin.TextureCache.InvalidateTexture(path);
             });
         }
 
-        // ── Double-click thumbnail to apply (only if no action icon is hovered) ──
-        bool anyIconHovered = isIconHovered || isUploadHovered || isClipHovered;
-        bool thumbHovered = ImGui.IsMouseHoveringRect(thumbStartPos, thumbEndPos);
-        if (thumbHovered && !anyIconHovered)
+        // ── Double-click thumbnail to apply (only if main window is hovered) ──
+        if (ImGui.IsWindowHovered())
         {
-            ImGui.SetTooltip(Strings.TooltipThumbnail);
-            if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
+            bool anyIconHovered = isIconHovered || isUploadHovered || isClipHovered;
+            bool thumbHovered = ImGui.IsMouseHoveringRect(thumbStartPos, thumbEndPos);
+            if (thumbHovered && !anyIconHovered)
             {
-                plugin.CloseSubWindows();
-                plugin.GlamourerService.ApplyDesign(designId, plugin.Configuration.ApplyEquipmentOnly || ImGui.GetIO().KeyCtrl);
+                ImGui.SetTooltip(Strings.TooltipThumbnail);
+                if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
+                {
+                    plugin.CloseSubWindows();
+                    plugin.GlamourerService.ApplyDesign(designId, plugin.Configuration.ApplyEquipmentOnly || ImGui.GetIO().KeyCtrl);
+                }
             }
         }
 
@@ -644,63 +714,75 @@ public class MainWindow : Window, IDisposable
         // Minimal spacing
         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 12f);
 
-        // Design name - centered in a box-like display
-        string displayedName = designMetadataService.GetDisplayName(designId);
-        string originalName = displayedName;
+        // Design name - centered, double-click to edit inline
+        string displayName = designMetadataService.GetDisplayName(designId);
+        bool isEditing = editingDesignId == designId;
 
-        const int maxNameChars = 24;
-
-        // Truncate if too long
-        if (displayedName.Length > maxNameChars)
+        if (isEditing)
         {
-            displayedName = displayedName.Substring(0, maxNameChars - 3) + "...";
+            ImGui.SetCursorPosX(8f);
+            ImGui.SetNextItemWidth(width - 16f);
+            bool enterPressed = ImGui.InputText($"##rename_{designId}", ref editingDesignName, 64, ImGuiInputTextFlags.EnterReturnsTrue);
+            if (enterPressed || ImGui.IsItemDeactivated())
+            {
+                var trimmed = editingDesignName.Trim();
+                var existing = designMetadataService.GetMetadata(designId);
+                designMetadataService.UpsertMetadata(designId, nickname: trimmed, customImagePath: existing?.CustomImagePath ?? "");
+                editingDesignId = Guid.Empty;
+                editingDesignName = string.Empty;
+            }
         }
-
-        // Center align the name
-        Vector2 nameSize = ImGui.CalcTextSize(displayedName);
-        float nameX = Math.Max(8f, (width - nameSize.X) / 2);
-        ImGui.SetCursorPosX(nameX);
-
-        // Fancy rose-gold color for name
-        ImGui.PushStyleColor(ImGuiCol.Text, RoseGoldTheme.TextHeading);
-        ImGui.Text(displayedName);
-        ImGui.PopStyleColor();
-
-        // Tooltip with full name on hover if truncated
-        if (displayedName.EndsWith("...") && ImGui.IsItemHovered())
+        else
         {
-            ImGui.BeginTooltip();
-            ImGui.Text(originalName);
-            ImGui.EndTooltip();
+            const int maxNameChars = 24;
+            string truncated = displayName.Length > maxNameChars
+                ? displayName.Substring(0, maxNameChars - 3) + "..."
+                : displayName;
+
+            Vector2 nameSize = ImGui.CalcTextSize(truncated);
+            float nameX = Math.Max(8f, (width - nameSize.X) / 2);
+            ImGui.SetCursorPosX(nameX);
+
+            ImGui.PushStyleColor(ImGuiCol.Text, RoseGoldTheme.TextHeading);
+            ImGui.Text(truncated);
+            ImGui.PopStyleColor();
+
+            if (truncated.EndsWith("...") && ImGui.IsItemHovered())
+                ImGui.SetTooltip(displayName);
+
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Double-click to rename");
+            if (ImGui.IsItemClicked(ImGuiMouseButton.Left) && ImGui.GetIO().MouseClickedCount[(int)ImGuiMouseButton.Left] == 2)
+            {
+                editingDesignId = designId;
+                editingDesignName = displayName;
+            }
         }
 
         // Spacing before buttons
         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 4f);
 
-        // Three-button layout: Apply | Edit | Delete
-        float btnWidth = 62f;
-        float deleteBtnWidth = 70f; // Slightly wider for "Delete"
+        // Button layout: Apply | Hide (or Apply | Unhide | Delete for hidden)
+        float btnW = isHidden ? 72f : 80f;
         float btnHeight = 28f;
         float btnSpacing = 12f;
-        float totalBtnWidth = (btnWidth * 2) + deleteBtnWidth + (btnSpacing * 2);
+        int btnCount = isHidden ? 3 : 2;
+        float totalBtnWidth = btnW * btnCount + btnSpacing * (btnCount - 1);
         float btnStartX = (width - totalBtnWidth) / 2;
 
         ImGui.SetCursorPosX(btnStartX);
-
         ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 4f);
 
-        // Apply button - Muted Steel Blue
+        // Apply button
         ImGui.PushStyleColor(ImGuiCol.Button, RoseGoldTheme.ApplyBtn);
         ImGui.PushStyleColor(ImGuiCol.ButtonHovered, RoseGoldTheme.ApplyBtnHover);
         ImGui.PushStyleColor(ImGuiCol.ButtonActive, RoseGoldTheme.ApplyBtnActive);
-
-        if (ImGui.Button(Strings.CardApply + $"##btn_apply_{designId}", new Vector2(btnWidth, btnHeight)))
+        if (ImGui.Button(Strings.CardApply + $"##btn_apply_{designId}", new Vector2(btnW, btnHeight)))
         {
             plugin.CloseSubWindows();
             bool equipmentOnly = plugin.Configuration.ApplyEquipmentOnly || ImGui.GetIO().KeyCtrl;
             plugin.GlamourerService.ApplyDesign(designId, equipmentOnly);
         }
-
         if (ImGui.IsItemHovered())
         {
             ImGui.BeginTooltip();
@@ -708,56 +790,86 @@ public class MainWindow : Window, IDisposable
             ImGui.TextDisabled(Strings.TooltipApplyCtrl);
             ImGui.EndTooltip();
         }
-
         ImGui.PopStyleColor(3);
 
-        // Edit button - Muted Warm Grey
-        ImGui.SameLine(btnStartX + btnWidth + btnSpacing);
-        ImGui.PushStyleColor(ImGuiCol.Button, RoseGoldTheme.EditBtn);
-        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, RoseGoldTheme.EditBtnHover);
-        ImGui.PushStyleColor(ImGuiCol.ButtonActive, RoseGoldTheme.EditBtnActive);
-
-        if (ImGui.Button(Strings.CardEdit + $"##btn_edit_{designId}", new Vector2(btnWidth, btnHeight)))
+        // Hide / Unhide button
+        ImGui.SameLine(btnStartX + btnW + btnSpacing);
+        bool alreadyHidden = plugin.Configuration.HiddenDesignIds.Contains(designId);
+        if (alreadyHidden)
         {
-            plugin.CloseSubWindows();
-            designEditorWindow?.OpenEdit(designId);
-        }
-
-        if (ImGui.IsItemHovered())
-        {
-            ImGui.BeginTooltip();
-            ImGui.Text(Strings.TooltipEdit);
-            ImGui.EndTooltip();
-        }
-
-        ImGui.PopStyleColor(3);
-
-        // Delete button - Muted Red-Grey
-        ImGui.SameLine(btnStartX + (btnWidth * 2) + (btnSpacing * 2));
-        ImGui.PushStyleColor(ImGuiCol.Button, RoseGoldTheme.DeleteBtn);
-        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, RoseGoldTheme.DeleteBtnHover);
-        ImGui.PushStyleColor(ImGuiCol.ButtonActive, RoseGoldTheme.DeleteBtnActive);
-
-        if (ImGui.Button(Strings.CardDelete + $"##btn_delete_{designId}", new Vector2(deleteBtnWidth, btnHeight)))
-        {
-            if (ImGui.GetIO().KeyCtrl)
+            ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.35f, 0.55f, 0.35f, 1f));
+            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.45f, 0.65f, 0.45f, 1f));
+            ImGui.PushStyleColor(ImGuiCol.ButtonActive, new Vector4(0.50f, 0.70f, 0.50f, 1f));
+            if (ImGui.Button(Strings.CardUnhide + $"##btn_unhide_{designId}", new Vector2(btnW, btnHeight)))
             {
-                plugin.CloseSubWindows();
-                plugin.GlamourerService.DeleteDesign(designId);
+                plugin.Configuration.HiddenDesignIds.Remove(designId);
+                plugin.Configuration.Save();
             }
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip(Strings.TooltipUnhide);
         }
-
-        if (ImGui.IsItemHovered())
+        else
         {
-            ImGui.BeginTooltip();
-            ImGui.Text(Strings.TooltipDelete);
-            ImGui.TextDisabled(Strings.TooltipDeleteCtrl);
-            ImGui.EndTooltip();
+            ImGui.PushStyleColor(ImGuiCol.Button, RoseGoldTheme.DeleteBtn);
+            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, RoseGoldTheme.DeleteBtnHover);
+            ImGui.PushStyleColor(ImGuiCol.ButtonActive, RoseGoldTheme.DeleteBtnActive);
+            if (ImGui.Button(Strings.CardHide + $"##btn_hide_{designId}", new Vector2(btnW, btnHeight)))
+            {
+                plugin.Configuration.HiddenDesignIds.Add(designId);
+                plugin.Configuration.Save();
+            }
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip(Strings.TooltipHide);
+        }
+        ImGui.PopStyleColor(3);
+        ImGui.PopStyleVar(); // FrameRounding
+
+        // Delete button for hidden designs (at full opacity)
+        if (isHidden)
+        {
+            ImGui.PopStyleVar(); // pop Alpha 0.5
+            ImGui.SameLine(btnStartX + btnW * 2 + btnSpacing * 2);
+            ImGui.PushStyleColor(ImGuiCol.Button, RoseGoldTheme.DeleteBtn);
+            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, RoseGoldTheme.DeleteBtnHover);
+            ImGui.PushStyleColor(ImGuiCol.ButtonActive, RoseGoldTheme.DeleteBtnActive);
+            if (ImGui.Button(Strings.CardDelete + $"##btn_delete_{designId}", new Vector2(btnW, btnHeight)))
+            {
+                if (ImGui.GetIO().KeyCtrl)
+                {
+                    ImGui.OpenPopup($"##confirm_delete_{designId}");
+                }
+            }
+            ImGui.PopStyleColor(3);
+            if (ImGui.IsItemHovered())
+            {
+                ImGui.BeginTooltip();
+                ImGui.Text(Strings.TooltipDelete);
+                ImGui.TextDisabled(Strings.TooltipDeleteCtrl);
+                ImGui.EndTooltip();
+            }
+
+            // Confirmation popup
+            if (ImGui.BeginPopup($"##confirm_delete_{designId}"))
+            {
+                ImGui.Text("Are you sure you want to delete");
+                ImGui.Text("this design from Glamourer?");
+                ImGui.Spacing();
+                if (ImGui.Button("Yes##del_yes"))
+                {
+                    plugin.CloseSubWindows();
+                    plugin.GlamourerService.DeleteDesign(designId);
+                    ImGui.CloseCurrentPopup();
+                }
+                ImGui.SameLine();
+                if (ImGui.Button("No##del_no"))
+                    ImGui.CloseCurrentPopup();
+                ImGui.EndPopup();
+            }
+            ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 0.5f); // restore hidden opacity
         }
 
-        ImGui.PopStyleColor(3);
-        ImGui.PopStyleVar();
-
+        if (isHidden)
+            ImGui.PopStyleVar(); // pop Alpha
         ImGui.EndChild();
     }
 }

@@ -15,7 +15,7 @@ public class ConfigWindow : Window, IDisposable
         Flags = ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoScrollbar |
                 ImGuiWindowFlags.NoScrollWithMouse;
 
-        Size = new Vector2(280, 100);
+        Size = new Vector2(280, 140);
         SizeCondition = ImGuiCond.Once;
 
         this.plugin = plugin;
@@ -36,5 +36,14 @@ public class ConfigWindow : Window, IDisposable
         }
         if (ImGui.IsItemHovered())
             ImGui.SetTooltip("When enabled, design apply will only change gear, not character appearance");
+
+        var showHidden = configuration.ShowHidden;
+        if (ImGui.Checkbox("Show Hidden", ref showHidden))
+        {
+            configuration.ShowHidden = showHidden;
+            configuration.Save();
+        }
+        if (ImGui.IsItemHovered())
+            ImGui.SetTooltip("Show hidden designs instead of visible ones");
     }
 }

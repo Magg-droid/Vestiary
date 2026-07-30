@@ -61,16 +61,6 @@ public class CollectionEditorWindow : Window, IDisposable
 
         // Header Section
         ImGui.Spacing();
-        ImGui.Spacing();
-        
-        // Title - left aligned
-        string windowTitle = isEditing ? Strings.ColEditTitle : Strings.ColCreateTitle;
-        ImGui.TextColored(RoseGoldTheme.TextHeading, windowTitle);
-        
-        ImGui.Spacing();
-        ImGui.Separator();
-        ImGui.Spacing();
-
         // Collection Name Section
         ImGui.AlignTextToFramePadding();
         ImGui.Text(Strings.ColNameLabel);

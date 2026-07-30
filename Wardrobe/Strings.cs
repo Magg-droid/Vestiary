@@ -29,9 +29,13 @@ public static class Strings
     public const string CardApply          = "Apply";
     public const string CardEdit           = "Edit";
     public const string CardDelete         = "Delete";
+    public const string CardHide           = "Hide";
+    public const string CardUnhide         = "Unhide";
     public const string TooltipApply       = "Apply this design";
     public const string TooltipApplyCtrl   = "Ctrl+Click: Equipment only";
     public const string TooltipEdit        = "Edit configuration";
+    public const string TooltipHide        = "Hide this design from the gallery";
+    public const string TooltipUnhide       = "Show this design in the gallery again";
     public const string TooltipDelete      = "Delete the design from Glamourer";
     public const string TooltipDeleteCtrl  = "Ctrl+Click to confirm";
     public const string TooltipCamera      = "Take snapshot";
