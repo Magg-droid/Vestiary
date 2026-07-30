@@ -52,7 +52,7 @@
 
 ## UI & Experience
 
-- Four themes: Rose Gold, Ocean (grey-blue), Midnight Purple (grey-lavender), Forest (grey-sage)
+- Four themes: Classic (warm grey), Ocean (grey-blue), Midnight Purple (grey-lavender), Forest (charcoal sage)
 - Live theme switching via radio buttons in Settings — no reload
 - Empty-state wizard for new users (icon + heading + call-to-action button)
 - Centered "No designs" / "No hidden designs" headings when galleries are empty
