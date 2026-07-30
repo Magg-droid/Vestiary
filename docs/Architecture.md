@@ -41,14 +41,16 @@ Wardrobe/
 │   ├── GlamourerService.cs           ← IPC bridge: GetDesignList, ApplyDesign, DeleteDesign
 │   ├── CollectionService.cs          ← CRUD for collections, filters designs by folder path
 │   ├── DesignMetadataService.cs      ← CRUD for per-design metadata (nicknames, image paths)
-│   └── TextureCache.cs               ← Caches loaded textures so gallery scrolls smoothly
+│   ├── TextureCache.cs               ← Caches loaded textures so gallery scrolls smoothly
+│   ├── HiddenDesignService.cs        ← Hide/show designs (planned — currently inline in MainWindow)
+│   ├── ThumbnailService.cs           ← Thumbnail file management (planned)
+│   └── GalleryService.cs             ← Main orchestrator (planned)
 │
-└── Windows/
-    ├── MainWindow.cs                 ← ~720 lines: tab bar, gallery, cards, empty state
-    ├── ConfigWindow.cs               ← Plugin settings (minimal)
-    ├── CollectionEditorWindow.cs     ← Create/edit collection popup (name + folder paths)
-    ├── DesignEditorWindow.cs         ← Edit design metadata popup (nickname + image)
-    └── CameraWindow.cs               ← Full-screen 4:5 camera overlay with drag/resize
+├── Windows/
+│   ├── MainWindow.cs
+│   ├── ConfigWindow.cs               ← Settings: Apply Equipment Only, Show Hidden
+│   ├── CollectionEditorWindow.cs     ← Create/edit collection popup (name + folder paths)
+│   └── CameraWindow.cs               ← Full-screen 4:5 camera overlay with drag/resize
 ```
 
 ---
@@ -171,4 +173,4 @@ Priorities for next releases:
 
 ---
 
-*Last updated: v0.4.0.0*
+*Last updated: v0.5.0.0*

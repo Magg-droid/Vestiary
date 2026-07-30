@@ -6,6 +6,97 @@
 
 ---
 
+## 0. Core Architecture Principle
+
+### Thin Windows, Fat Services
+
+> **Windows display data. Services perform actions.**
+
+This project follows an Angular-inspired service-oriented architecture. The main principle:
+
+- **Windows** should only draw ImGui UI, display data, and forward user actions.
+- **Windows** should **never** contain business logic, IPC calls, configuration manipulation, or file operations.
+- **Services** contain all application logic and are injected into windows through the constructor.
+
+```csharp
+// ❌  Bad — business logic in the window
+if (ImGui.Button("Hide"))
+{
+    configuration.HiddenDesignIds.Add(designId);
+    configuration.Save();
+    RefreshGallery();
+}
+
+// ✅  Good — window delegates to a service
+if (ImGui.Button("Hide"))
+{
+    galleryService.HideDesign(designId);
+}
+```
+
+### One Responsibility Per Service
+
+Each service owns a specific feature domain:
+
+| Service | Owns |
+|---|---|
+| `GlamourerService` | All IPC communication |
+| `CollectionService` | Collection CRUD |
+| `HiddenDesignService` | Hide/show designs |
+| `ThumbnailService` | Thumbnail file management |
+| `CameraService` | Camera capture flow |
+| `GalleryService` | Orchestrates multiple services for the gallery |
+
+### Service Dependency Direction
+
+```
+MainWindow
+      │
+      ▼
+GalleryService      ← Main orchestrator
+      │
+      ├── GlamourerService
+      ├── CollectionService
+      ├── HiddenDesignService
+      └── ThumbnailService
+```
+
+- Windows depend on services. Services never depend on windows.
+- The UI never talks directly to configuration or IPC.
+- `GalleryService` is the main entry point for window interactions.
+
+### Feature Development Pattern
+
+For every new feature, create:
+
+1. **Model** (if state is needed)
+2. **Service** (all logic)
+3. **UI** (rendering only)
+
+Example — adding "Favorites":
+
+```
+Models/FavoriteDesign.cs
+Services/FavoriteService.cs
+Windows/UI   → Favorite button in DesignCard
+```
+
+### UI State
+
+UI-only state should live in a dedicated model, not scattered across window fields:
+
+```csharp
+public class GalleryState
+{
+    public Guid SelectedCollectionId;
+    public bool ShowHidden;
+    public string SearchText = "";
+    public GallerySortMode SortMode;
+}
+```
+
+---
+
 ## 1. Theme Colors
 
 **All UI colors live in `Wardrobe/RoseGoldTheme.cs`.**
@@ -66,15 +157,22 @@ Wardrobe/
 │   └── DesignMetadata.cs
 ├── Services/
 │   ├── GlamourerService.cs
+│   ├── GalleryService.cs
 │   ├── CollectionService.cs
-│   ├── DesignMetadataService.cs
+│   ├── HiddenDesignService.cs
+│   ├── ThumbnailService.cs
+│   ├── CameraService.cs
 │   └── TextureCache.cs
-└── Windows/
-    ├── MainWindow.cs
-    ├── ConfigWindow.cs
-    ├── CollectionEditorWindow.cs
-    ├── DesignEditorWindow.cs
-    └── CameraWindow.cs
+├── Windows/
+│   ├── MainWindow.cs
+│   ├── ConfigWindow.cs
+│   ├── CollectionEditorWindow.cs
+│   ├── DesignEditorWindow.cs
+│   └── CameraWindow.cs
+└── UI/
+    ├── DesignCard.cs
+    ├── CollectionTabs.cs
+    └── SharedStyles.cs
 ```
 
 ### When files get too large
@@ -101,12 +199,11 @@ Services are plain classes injected through the constructor:
 ```csharp
 public class MainWindow : Window
 {
-    private readonly CollectionService collectionService;
-    private readonly DesignMetadataService designMetadataService;
+    private readonly GalleryService galleryService;
 
-    public MainWindow(CollectionService collectionService, ...)
+    public MainWindow(GalleryService galleryService)
     {
-        this.collectionService = collectionService;
+        this.galleryService = galleryService;
     }
 }
 ```
@@ -114,6 +211,8 @@ public class MainWindow : Window
 - Keep services **stateless where possible**.
 - Save/load goes through `Configuration` (which calls `configuration.Save()`).
 - No service depends on a Window — windows depend on services.
+- Prefer **clarity over cleverness**. Use descriptive names and explicit intermediate variables.
+- Avoid overly compact LINQ when readability suffers.
 
 ---
 
@@ -178,4 +277,4 @@ ImGui.Button($"Apply##btn_apply_{designId}");
 
 ---
 
-*Last updated: v0.3.0.0 — this document grows as patterns solidify.*
+*Last updated: v0.5.0.0 — this document grows as patterns solidify.*
