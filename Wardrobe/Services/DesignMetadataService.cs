@@ -57,6 +57,24 @@ public class DesignMetadataService
     }
 
     /// <summary>
+    /// Set nickname without touching the custom image path.
+    /// </summary>
+    public void SetNickname(Guid designId, string nickname)
+    {
+        var existing = GetMetadata(designId);
+        UpsertMetadata(designId, nickname: nickname, customImagePath: existing?.CustomImagePath ?? "");
+    }
+
+    /// <summary>
+    /// Set custom image path without touching the nickname.
+    /// </summary>
+    public void SetCustomImage(Guid designId, string path)
+    {
+        var existing = GetMetadata(designId);
+        UpsertMetadata(designId, nickname: existing?.Nickname ?? "", customImagePath: path);
+    }
+
+    /// <summary>
     /// Get display name for a design: returns Nickname if set, otherwise Glamourer's DisplayName.
     /// </summary>
     public string GetDisplayName(Guid designId)

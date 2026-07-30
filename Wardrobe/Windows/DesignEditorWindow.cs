@@ -10,6 +10,7 @@ namespace Wardrobe.Windows;
 public class DesignEditorWindow : Window, IDisposable
 {
     private readonly Plugin plugin;
+    private readonly UtilityService utility;
     private readonly DesignMetadataService designMetadataService;
     private readonly GlamourerService glamourerService;
 
@@ -18,10 +19,11 @@ public class DesignEditorWindow : Window, IDisposable
     private string nickname = string.Empty;
     private string customImagePath = string.Empty;
 
-    public DesignEditorWindow(Plugin plugin, DesignMetadataService designMetadataService, GlamourerService glamourerService)
+    public DesignEditorWindow(Plugin plugin, UtilityService utility, DesignMetadataService designMetadataService, GlamourerService glamourerService)
         : base("Edit Design Metadata##DesignEditor", ImGuiWindowFlags.None)
     {
         this.plugin = plugin;
+        this.utility = utility;
         this.designMetadataService = designMetadataService;
         this.glamourerService = glamourerService;
 
@@ -100,13 +102,13 @@ public class DesignEditorWindow : Window, IDisposable
         ImGui.Spacing();
         if (ImGui.Button(Strings.DesignChooseImage, new Vector2(150, 0)))
         {
-            plugin.OpenImageFilePicker(OnImageSelected);
+            utility.OpenImageFilePicker(OnImageSelected);
         }
 
         ImGui.SameLine();
         if (ImGui.Button(Strings.DesignFromClipboard, new Vector2(160, 0)))
         {
-            plugin.CopyImageFromClipboard(OnImageSelected);
+            utility.CopyImageFromClipboard(OnImageSelected);
         }
 
         ImGui.SameLine();
@@ -158,7 +160,7 @@ public class DesignEditorWindow : Window, IDisposable
         // Buttons - left aligned
         if (ImGui.Button(Strings.Save, new Vector2(100, 0)))
         {
-            var thumbnailsDir = plugin.ThumbnailsDirectory;
+            var thumbnailsDir = utility.ThumbnailsDirectory;
             
             if (!string.IsNullOrEmpty(customImagePath) && File.Exists(customImagePath))
             {
@@ -234,7 +236,7 @@ public class DesignEditorWindow : Window, IDisposable
                 return;
 
             var extension = Path.GetExtension(selectedPath);
-            var thumbnailsDir = plugin.ThumbnailsDirectory;
+            var thumbnailsDir = utility.ThumbnailsDirectory;
             
             // Create thumbnails directory if it doesn't exist
             Directory.CreateDirectory(thumbnailsDir);

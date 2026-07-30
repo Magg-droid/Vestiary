@@ -6,6 +6,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Windowing;
+using Wardrobe.Services;
 
 namespace Wardrobe.Windows;
 
@@ -16,6 +17,7 @@ namespace Wardrobe.Windows;
 public class CameraWindow : Window, IDisposable
 {
     private readonly Plugin plugin;
+    private readonly UtilityService utility;
     private Action<string>? onImageCaptured;
     private bool isActive;
 
@@ -34,9 +36,10 @@ public class CameraWindow : Window, IDisposable
     private const float HandleR = 14f, MinW = 120f, MinH = 150f;
     private const float Ratio = 4f / 5f, Inset = 8f;
 
-    public CameraWindow(Plugin plugin) : base("Wardrobe Camera##CameraOverlay")
+    public CameraWindow(Plugin plugin, UtilityService utility) : base("Wardrobe Camera##CameraOverlay")
     {
         this.plugin = plugin;
+        this.utility = utility;
         Flags = ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove
                 | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse
                 | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoSavedSettings
@@ -226,7 +229,7 @@ public class CameraWindow : Window, IDisposable
             using var bmp = new Bitmap(sw, sh);
             using var g = Graphics.FromImage(bmp);
             g.CopyFromScreen(sx, sy, 0, 0, new Size(sw, sh), CopyPixelOperation.SourceCopy);
-            var dir = plugin.ThumbnailsDirectory;
+            var dir = utility.ThumbnailsDirectory;
             Directory.CreateDirectory(dir);
             var path = Path.Combine(dir, $"camera_{DateTime.Now:yyyyMMdd_HHmmss_fff}.png");
             bmp.Save(path, ImageFormat.Png);
