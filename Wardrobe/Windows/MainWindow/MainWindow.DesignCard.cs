@@ -140,7 +140,7 @@ public partial class MainWindow
         var iconMax = new Vector2(thumbEndPos.X - iconPadX, thumbStartPos.Y + iconPadY + iconSize);
 
         // Camera
-        DrawActionIcon(iconMin, iconMax, cameraIconPath, Strings.TooltipCamera, windowHovered,
+        _isCameraHovered = DrawActionIcon(iconMin, iconMax, cameraIconPath, Strings.TooltipCamera, windowHovered,
             path => plugin.ShowCameraOverlay(p =>
             {
                 designMetadataService.SetCustomImage(designId, p);
@@ -150,7 +150,7 @@ public partial class MainWindow
         // Upload
         var uploadMin = new Vector2(iconMin.X, iconMax.Y + iconGap);
         var uploadMax = new Vector2(iconMax.X, uploadMin.Y + iconSize);
-        DrawActionIcon(uploadMin, uploadMax, uploadIconPath, Strings.TooltipUpload, windowHovered,
+        _isUploadHovered = DrawActionIcon(uploadMin, uploadMax, uploadIconPath, Strings.TooltipUpload, windowHovered,
             path => utility.OpenImageFilePicker(p =>
             {
                 designMetadataService.SetCustomImage(designId, p);
@@ -160,7 +160,7 @@ public partial class MainWindow
         // Clipboard
         var clipMin = new Vector2(iconMin.X, uploadMax.Y + iconGap);
         var clipMax = new Vector2(iconMax.X, clipMin.Y + iconSize);
-        DrawActionIcon(clipMin, clipMax, clipboardIconPath, Strings.TooltipClipboard, windowHovered,
+        _isClipboardHovered = DrawActionIcon(clipMin, clipMax, clipboardIconPath, Strings.TooltipClipboard, windowHovered,
             path => utility.CopyImageFromClipboard(p =>
             {
                 designMetadataService.SetCustomImage(designId, p);
@@ -168,13 +168,31 @@ public partial class MainWindow
             }));
 
         // Lock
-        var lockMin = new Vector2(iconMin.X, clipMax.Y + iconGap);
-        var lockMax = new Vector2(iconMax.X, lockMin.Y + iconSize);
-        DrawActionIcon(lockMin, lockMax, lockIconPath, "Lock", windowHovered,
-            _ => { /* TODO: quickshot feature */ });
+        var lockMin = new Vector2(iconMin.X + 6f, clipMax.Y + iconGap);
+        var lockMax = new Vector2(iconMax.X + 6f, lockMin.Y + iconSize);
+        bool isLockHovered = windowHovered && ImGui.IsMouseHoveringRect(lockMin, lockMax);
+        var lockTex = plugin.TextureCache.GetOrLoadTexture(lockIconPath)?.GetWrapOrDefault();
+        if (lockTex != null)
+            ImGui.GetWindowDrawList().AddImage(lockTex.Handle, lockMin, lockMax, Vector2.Zero, Vector2.One,
+                ImGui.GetColorU32(isLockHovered ? ThemeManager.Current.IconHovered : ThemeManager.Current.IconDefault));
+        if (isLockHovered)
+            ImGui.SetTooltip("Save current state of your mods");
+        if (isLockHovered && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+        {
+            /* TODO: quickshot feature */
+        }
+
+        // Note: lock icon is drawn manually here so its hover state can be returned.
+        // The double-click code uses this to exclude the lock area from thumbnail interactions.
+        _lastLockHovered = isLockHovered;
     }
 
-    private void DrawActionIcon(Vector2 min, Vector2 max, string iconPath, string tooltip,
+    private bool _isCameraHovered;
+    private bool _isUploadHovered;
+    private bool _isClipboardHovered;
+    private bool _lastLockHovered;
+
+    private bool DrawActionIcon(Vector2 min, Vector2 max, string iconPath, string tooltip,
         bool windowHovered, Action<string> onClick)
     {
         bool hovered = windowHovered && ImGui.IsMouseHoveringRect(min, max);
@@ -189,6 +207,7 @@ public partial class MainWindow
             plugin.CloseSubWindows();
             onClick("");
         }
+        return hovered;
     }
 
     private void DrawThumbnailDoubleClick(Guid designId, Vector2 thumbStartPos, Vector2 thumbEndPos)
@@ -197,7 +216,8 @@ public partial class MainWindow
             return;
 
         bool thumbHovered = ImGui.IsMouseHoveringRect(thumbStartPos, thumbEndPos);
-        if (thumbHovered)
+        bool anyIconHovered = _isCameraHovered || _isUploadHovered || _isClipboardHovered || _lastLockHovered;
+        if (thumbHovered && !anyIconHovered)
         {
             ImGui.SetTooltip(Strings.TooltipThumbnail);
             if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
