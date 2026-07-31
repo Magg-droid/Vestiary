@@ -25,6 +25,9 @@ public class PenumbraService
     private readonly ICallGateSubscriber<string, string, Dictionary<string, object?>>
         getChangedItemsSubscriber;
 
+    private readonly ICallGateSubscriber<int, (bool, bool, (Guid Id, string Name))>
+        getCollectionForObjectSubscriber;
+
     private readonly ICallGateSubscriber<byte, (Guid Id, string Name)?>
         getCollectionSubscriber;
 
@@ -60,6 +63,9 @@ public class PenumbraService
 
         getChangedItemsSubscriber = pluginInterface
             .GetIpcSubscriber<string, string, Dictionary<string, object?>>("Penumbra.GetChangedItems.V5");
+
+        getCollectionForObjectSubscriber = pluginInterface
+            .GetIpcSubscriber<int, (bool, bool, (Guid Id, string Name))>("Penumbra.GetCollectionForObject.V5");
 
         getCollectionSubscriber = pluginInterface
             .GetIpcSubscriber<byte, (Guid Id, string Name)?>("Penumbra.GetCollection");
@@ -115,8 +121,12 @@ public class PenumbraService
 
     public (Guid Id, string Name)? GetPlayerCollection()
     {
-        try { return getCollectionSubscriber.InvokeFunc(0); }
-        catch (Exception ex) { log.Error($"[ModSnapshot] GetCollection failed: {ex.Message}"); return null; }
+        try
+        {
+            var (valid, _, (id, name)) = getCollectionForObjectSubscriber.InvokeFunc(0);
+            return valid ? (id, name) : null;
+        }
+        catch (Exception ex) { log.Error($"[ModSnapshot] GetCollectionForObject failed: {ex.Message}"); return null; }
     }
 
     // ── Restore ─────────────────────────────────────────────────────
