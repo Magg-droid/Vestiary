@@ -106,6 +106,7 @@ public class ModStateService
 
         int enabled = 0, disabled = 0, unchanged = 0, errors = 0;
         int desiredOn = 0, desiredOff = 0;
+        bool snapshotChanged = false;
 
         if (snapshot.ItemNames.Count > 0)
         {
@@ -148,7 +149,7 @@ public class ModStateService
                         }
                     }
                     else if (ec == 1) unchanged++;
-                    else if (ec == 3) { snapshot.Mods.Remove(entry); configuration.Save(); Plugin.Log.Information($"[SaveMods]   🗑 Removed missing mod [{dir}]"); }
+                    else if (ec == 3) { snapshot.Mods.Remove(entry); snapshotChanged = true; Plugin.Log.Information($"[SaveMods]   🗑 Removed missing mod [{dir}]"); }
                     else errors++;
                 }
                 else
@@ -187,10 +188,13 @@ public class ModStateService
                     }
                 }
                 else if (ec == 1) unchanged++;
-                else if (ec == 3) { snapshot.Mods.Remove(mod); configuration.Save(); Plugin.Log.Information($"[SaveMods]   🗑 Removed missing mod [{mod.DirName}]"); }
+                else if (ec == 3) { snapshot.Mods.Remove(mod); snapshotChanged = true; Plugin.Log.Information($"[SaveMods]   🗑 Removed missing mod [{mod.DirName}]"); }
                 else errors++;
             }
         }
+
+        if (snapshotChanged)
+            configuration.Save();
 
         Plugin.Log.Information($"[SaveMods] 🔄 Restored — {desiredOn} on, {desiredOff} off, {unchanged} unchanged, {errors} errors @ {collection.Value.Name} ({sw.ElapsedMilliseconds}ms)");
     }

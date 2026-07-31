@@ -417,5 +417,4 @@ public partial class MainWindow
         if (isHidden)
             ImGui.PopStyleVar(); // pop Alpha
     }
-    // te
 }
