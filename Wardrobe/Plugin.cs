@@ -85,7 +85,7 @@ public sealed class Plugin : IDalamudPlugin
         CameraWindow = new CameraWindow(this, UtilityService);
         GuideWin = new GuideWindow(TextureCache,
             cameraIconPath, uploadIconPath, clipboardIconPath,
-            starFilledPath, saveModsIconPath, viewIconPath);
+            starFilledPath, saveModsIconPath);
 
         WindowSystem.AddWindow(ConfigWindow);
         WindowSystem.AddWindow(MainWindow);

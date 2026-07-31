@@ -14,7 +14,6 @@ public class GuideWindow : Window, IDisposable
     private readonly string clipboardIconPath;
     private readonly string starFilledPath;
     private readonly string saveModsIconPath;
-    private readonly string eyeIconPath;
 
     private static readonly (string Title, string? Body)[] Sections =
     [
@@ -66,7 +65,7 @@ public class GuideWindow : Window, IDisposable
     public GuideWindow(
         TextureCache textureCache,
         string cameraIconPath, string uploadIconPath, string clipboardIconPath,
-        string starFilledPath, string saveModsIconPath, string eyeIconPath)
+        string starFilledPath, string saveModsIconPath)
         : base("Wardrobe Guide##WRGuide", ImGuiWindowFlags.NoScrollbar)
     {
         this.textureCache = textureCache;
@@ -75,7 +74,6 @@ public class GuideWindow : Window, IDisposable
         this.clipboardIconPath = clipboardIconPath;
         this.starFilledPath = starFilledPath;
         this.saveModsIconPath = saveModsIconPath;
-        this.eyeIconPath = eyeIconPath;
 
         SizeConstraints = new WindowSizeConstraints
         {
