@@ -31,6 +31,14 @@ public class ModStateService
         if (itemNames.Count == 0) return;
 
         var modList = penumbra.GetModList();
+        var allMods = penumbra.GetAllModChangedItems();
+        var allSettings = penumbra.GetAllModSettings(collection.Value.Id);
+
+        // Build lookup: dir → changed items
+        var changedItemsByDir = new Dictionary<string, IReadOnlyDictionary<string, object?>>(StringComparer.OrdinalIgnoreCase);
+        foreach (var m in allMods)
+            changedItemsByDir[m.ModDirectory] = m.ChangedItems;
+
         var snapshot = new ModSnapshot
         {
             DesignId = designId,
@@ -40,11 +48,18 @@ public class ModStateService
 
         foreach (var (dir, modName) in modList)
         {
-            var changedItems = penumbra.GetModChangedItems(dir, modName);
+            if (!changedItemsByDir.TryGetValue(dir, out var changedItems)) continue;
             if (!changedItems.Keys.Any(key => itemNames.Contains(key))) continue;
 
-            var settings = penumbra.GetModSettings(collection.Value.Id, dir, modName);
-            var modEnabled = settings?.Enabled ?? false;
+            var modEnabled = false;
+            int modPriority = 0;
+            Dictionary<string, List<string>> modSettings = new();
+            if (allSettings != null && allSettings.TryGetValue(dir, out var s))
+            {
+                modEnabled = s.Enabled;
+                modPriority = s.Priority;
+                modSettings = s.Settings;
+            }
             if (modEnabled) enabled++; else disabled++;
 
             snapshot.Mods.Add(new ModEntry
@@ -52,8 +67,8 @@ public class ModStateService
                 DirName = dir,
                 ModName = modName,
                 Enabled = modEnabled,
-                Priority = settings?.Priority ?? 0,
-                Settings = settings?.Settings ?? new()
+                Priority = modPriority,
+                Settings = modSettings
             });
         }
 
@@ -100,7 +115,7 @@ public class ModStateService
 
             var itemNames = new HashSet<string>(snapshot.ItemNames, StringComparer.OrdinalIgnoreCase);
 
-            // Use bulk IPC for changed items
+            // Use bulk IPC for changed items and settings
             var allMods = penumbra.GetAllModChangedItems();
             var matchingMods = allMods
                 .Where(m => m.ChangedItems.Keys.Any(key => itemNames.Contains(key)))

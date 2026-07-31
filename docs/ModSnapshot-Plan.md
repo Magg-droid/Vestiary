@@ -20,8 +20,27 @@
 | UX | Right-click to clear, tooltips, console toasts | ✅ |
 | New | Snapshot stores ItemNames — catches new mods on restore | ✅ |
 | Perf | Bulk IPC for changed items on restore (1 call vs 4000) | ✅ |
+| Perf | Bulk IPC for settings on capture + restore (`GetAllModSettings`) | ✅ |
+| Perf | Dictionary lookup instead of O(n²) per-mod scan | ✅ |
+| Fix | `GetCollectionForObject(0)` instead of `GetCollection(Current)` | ✅ |
+| Fix | Auto-remove deleted mods from snapshot on restore | ✅ |
+| Fix | Restore log shows desired state (X on, Y off) not just changes | ✅ |
+| Fix | Collection name logged on capture and restore | ✅ |
+| Fix | `The Emperor's New` items skipped, empty slots handled | ✅ |
+| UX | Settings toggle: Enable Save Mods (default off) | ✅ |
 
 ---
+
+## Performance
+
+| Metric | Before | After |
+|---|---|---|
+| Changed items IPC | `GetModChangedItems()` × 4000 | `GetAllModChangedItems()` × 1 |
+| Mod settings IPC | `GetCurrentModSettings()` × 30-100 | `GetAllModSettings()` × 1 |
+| Lookup | Per-mod IPC in loop | Dictionary (in-memory O(1)) |
+| Total IPCs (capture) | ~4000+ | 3 |
+| Time (capture) | ~200ms | ~17ms (103 mods) |
+| Time (restore) | ~47ms | ~1ms |
 
 ## Architecture (as built)
 

@@ -22,6 +22,9 @@ public class PenumbraService
     private readonly ICallGateSubscriber<Guid, string, string, bool, (int, (bool, int, Dictionary<string, List<string>>, bool)?)>
         getCurrentModSettingsSubscriber;
 
+    private readonly ICallGateSubscriber<Guid, bool, bool, int, (int, Dictionary<string, (bool, int, Dictionary<string, List<string>>, bool, bool)>?)>
+        getAllModSettingsSubscriber;
+
     private readonly ICallGateSubscriber<string, string, Dictionary<string, object?>>
         getChangedItemsSubscriber;
 
@@ -60,6 +63,10 @@ public class PenumbraService
         getCurrentModSettingsSubscriber = pluginInterface
             .GetIpcSubscriber<Guid, string, string, bool, (int, (bool, int, Dictionary<string, List<string>>, bool)?)>(
                 "Penumbra.GetCurrentModSettings.V5");
+
+        getAllModSettingsSubscriber = pluginInterface
+            .GetIpcSubscriber<Guid, bool, bool, int, (int, Dictionary<string, (bool, int, Dictionary<string, List<string>>, bool, bool)>?)>(
+                "Penumbra.GetAllModSettings");
 
         getChangedItemsSubscriber = pluginInterface
             .GetIpcSubscriber<string, string, Dictionary<string, object?>>("Penumbra.GetChangedItems.V5");
@@ -155,6 +162,23 @@ public class PenumbraService
         catch (Exception ex) { log.Error($"[ModSnapshot] TrySetModSettings failed for [{dirName}]: {ex.Message}"); return -1; }
     }
 
+    /// <summary>
+    /// Get settings for ALL mods in a collection (bulk IPC).
+    /// Returns dictionary keyed by mod directory.
+    /// </summary>
+    public Dictionary<string, (bool Enabled, int Priority, Dictionary<string, List<string>> Settings)>? GetAllModSettings(Guid collectionId)
+    {
+        try
+        {
+            var (ec, result) = getAllModSettingsSubscriber.InvokeFunc(collectionId, false, false, 0);
+            if (ec != 0 || result == null) return null;
+            return result.ToDictionary(
+                kvp => kvp.Key,
+                kvp => (kvp.Value.Item1, kvp.Value.Item2, kvp.Value.Item3));
+        }
+        catch (Exception ex) { log.Error($"[ModSnapshot] GetAllModSettings failed: {ex.Message}"); return null; }
+    }
+
     private const uint MaxValidItemId = 1000000;
 
     /// <summary>
@@ -193,17 +217,25 @@ public class PenumbraService
         log.Information($"[ModSnapshot] Collection: {collection.Value.Name}");
         log.Information($"[ModSnapshot] ========================================");
 
+        var allMods = GetAllModChangedItems();
+        var allSettings = GetAllModSettings(collection.Value.Id);
+
+        var changedItemsByDir = new Dictionary<string, IReadOnlyDictionary<string, object?>>(StringComparer.OrdinalIgnoreCase);
+        foreach (var m in allMods)
+            changedItemsByDir[m.ModDirectory] = m.ChangedItems;
+
         var modList = GetModList();
         int enabledCount = 0, disabledCount = 0, matchingCount = 0;
 
         foreach (var (dir, modName) in modList)
         {
-            var changedItems = GetModChangedItems(dir, modName);
+            if (!changedItemsByDir.TryGetValue(dir, out var changedItems)) continue;
             if (!changedItems.Keys.Any(key => itemNames.Contains(key))) continue;
 
             matchingCount++;
-            var settings = GetModSettings(collection.Value.Id, dir, modName);
-            bool enabled = settings?.Enabled ?? false;
+            bool enabled = false;
+            if (allSettings != null && allSettings.TryGetValue(dir, out var s))
+                enabled = s.Enabled;
             if (enabled) enabledCount++; else disabledCount++;
             log.Information($"[ModSnapshot]   {(enabled ? "✅" : "❌")}  [{dir}]  \"{modName}\"");
         }
