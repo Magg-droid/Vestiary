@@ -62,7 +62,7 @@ public class ModStateService
         configuration.ModSnapshots.Add(snapshot);
         configuration.Save();
 
-        Plugin.Log.Information($"[SaveMods] 💾 {snapshot.Mods.Count} mods saved ({enabled} enabled, {disabled} disabled) ({sw.ElapsedMilliseconds}ms)");
+        Plugin.Log.Information($"[SaveMods] 💾 {snapshot.Mods.Count} mods saved ({enabled} enabled, {disabled} disabled) @ {collection.Value.Name} ({sw.ElapsedMilliseconds}ms)");
     }
 
     public bool HasSnapshot(Guid designId) =>
@@ -90,6 +90,7 @@ public class ModStateService
         if (collection == null) return;
 
         int enabled = 0, disabled = 0, unchanged = 0, errors = 0;
+        int desiredOn = 0, desiredOff = 0;
 
         if (snapshot.ItemNames.Count > 0)
         {
@@ -114,6 +115,7 @@ public class ModStateService
 
                 if (snapshotMods.TryGetValue(dir, out var entry))
                 {
+                    if (entry.Enabled) desiredOn++; else desiredOff++;
                     var ec = penumbra.TrySetMod(collection.Value.Id, dir, entry.Enabled, modName);
                     if (ec == 0)
                     {
@@ -131,6 +133,7 @@ public class ModStateService
                         }
                     }
                     else if (ec == 1) unchanged++;
+                    else if (ec == 3) { snapshot.Mods.Remove(entry); configuration.Save(); Plugin.Log.Information($"[SaveMods]   🗑 Removed missing mod [{dir}]"); }
                     else errors++;
                 }
                 else
@@ -139,6 +142,7 @@ public class ModStateService
                     if (ec == 0)
                     {
                         disabled++;
+                        desiredOff++;
                         Plugin.Log.Information($"[SaveMods]   🆕 Disabled new mod [{dir}]");
                     }
                     else if (ec == 1) unchanged++;
@@ -168,10 +172,11 @@ public class ModStateService
                     }
                 }
                 else if (ec == 1) unchanged++;
+                else if (ec == 3) { snapshot.Mods.Remove(mod); configuration.Save(); Plugin.Log.Information($"[SaveMods]   🗑 Removed missing mod [{mod.DirName}]"); }
                 else errors++;
             }
         }
 
-        Plugin.Log.Information($"[SaveMods] 🔄 Restored — {enabled} enabled, {disabled} disabled, {unchanged} unchanged, {errors} errors ({sw.ElapsedMilliseconds}ms)");
+        Plugin.Log.Information($"[SaveMods] 🔄 Restored — {desiredOn} on, {desiredOff} off, {unchanged} unchanged, {errors} errors @ {collection.Value.Name} ({sw.ElapsedMilliseconds}ms)");
     }
 }
