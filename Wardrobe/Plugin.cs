@@ -16,6 +16,7 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static ITextureProvider TextureProvider { get; private set; } = null!;
     [PluginService] internal static ICommandManager CommandManager { get; private set; } = null!;
     [PluginService] internal static IPluginLog Log { get; private set; } = null!;
+    [PluginService] internal static IDataManager DataManager { get; private set; } = null!;
 
     private const string CommandName = "/wardrobe";
     private const string ShortCommandName = "/wr";
@@ -54,7 +55,7 @@ public sealed class Plugin : IDalamudPlugin
         CollectionService = new CollectionService(Configuration, GlamourerService);
         DesignMetadataService = new DesignMetadataService(Configuration, GlamourerService);
         HiddenDesignService = new HiddenDesignService(Configuration);
-        PenumbraService = new PenumbraService(PluginInterface, Log);
+        PenumbraService = new PenumbraService(PluginInterface, Log, DataManager);
         ModStateService = new ModStateService(Configuration, PenumbraService, GlamourerService);
         FavoriteService = new FavoriteService(Configuration, CollectionService);
         UtilityService = new UtilityService(pluginDir, Log, Configuration);

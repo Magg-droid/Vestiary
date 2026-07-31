@@ -49,6 +49,7 @@ public class ClassicTheme : ITheme
     // ── Icons ───────────────────────────────────────
     public Vector4 IconDefault    => new(1f,    1f,    1f,    0.6f);
     public Vector4 IconHovered    => new(1f,    1f,    1f,    0.95f);
+    public Vector4 LockGold       => new(1f,    0.85f, 0.2f, 1f);
 
     // ── Apply (primary accent: steel blue) ──────────
     public Vector4 ApplyBtn       => new(0.36f, 0.46f, 0.53f, 1f);

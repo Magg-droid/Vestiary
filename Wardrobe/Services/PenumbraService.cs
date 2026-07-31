@@ -1,68 +1,203 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Ipc;
 using Dalamud.Plugin.Services;
 
 namespace Wardrobe.Services;
 
-/// <summary>
-/// IPC bridge to Penumbra. Handles mod collection queries.
-/// </summary>
 public class PenumbraService
 {
     private readonly IDalamudPluginInterface pluginInterface;
     private readonly IPluginLog log;
+    private readonly IDataManager dataManager;
 
-    public PenumbraService(IDalamudPluginInterface pluginInterface, IPluginLog log)
+    private readonly ICallGateSubscriber<IReadOnlyList<(string ModDirectory, IReadOnlyDictionary<string, object?> ChangedItems)>>
+        getChangedItemAdapterListSubscriber;
+
+    private readonly ICallGateSubscriber<Dictionary<string, string>>
+        getModListSubscriber;
+
+    private readonly ICallGateSubscriber<Guid, string, string, bool, (int, (bool, int, Dictionary<string, List<string>>, bool)?)>
+        getCurrentModSettingsSubscriber;
+
+    private readonly ICallGateSubscriber<string, string, Dictionary<string, object?>>
+        getChangedItemsSubscriber;
+
+    private readonly ICallGateSubscriber<byte, (Guid Id, string Name)?>
+        getCollectionSubscriber;
+
+    // Restore IPCs
+    private readonly ICallGateSubscriber<Guid, string, string, bool, int>
+        trySetModSubscriber;
+
+    private readonly ICallGateSubscriber<Guid, string, string, int, int>
+        trySetModPrioritySubscriber;
+
+    private readonly ICallGateSubscriber<Guid, string, string, string, string, int>
+        trySetModSettingSubscriber;
+
+    private readonly ICallGateSubscriber<Guid, string, string, string, IReadOnlyList<string>, int>
+        trySetModSettingsSubscriber;
+
+    public PenumbraService(IDalamudPluginInterface pluginInterface, IPluginLog log, IDataManager dataManager)
     {
         this.pluginInterface = pluginInterface;
         this.log = log;
+        this.dataManager = dataManager;
+
+        getChangedItemAdapterListSubscriber = pluginInterface
+            .GetIpcSubscriber<IReadOnlyList<(string ModDirectory, IReadOnlyDictionary<string, object?> ChangedItems)>>(
+                "Penumbra.GetChangedItemAdapterList");
+
+        getModListSubscriber = pluginInterface
+            .GetIpcSubscriber<Dictionary<string, string>>("Penumbra.GetModList");
+
+        getCurrentModSettingsSubscriber = pluginInterface
+            .GetIpcSubscriber<Guid, string, string, bool, (int, (bool, int, Dictionary<string, List<string>>, bool)?)>(
+                "Penumbra.GetCurrentModSettings.V5");
+
+        getChangedItemsSubscriber = pluginInterface
+            .GetIpcSubscriber<string, string, Dictionary<string, object?>>("Penumbra.GetChangedItems.V5");
+
+        getCollectionSubscriber = pluginInterface
+            .GetIpcSubscriber<byte, (Guid Id, string Name)?>("Penumbra.GetCollection");
+
+        trySetModSubscriber = pluginInterface
+            .GetIpcSubscriber<Guid, string, string, bool, int>("Penumbra.TrySetMod.V5");
+
+        trySetModPrioritySubscriber = pluginInterface
+            .GetIpcSubscriber<Guid, string, string, int, int>("Penumbra.TrySetModPriority.V5");
+
+        trySetModSettingSubscriber = pluginInterface
+            .GetIpcSubscriber<Guid, string, string, string, string, int>("Penumbra.TrySetModSetting.V5");
+
+        trySetModSettingsSubscriber = pluginInterface
+            .GetIpcSubscriber<Guid, string, string, string, IReadOnlyList<string>, int>("Penumbra.TrySetModSettings.V5");
     }
 
-    /// <summary>
-    /// Returns true if Penumbra is currently loaded and accepting IPC calls.
-    /// </summary>
     public bool IsAvailable()
+    {
+        try { var _ = pluginInterface.GetIpcSubscriber<(int, int)>("Penumbra.ApiVersions").InvokeFunc(); return true; }
+        catch { return false; }
+    }
+
+    public Dictionary<string, string> GetModList()
+    {
+        try { return getModListSubscriber.InvokeFunc(); }
+        catch (Exception ex) { log.Error($"[ModSnapshot] GetModList failed: {ex.Message}"); return new(); }
+    }
+
+    public IReadOnlyList<(string ModDirectory, IReadOnlyDictionary<string, object?> ChangedItems)> GetAllModChangedItems()
+    {
+        try { return getChangedItemAdapterListSubscriber.InvokeFunc(); }
+        catch (Exception ex) { log.Error($"[ModSnapshot] GetChangedItemAdapterList failed: {ex.Message}"); return Array.Empty<(string, IReadOnlyDictionary<string, object?>)>(); }
+    }
+
+    public Dictionary<string, object?> GetModChangedItems(string directoryName, string modName)
+    {
+        try { return getChangedItemsSubscriber.InvokeFunc(directoryName, modName); }
+        catch (Exception ex) { log.Error($"[ModSnapshot] GetChangedItems failed for [{directoryName}]: {ex.Message}"); return new(); }
+    }
+
+    public (bool Enabled, int Priority, Dictionary<string, List<string>> Settings)? GetModSettings(
+        Guid collectionId, string directoryName, string modName)
     {
         try
         {
-            // TODO: Check if Penumbra IPC is available
-            // var penumbra = pluginInterface.GetIpcSubscriber<...>("Penumbra.XXX");
-            return false;
+            var (ec, result) = getCurrentModSettingsSubscriber.InvokeFunc(collectionId, directoryName, modName, false);
+            if (ec != 0 || result == null) return null;
+            return (result.Value.Item1, result.Value.Item2, result.Value.Item3);
         }
-        catch (Exception ex)
+        catch (Exception ex) { log.Error($"[ModSnapshot] GetCurrentModSettings failed for [{directoryName}]: {ex.Message}"); return null; }
+    }
+
+    public (Guid Id, string Name)? GetPlayerCollection()
+    {
+        try { return getCollectionSubscriber.InvokeFunc(0); }
+        catch (Exception ex) { log.Error($"[ModSnapshot] GetCollection failed: {ex.Message}"); return null; }
+    }
+
+    // ── Restore ─────────────────────────────────────────────────────
+
+    public int TrySetMod(Guid collectionId, string dirName, bool enabled, string modName = "")
+    {
+        try { return trySetModSubscriber.InvokeFunc(collectionId, dirName, modName, enabled); }
+        catch (Exception ex) { log.Error($"[ModSnapshot] TrySetMod failed for [{dirName}]: {ex.Message}"); return -1; }
+    }
+
+    public int TrySetModPriority(Guid collectionId, string dirName, int priority, string modName = "")
+    {
+        try { return trySetModPrioritySubscriber.InvokeFunc(collectionId, dirName, modName, priority); }
+        catch (Exception ex) { log.Error($"[ModSnapshot] TrySetModPriority failed for [{dirName}]: {ex.Message}"); return -1; }
+    }
+
+    public int TrySetModSetting(Guid collectionId, string dirName, string optionGroup, string optionValue, string modName = "")
+    {
+        try { return trySetModSettingSubscriber.InvokeFunc(collectionId, dirName, modName, optionGroup, optionValue); }
+        catch (Exception ex) { log.Error($"[ModSnapshot] TrySetModSetting failed for [{dirName}]: {ex.Message}"); return -1; }
+    }
+
+    public int TrySetModSettings(Guid collectionId, string dirName, string optionGroup, IReadOnlyList<string> optionValues, string modName = "")
+    {
+        try { return trySetModSettingsSubscriber.InvokeFunc(collectionId, dirName, modName, optionGroup, optionValues); }
+        catch (Exception ex) { log.Error($"[ModSnapshot] TrySetModSettings failed for [{dirName}]: {ex.Message}"); return -1; }
+    }
+
+    /// <summary>
+    /// Convert equipment ItemIds to item names using game data.
+    /// Skips invalid IDs and "The Emperor's New" items.
+    /// </summary>
+    public HashSet<string> GetDesignItemNames(Dictionary<string, uint> equipment)
+    {
+        var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var itemSheet = dataManager.GetExcelSheet<Lumina.Excel.Sheets.Item>();
+        foreach (var (_, itemId) in equipment)
         {
-            log.Error($"Penumbra IPC check failed: {ex.Message}");
-            return false;
+            if (itemId == 0 || itemId > 1000000) continue;
+            var name = itemSheet.GetRow(itemId).Name.ToString();
+            if (string.IsNullOrEmpty(name)) continue;
+            if (name.StartsWith("The Emperor's New", StringComparison.OrdinalIgnoreCase)) continue;
+            names.Add(name);
         }
+        return names;
     }
 
-    /// <summary>
-    /// Gets the Penumbra collection assigned to the player character.
-    /// Returns null if Penumbra is not available or no collection is assigned.
-    /// </summary>
-    public string? GetCollectionForPlayer()
-    {
-        // TODO: Call Penumbra IPC to get current collection
-        // var getCollection = pluginInterface.GetIpcSubscriber<Func<string?>>("Penumbra.GetCollectionForObject");
-        // return getCollection();
-        return null;
-    }
+    // ── Console log (for debugging) ──────────────────────────────────
 
-    /// <summary>
-    /// Gets the list of mods (paths) active in the given collection.
-    /// </summary>
-    public List<string> GetModsInCollection(string collectionName)
+    public void LogModsForDesign(Guid designId, GlamourerService glamourer)
     {
-        // TODO: Call Penumbra IPC to get mods in collection
-        return new List<string>();
-    }
+        if (!IsAvailable()) { log.Information("[ModSnapshot] Penumbra is not available."); return; }
+        var collection = GetPlayerCollection();
+        if (collection == null) { log.Information("[ModSnapshot] No Penumbra collection assigned to player."); return; }
 
-    /// <summary>
-    /// Sets the Penumbra collection for the player character.
-    /// </summary>
-    public void SetCollectionForPlayer(string collectionName)
-    {
-        // TODO: Call Penumbra IPC to set collection
+        var equipment = glamourer.GetDesignEquipment(designId);
+        var itemNames = GetDesignItemNames(equipment);
+
+        log.Information($"[ModSnapshot] ========================================");
+        log.Information($"[ModSnapshot] Design: {designId}");
+        log.Information($"[ModSnapshot] Items: {string.Join(" | ", itemNames)}");
+        log.Information($"[ModSnapshot] Collection: {collection.Value.Name}");
+        log.Information($"[ModSnapshot] ========================================");
+
+        var modList = GetModList();
+        int enabledCount = 0, disabledCount = 0, matchingCount = 0;
+
+        foreach (var (dir, modName) in modList)
+        {
+            var changedItems = GetModChangedItems(dir, modName);
+            if (!changedItems.Keys.Any(key => itemNames.Contains(key))) continue;
+
+            matchingCount++;
+            var settings = GetModSettings(collection.Value.Id, dir, modName);
+            bool enabled = settings?.Enabled ?? false;
+            if (enabled) enabledCount++; else disabledCount++;
+            log.Information($"[ModSnapshot]   {(enabled ? "✅" : "❌")}  [{dir}]  \"{modName}\"");
+        }
+
+        log.Information($"[ModSnapshot] ========================================");
+        log.Information($"[ModSnapshot] Matching: {matchingCount} ({enabledCount} enabled, {disabledCount} disabled)");
+        log.Information($"[ModSnapshot] ========================================");
     }
 }

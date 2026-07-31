@@ -41,6 +41,7 @@ public class MidnightPurpleTheme : ITheme
 
     public Vector4 IconDefault    => new(1f,    1f,    1f,    0.6f);
     public Vector4 IconHovered    => new(1f,    1f,    1f,    0.95f);
+    public Vector4 LockGold       => new(1f,    0.85f, 0.2f, 1f);
 
     public Vector4 ApplyBtn       => new(0.46f, 0.38f, 0.58f, 1f);
     public Vector4 ApplyBtnHover  => new(0.54f, 0.45f, 0.65f, 1f);

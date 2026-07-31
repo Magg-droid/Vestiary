@@ -21,6 +21,8 @@ public static class Strings
     public const string TooltipSettings     = "Open Settings";
     public const string TooltipEyeShowHidden  = "Show hidden designs";
     public const string TooltipEyeShowVisible = "Show visible designs";
+    public const string TooltipLockSave        = "Save current state of your mods";
+    public const string TooltipLockResave      = "Mod snapshot saved — click to re-capture";
 
     // ── Main window · Empty state ───────────────────
     public const string EmptyHeading       = "No collections yet";

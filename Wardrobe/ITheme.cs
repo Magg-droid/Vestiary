@@ -45,6 +45,7 @@ public interface ITheme
     // ── Thumbnail action icons ──────────────────────
     Vector4 IconDefault { get; }
     Vector4 IconHovered { get; }
+    Vector4 LockGold    { get; }
 
     // ── Apply button ────────────────────────────────
     Vector4 ApplyBtn { get; }

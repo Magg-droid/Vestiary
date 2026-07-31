@@ -41,6 +41,7 @@ public class OceanTheme : ITheme
 
     public Vector4 IconDefault    => new(1f,    1f,    1f,    0.6f);
     public Vector4 IconHovered    => new(1f,    1f,    1f,    0.95f);
+    public Vector4 LockGold       => new(1f,    0.85f, 0.2f, 1f);
 
     public Vector4 ApplyBtn       => new(0.38f, 0.52f, 0.62f, 1f);
     public Vector4 ApplyBtnHover  => new(0.45f, 0.60f, 0.70f, 1f);

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Numerics;
 using Dalamud.Bindings.ImGui;
 
@@ -182,15 +183,28 @@ public partial class MainWindow
         var lockMin = new Vector2(iconMin.X + 6f, clipMax.Y + iconGap);
         var lockMax = new Vector2(iconMax.X + 6f, lockMin.Y + iconSize);
         bool isLockHovered = windowHovered && ImGui.IsMouseHoveringRect(lockMin, lockMax);
+        bool hasSnapshot = plugin.ModStateService.HasSnapshot(designId);
+
         var lockTex = plugin.TextureCache.GetOrLoadTexture(lockIconPath)?.GetWrapOrDefault();
         if (lockTex != null)
-            ImGui.GetWindowDrawList().AddImage(lockTex.Handle, lockMin, lockMax, Vector2.Zero, Vector2.One,
-                ImGui.GetColorU32(isLockHovered ? ThemeManager.Current.IconHovered : ThemeManager.Current.IconDefault));
+        {
+            uint lockTint;
+            if (isLockHovered)
+                lockTint = ImGui.GetColorU32(ThemeManager.Current.IconHovered);
+            else if (hasSnapshot)
+                lockTint = ImGui.GetColorU32(ThemeManager.Current.LockGold);
+            else
+                lockTint = ImGui.GetColorU32(ThemeManager.Current.IconDefault);
+
+            ImGui.GetWindowDrawList().AddImage(lockTex.Handle, lockMin, lockMax, Vector2.Zero, Vector2.One, lockTint);
+        }
+
         if (isLockHovered)
-            ImGui.SetTooltip("Save current state of your mods");
+            ImGui.SetTooltip(hasSnapshot ? Strings.TooltipLockResave : Strings.TooltipLockSave);
         if (isLockHovered && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
         {
-            /* TODO: quickshot feature */
+            plugin.ModStateService.CaptureState(designId);
+            plugin.PenumbraService.LogModsForDesign(designId, plugin.GlamourerService);
         }
 
         // Note: lock icon is drawn manually so its hover state can be returned.
@@ -236,6 +250,7 @@ public partial class MainWindow
                 plugin.CloseSubWindows();
                 plugin.GlamourerService.ApplyDesign(designId,
                     plugin.Configuration.ApplyEquipmentOnly || ImGui.GetIO().KeyCtrl);
+                plugin.ModStateService.RestoreState(designId, Plugin.Log);
             }
         }
     }
@@ -308,6 +323,7 @@ public partial class MainWindow
             plugin.CloseSubWindows();
             plugin.GlamourerService.ApplyDesign(designId,
                 plugin.Configuration.ApplyEquipmentOnly || ImGui.GetIO().KeyCtrl);
+            plugin.ModStateService.RestoreState(designId, Plugin.Log);
         }
         if (ImGui.IsItemHovered())
         {

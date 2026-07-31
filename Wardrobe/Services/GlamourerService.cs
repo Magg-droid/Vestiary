@@ -1,6 +1,7 @@
 using Dalamud.Plugin;
 using Dalamud.Plugin.Ipc;
 using Dalamud.Plugin.Services;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,7 @@ public class GlamourerService
 {
     private readonly ICallGateSubscriber<Dictionary<Guid, (string DisplayName, string FullPath, uint DisplayColor, bool ShownInQdb)>> designListSubscriber;
     private readonly ICallGateSubscriber<Guid, string?> designBase64Subscriber;
+    private readonly ICallGateSubscriber<Guid, JObject?> designJObjectSubscriber;
     private readonly ICallGateSubscriber<Guid, int, uint, ulong, int> applyDesignSubscriber;
     private readonly ICallGateSubscriber<Guid, int> deleteDesignSubscriber;
     private readonly IPluginLog log;
@@ -24,6 +26,9 @@ public class GlamourerService
 
         designBase64Subscriber = pluginInterface.GetIpcSubscriber<Guid, string?>(
             "Glamourer.GetDesignBase64");
+
+        designJObjectSubscriber = pluginInterface.GetIpcSubscriber<Guid, JObject?>(
+            "Glamourer.GetDesignJObject");
         
         applyDesignSubscriber = pluginInterface.GetIpcSubscriber<Guid, int, uint, ulong, int>(
             "Glamourer.ApplyDesign");
@@ -40,6 +45,47 @@ public class GlamourerService
     public string? GetDesignBase64(Guid designId)
     {
         return designBase64Subscriber.InvokeFunc(designId);
+    }
+
+    /// <summary>
+    /// Get a design as a parsed JObject from Glamourer.
+    /// </summary>
+    public JObject? GetDesignJObject(Guid designId)
+    {
+        try
+        {
+            return designJObjectSubscriber.InvokeFunc(designId);
+        }
+        catch (Exception ex)
+        {
+            log.Error($"[ModSnapshot] GetDesignJObject failed for {designId}: {ex.Message}");
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Extract equipment ItemIds from a Glamourer design JObject.
+    /// Returns slot name → ItemId for non-empty slots.
+    /// </summary>
+    public Dictionary<string, uint> GetDesignEquipment(Guid designId)
+    {
+        var result = new Dictionary<string, uint>();
+        var design = GetDesignJObject(designId);
+        if (design == null)
+            return result;
+
+        var equipment = design["Equipment"] as JObject;
+        if (equipment == null)
+            return result;
+
+        foreach (var prop in equipment.Properties())
+        {
+            var itemId = prop.Value["ItemId"]?.ToObject<uint>() ?? 0;
+            if (itemId > 0)
+                result[prop.Name] = itemId;
+        }
+
+        return result;
     }
 
     public List<string> GetUniqueFolderPaths()

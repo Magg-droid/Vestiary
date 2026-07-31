@@ -48,10 +48,10 @@ public partial class MainWindow : Window, IDisposable
         string clipboardIconPath,
         string viewIconPath,
         string hiddenIconPath,
-        string lockIconPath,
         string starEmptyPath,
         string starFilledPath,
-        string searchIconPath
+        string searchIconPath,
+        string lockIconPath
     )
         : base("Wardrobe##With a hidden ID", ImGuiWindowFlags.None)
     {
@@ -68,10 +68,10 @@ public partial class MainWindow : Window, IDisposable
         this.clipboardIconPath = clipboardIconPath;
         this.viewIconPath = viewIconPath;
         this.hiddenIconPath = hiddenIconPath;
-        this.lockIconPath = lockIconPath;
         this.starEmptyPath = starEmptyPath;
         this.starFilledPath = starFilledPath;
         this.searchIconPath = searchIconPath;
+        this.lockIconPath = lockIconPath;
         this.plugin = plugin;
         this.utility = utility;
         this.collectionService = collectionService;
