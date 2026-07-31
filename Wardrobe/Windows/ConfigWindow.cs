@@ -55,6 +55,15 @@ public class ConfigWindow : Window, IDisposable
         if (ImGui.IsItemHovered())
             ImGui.SetTooltip(Strings.SettingsEnableSaveModsTooltip);
 
+        var enableEmotes = configuration.EnableEmotes;
+        if (ImGui.Checkbox(Strings.SettingsEnableEmotes, ref enableEmotes))
+        {
+            configuration.EnableEmotes = enableEmotes;
+            configuration.Save();
+        }
+        if (ImGui.IsItemHovered())
+            ImGui.SetTooltip(Strings.SettingsEnableEmotesTooltip);
+
         ImGui.Spacing();
         ImGui.Separator();
         ImGui.Spacing();

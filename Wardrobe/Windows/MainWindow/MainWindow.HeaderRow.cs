@@ -8,6 +8,8 @@ public partial class MainWindow
 {
     private void DrawHeaderRow(ImDrawListPtr dl, float maxTabH, Vector2 tabBarStart)
     {
+        if (_currentView == 1) return; // emote view — no glamour header
+
         if (selectedCollectionId == Guid.Empty)
             return;
 

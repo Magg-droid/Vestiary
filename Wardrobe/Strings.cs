@@ -23,6 +23,8 @@ public static class Strings
     public const string TooltipEyeShowVisible = "Show visible designs";
     public const string SettingsEnableSaveMods = "Enable Save Mods";
     public const string SettingsEnableSaveModsTooltip = "Save and restore Penumbra mod state per outfit";
+    public const string SettingsEnableEmotes = "Enable Emotes (Beta)";
+    public const string SettingsEnableEmotesTooltip = "Experimental emote gallery with mod capture and auto-play";
     public const string TooltipSaveModsSave   = "Save mods for this outfit";
     public const string TooltipSaveModsReSave = "Mods saved — click to re-save";
     public const string TooltipSaveModsClear  = "Right-click to clear saved mods";

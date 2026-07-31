@@ -5,6 +5,8 @@ using Dalamud.IoC;
 using Dalamud.Plugin;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
+using ECommons;
+using ECommons.Automation;
 using Wardrobe.Services;
 using Wardrobe.Windows;
 
@@ -21,6 +23,7 @@ public sealed class Plugin : IDalamudPlugin
     private const string CommandName = "/wardrobe";
     private const string ShortCommandName = "/wr";
     private const string GuideCommandName = "/wrguide";
+    private const string EmotesCommandName = "/wremotes";
 
     public Configuration Configuration { get; init; }
 
@@ -38,6 +41,7 @@ public sealed class Plugin : IDalamudPlugin
     public HiddenDesignService HiddenDesignService { get; init; }
     public PenumbraService PenumbraService { get; init; }
     public ModStateService ModStateService { get; init; }
+    public EmoteService EmoteService { get; init; }
     public FavoriteService FavoriteService { get; init; }
     public UtilityService UtilityService { get; init; }
     public TextureCache TextureCache { get; init; }
@@ -51,6 +55,7 @@ public sealed class Plugin : IDalamudPlugin
         Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
         ThemeManager.SetTheme(Configuration.ThemeName);
 
+
         var pluginDir = PluginInterface.AssemblyLocation.Directory?.FullName!;
 
         GlamourerService = new GlamourerService(PluginInterface, Log);
@@ -59,6 +64,7 @@ public sealed class Plugin : IDalamudPlugin
         HiddenDesignService = new HiddenDesignService(Configuration);
         PenumbraService = new PenumbraService(PluginInterface, Log, DataManager);
         ModStateService = new ModStateService(Configuration, PenumbraService, GlamourerService);
+        EmoteService = new EmoteService(Configuration, PenumbraService);
         FavoriteService = new FavoriteService(Configuration, CollectionService);
         UtilityService = new UtilityService(pluginDir, Log, Configuration);
         TextureCache = new TextureCache(TextureProvider);
@@ -108,10 +114,17 @@ public sealed class Plugin : IDalamudPlugin
         {
             HelpMessage = "Open the Wardrobe user guide"
         });
+        CommandManager.AddHandler(EmotesCommandName, new CommandInfo(OnEmotesCommand)
+        {
+            HelpMessage = "Open Wardrobe in Emotes view"
+        });
 
         PluginInterface.UiBuilder.Draw += WindowSystem.Draw;
+        PluginInterface.UiBuilder.Draw += ProcessPendingEmote;
         PluginInterface.UiBuilder.OpenConfigUi += ToggleConfigUi;
         PluginInterface.UiBuilder.OpenMainUi += ToggleMainUi;
+
+        ECommonsMain.Init(PluginInterface, this);
 
         Log.Information($"===A cool log message from {PluginInterface.Manifest.Name}===");
     }
@@ -119,6 +132,7 @@ public sealed class Plugin : IDalamudPlugin
     public void Dispose()
     {
         PluginInterface.UiBuilder.Draw -= WindowSystem.Draw;
+        PluginInterface.UiBuilder.Draw -= ProcessPendingEmote;
         PluginInterface.UiBuilder.OpenConfigUi -= ToggleConfigUi;
         PluginInterface.UiBuilder.OpenMainUi -= ToggleMainUi;
 
@@ -130,9 +144,13 @@ public sealed class Plugin : IDalamudPlugin
         GuideWin.Dispose();
         TextureCache.Dispose();
 
+        ECommonsMain.Dispose();
+
         CommandManager.RemoveHandler(CommandName);
         CommandManager.RemoveHandler(ShortCommandName);
         CommandManager.RemoveHandler(GuideCommandName);
+        CommandManager.RemoveHandler(EmotesCommandName);
+
     }
 
     private void OnCommand(string command, string args)
@@ -150,9 +168,25 @@ public sealed class Plugin : IDalamudPlugin
         MainWindow.Toggle();
     }
 
+    private void ProcessPendingEmote()
+    {
+        if (string.IsNullOrEmpty(MainWindow._pendingEmoteCommand)) return;
+        var cmd = MainWindow._pendingEmoteCommand;
+        MainWindow._pendingEmoteCommand = string.Empty;
+        Chat.SendMessage(cmd);
+        Plugin.Log.Information($"[Emotes] Sent: {cmd}");
+    }
+
     private void OnGuideCommand(string command, string args)
     {
         GuideWin.Toggle();
+    }
+
+    private void OnEmotesCommand(string command, string args)
+    {
+        if (!Configuration.EnableEmotes) return;
+        MainWindow.ShowEmotes();
+        MainWindow.Toggle();
     }
 
     public void ToggleConfigUi() => ConfigWindow.Toggle();
