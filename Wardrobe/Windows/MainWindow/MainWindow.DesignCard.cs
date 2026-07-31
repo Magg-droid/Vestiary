@@ -62,7 +62,7 @@ public partial class MainWindow
             cornerRounding, 0, borderThickness);
 
         ImGui.BeginChild($"##DesignCard_{designId}", new Vector2(width, height), false, ImGuiWindowFlags.None);
-        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5f);
+        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 8f);
 
         // Thumbnail
         const float thumbWidth = 240f;
@@ -167,7 +167,18 @@ public partial class MainWindow
                 plugin.TextureCache.InvalidateTexture(p);
             }));
 
-        // Lock
+        // Favourite — top-left corner of thumbnail
+        var favMin = new Vector2(thumbStartPos.X + 4f, thumbStartPos.Y + 4f);
+        var favMax = new Vector2(favMin.X + iconSize, favMin.Y + iconSize);
+        bool isFav = favoriteService.IsFavorite(designId);
+        string favPath = isFav ? starFilledPath : starEmptyPath;
+        string favTooltip = isFav ? Strings.TooltipFavRemove : Strings.TooltipFavAdd;
+        _isFavHovered = DrawActionIcon(favMin, favMax, favPath, favTooltip, windowHovered, _ =>
+        {
+            favoriteService.Toggle(designId);
+        });
+
+        // Lock — bottom of action icon column
         var lockMin = new Vector2(iconMin.X + 6f, clipMax.Y + iconGap);
         var lockMax = new Vector2(iconMax.X + 6f, lockMin.Y + iconSize);
         bool isLockHovered = windowHovered && ImGui.IsMouseHoveringRect(lockMin, lockMax);
@@ -182,14 +193,14 @@ public partial class MainWindow
             /* TODO: quickshot feature */
         }
 
-        // Note: lock icon is drawn manually here so its hover state can be returned.
-        // The double-click code uses this to exclude the lock area from thumbnail interactions.
+        // Note: lock icon is drawn manually so its hover state can be returned.
         _lastLockHovered = isLockHovered;
     }
 
     private bool _isCameraHovered;
     private bool _isUploadHovered;
     private bool _isClipboardHovered;
+    private bool _isFavHovered;
     private bool _lastLockHovered;
 
     private bool DrawActionIcon(Vector2 min, Vector2 max, string iconPath, string tooltip,
@@ -216,7 +227,7 @@ public partial class MainWindow
             return;
 
         bool thumbHovered = ImGui.IsMouseHoveringRect(thumbStartPos, thumbEndPos);
-        bool anyIconHovered = _isCameraHovered || _isUploadHovered || _isClipboardHovered || _lastLockHovered;
+        bool anyIconHovered = _isCameraHovered || _isUploadHovered || _isClipboardHovered || _lastLockHovered || _isFavHovered;
         if (thumbHovered && !anyIconHovered)
         {
             ImGui.SetTooltip(Strings.TooltipThumbnail);
@@ -266,7 +277,7 @@ public partial class MainWindow
             if (truncated.EndsWith("...") && ImGui.IsItemHovered())
                 ImGui.SetTooltip(displayName);
             if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("Double-click to rename");
+                ImGui.SetTooltip(Strings.TooltipRename);
             if (ImGui.IsItemClicked(ImGuiMouseButton.Left)
                 && ImGui.GetIO().MouseClickedCount[(int)ImGuiMouseButton.Left] == 2)
             {
@@ -357,17 +368,17 @@ public partial class MainWindow
 
             if (ImGui.BeginPopup($"##confirm_delete_{designId}"))
             {
-                ImGui.Text("Are you sure you want to delete");
-                ImGui.Text("this design from Glamourer?");
+                ImGui.Text(Strings.ConfirmDeleteTitle);
+                ImGui.Text(Strings.ConfirmDeleteBody);
                 ImGui.Spacing();
-                if (ImGui.Button("Yes##del_yes"))
+                if (ImGui.Button($"{Strings.Yes}##del_yes"))
                 {
                     plugin.CloseSubWindows();
                     plugin.GlamourerService.DeleteDesign(designId);
                     ImGui.CloseCurrentPopup();
                 }
                 ImGui.SameLine();
-                if (ImGui.Button("No##del_no"))
+                if (ImGui.Button($"{Strings.No}##del_no"))
                     ImGui.CloseCurrentPopup();
                 ImGui.EndPopup();
             }

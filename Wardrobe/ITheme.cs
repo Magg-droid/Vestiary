@@ -71,6 +71,12 @@ public interface ITheme
     Vector4 CtaBtnHover { get; }
     Vector4 CtaBtnActive { get; }
 
+    // ── Separator ──────────────────────────────────
+    Vector4 SeparatorColor { get; }
+
+    // ── Search ─────────────────────────────────────
+    Vector4 SearchBg { get; }
+
     // ── Camera overlay ──────────────────────────────
     Vector4 CameraVignette { get; }
     Vector4 CameraBorder { get; }

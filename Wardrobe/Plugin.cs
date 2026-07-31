@@ -35,6 +35,7 @@ public sealed class Plugin : IDalamudPlugin
     public HiddenDesignService HiddenDesignService { get; init; }
     public PenumbraService PenumbraService { get; init; }
     public ModStateService ModStateService { get; init; }
+    public FavoriteService FavoriteService { get; init; }
     public UtilityService UtilityService { get; init; }
     public TextureCache TextureCache { get; init; }
 
@@ -55,6 +56,7 @@ public sealed class Plugin : IDalamudPlugin
         HiddenDesignService = new HiddenDesignService(Configuration);
         PenumbraService = new PenumbraService(PluginInterface, Log);
         ModStateService = new ModStateService(Configuration, PenumbraService, GlamourerService);
+        FavoriteService = new FavoriteService(Configuration, CollectionService);
         UtilityService = new UtilityService(pluginDir, Log, Configuration);
         TextureCache = new TextureCache(TextureProvider);
 
@@ -66,11 +68,15 @@ public sealed class Plugin : IDalamudPlugin
         var viewIconPath = Path.Combine(pluginDir, "view.png");
         var hiddenIconPath = Path.Combine(pluginDir, "hidden.png");
         var lockIconPath = Path.Combine(pluginDir, "lock_icon.png");
+        var starEmptyPath = Path.Combine(pluginDir, "star_empty.png");
+        var starFilledPath = Path.Combine(pluginDir, "star_filled.png");
+        var searchIconPath = Path.Combine(pluginDir, "search_icon.png");
 
         ConfigWindow = new ConfigWindow(this);
         MainWindow = new MainWindow(this, UtilityService, goatImagePath, CollectionService,
-            DesignMetadataService, HiddenDesignService, noPreviewImagePath,
-            cameraIconPath, uploadIconPath, clipboardIconPath, viewIconPath, hiddenIconPath, lockIconPath);
+            DesignMetadataService, HiddenDesignService, FavoriteService, noPreviewImagePath,
+            cameraIconPath, uploadIconPath, clipboardIconPath, viewIconPath, hiddenIconPath,
+            starEmptyPath, starFilledPath, searchIconPath, lockIconPath);
         CollectionEditorWindow = new CollectionEditorWindow(this, CollectionService);
         DesignEditorWindow = new DesignEditorWindow(this, UtilityService, DesignMetadataService, GlamourerService);
         CameraWindow = new CameraWindow(this, UtilityService);

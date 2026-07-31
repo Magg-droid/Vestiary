@@ -16,6 +16,7 @@ public class Configuration : IPluginConfiguration
     public string ThemeName { get; set; } = "Classic";
     public List<Guid> HiddenDesignIds { get; set; } = new();
     public List<ModState>? ModStates { get; set; } = new();
+    public List<Guid> FavoriteDesignIds { get; set; } = new();
     public List<Collection> Collections { get; set; } = new();
     public List<DesignMetadata> DesignMetadata { get; set; } = new();
 

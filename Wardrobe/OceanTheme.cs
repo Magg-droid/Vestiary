@@ -62,6 +62,10 @@ public class OceanTheme : ITheme
     public Vector4 CtaBtnHover    => new(0.24f, 0.35f, 0.42f, 1f);
     public Vector4 CtaBtnActive   => new(0.14f, 0.22f, 0.28f, 1f);
 
+    public Vector4 SeparatorColor => new(0.32f, 0.34f, 0.38f, 0.5f);
+
+    public Vector4 SearchBg => new(0.14f, 0.16f, 0.20f, 0.85f);
+
     public Vector4 CameraVignette => new(0f,    0f,    0f,    0.4f);
     public Vector4 CameraBorder   => new(0.62f, 0.68f, 0.74f, 0.45f);
     public Vector4 CameraGrid     => new(1f,    1f,    1f,    0.12f);

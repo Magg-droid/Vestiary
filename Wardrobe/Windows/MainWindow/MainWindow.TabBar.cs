@@ -55,22 +55,26 @@ public partial class MainWindow
             if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
                 selectedCollectionId = collection.Id;
 
-            if (ImGui.IsItemHovered())
+            bool isFavorites = collection.Name == "Favorites";
+            if (!isFavorites && ImGui.IsItemHovered())
                 ImGui.SetTooltip(Strings.TabRightClickTooltip);
 
-            if (ImGui.BeginPopupContextItem($"##tabctx_{collection.Id}"))
+            if (!isFavorites && ImGui.BeginPopupContextItem($"##tabctx_{collection.Id}"))
             {
-                if (ImGui.MenuItem(Strings.Edit))
+                if (!isFavorites)
                 {
-                    collectionEditorWindow?.OpenEdit(collection);
-                    ImGui.CloseCurrentPopup();
-                }
-                if (ImGui.MenuItem(Strings.Delete))
-                {
-                    collectionService.DeleteCollection(collection.Id);
-                    if (selectedCollectionId == collection.Id)
-                        selectedCollectionId = Guid.Empty;
-                    ImGui.CloseCurrentPopup();
+                    if (ImGui.MenuItem(Strings.Edit))
+                    {
+                        collectionEditorWindow?.OpenEdit(collection);
+                        ImGui.CloseCurrentPopup();
+                    }
+                    if (ImGui.MenuItem(Strings.Delete))
+                    {
+                        collectionService.DeleteCollection(collection.Id);
+                        if (selectedCollectionId == collection.Id)
+                            selectedCollectionId = Guid.Empty;
+                        ImGui.CloseCurrentPopup();
+                    }
                 }
                 ImGui.EndPopup();
             }

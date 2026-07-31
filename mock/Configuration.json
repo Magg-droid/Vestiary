@@ -1,0 +1,58 @@
+{
+  "comment": "Wardrobe Configuration (persisted to disk by Dalamud)",
+  "type": "Configuration.cs",
+  "sample": {
+    "Version": 1,
+    "ApplyEquipmentOnly": false,
+    "ShowHidden": false,
+    "ThemeName": "Classic",
+    "HiddenDesignIds": [
+      "c3d4e5f6-3456-789a-bcde-f01234567890"
+    ],
+    "FavoriteDesignIds": [
+      "a1b2c3d4-1234-5678-9abc-def012345678",
+      "b2c3d4e5-2345-6789-abcd-ef0123456789"
+    ],
+    "Collections": [
+      {
+        "Id": "f1a2b3c4-1111-2222-3333-444455556666",
+        "Name": "Casual",
+        "FolderPaths": ["Casual"],
+        "Order": 0
+      },
+      {
+        "Id": "f2b3c4d5-2222-3333-4444-555566667777",
+        "Name": "Tank",
+        "FolderPaths": ["Tank/Raid"],
+        "Order": 1
+      },
+      {
+        "Id": "f3c4d5e6-3333-4444-5555-666677778888",
+        "Name": "All",
+        "FolderPaths": [],
+        "Order": 2
+      }
+    ],
+    "DesignMetadata": [
+      {
+        "DesignId": "a1b2c3d4-1234-5678-9abc-def012345678",
+        "Nickname": "My fav outfit",
+        "CustomImagePath": "C:/Users/.../Wardrobe/thumbnails/clipboard_20260727_142536.png",
+        "Order": 0
+      },
+      {
+        "DesignId": "b2c3d4e5-2345-6789-abcd-ef0123456789",
+        "Nickname": "",
+        "CustomImagePath": "",
+        "Order": 0
+      }
+    ]
+  },
+  "notes": {
+    "HiddenDesignIds": "Designs hidden from gallery (not deleted from Glamourer)",
+    "FavoriteDesignIds": "Favorited designs — appear in 'Favorites' tab",
+    "Collections_empty_FolderPaths": "Empty list = show uncategorized designs (no folder assigned)",
+    "DesignMetadata_Nickname": "Empty = use Glamourer's DisplayName as fallback",
+    "DesignMetadata_CustomImagePath": "Empty = show 'No Preview' placeholder"
+  }
+}

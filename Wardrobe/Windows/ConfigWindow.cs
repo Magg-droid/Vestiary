@@ -28,32 +28,29 @@ public class ConfigWindow : Window, IDisposable
     {
         if (plugin.IsCameraActive) return;
 
-        // ── Apply Equipment Only ──
         var eqOnly = configuration.ApplyEquipmentOnly;
-        if (ImGui.Checkbox("Apply Equipment Only", ref eqOnly))
+        if (ImGui.Checkbox(Strings.SettingsApplyEquipmentOnly, ref eqOnly))
         {
             configuration.ApplyEquipmentOnly = eqOnly;
             configuration.Save();
         }
         if (ImGui.IsItemHovered())
-            ImGui.SetTooltip("When enabled, design apply will only change gear, not character appearance");
+            ImGui.SetTooltip(Strings.SettingsApplyEquipmentTooltip);
 
-        // ── Show Hidden ──
         var showHidden = configuration.ShowHidden;
-        if (ImGui.Checkbox("Show Hidden", ref showHidden))
+        if (ImGui.Checkbox(Strings.SettingsShowHidden, ref showHidden))
         {
             configuration.ShowHidden = showHidden;
             configuration.Save();
         }
         if (ImGui.IsItemHovered())
-            ImGui.SetTooltip("Show hidden designs instead of visible ones");
+            ImGui.SetTooltip(Strings.SettingsShowHiddenTooltip);
 
         ImGui.Spacing();
         ImGui.Separator();
         ImGui.Spacing();
 
-        // ── Theme ──
-        ImGui.TextColored(ThemeManager.Current.TextHeading, "Theme");
+        ImGui.TextColored(ThemeManager.Current.TextHeading, Strings.SettingsThemeHeading);
         ImGui.Spacing();
 
         int selectedTheme = configuration.ThemeName switch
@@ -63,29 +60,20 @@ public class ConfigWindow : Window, IDisposable
             "Forest" => 3,
             _ => 0,
         };
-        if (ImGui.RadioButton("Classic", ref selectedTheme, 0))
-        {
-            configuration.ThemeName = "Classic";
-            configuration.Save();
-            ThemeManager.SetTheme("Classic");
-        }
-        if (ImGui.RadioButton("Ocean", ref selectedTheme, 1))
-        {
-            configuration.ThemeName = "Ocean";
-            configuration.Save();
-            ThemeManager.SetTheme("Ocean");
-        }
-        if (ImGui.RadioButton("Midnight Purple", ref selectedTheme, 2))
-        {
-            configuration.ThemeName = "Midnight Purple";
-            configuration.Save();
-            ThemeManager.SetTheme("Midnight Purple");
-        }
-        if (ImGui.RadioButton("Forest", ref selectedTheme, 3))
-        {
-            configuration.ThemeName = "Forest";
-            configuration.Save();
-            ThemeManager.SetTheme("Forest");
-        }
+        if (ImGui.RadioButton(Strings.SettingsThemeClassic, ref selectedTheme, 0))
+            SetTheme("Classic");
+        if (ImGui.RadioButton(Strings.SettingsThemeOcean, ref selectedTheme, 1))
+            SetTheme("Ocean");
+        if (ImGui.RadioButton(Strings.SettingsThemePurple, ref selectedTheme, 2))
+            SetTheme("Midnight Purple");
+        if (ImGui.RadioButton(Strings.SettingsThemeForest, ref selectedTheme, 3))
+            SetTheme("Forest");
+    }
+
+    private void SetTheme(string name)
+    {
+        configuration.ThemeName = name;
+        configuration.Save();
+        ThemeManager.SetTheme(name);
     }
 }
