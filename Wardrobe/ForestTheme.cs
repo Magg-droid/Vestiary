@@ -48,7 +48,7 @@ public class ForestTheme : ITheme
     // ── Icons — white, unchanged ────────────────────
     public Vector4 IconDefault    => new(1f,    1f,    1f,    0.6f);
     public Vector4 IconHovered    => new(1f,    1f,    1f,    0.95f);
-    public Vector4 LockGold       => new(1f,    0.85f, 0.2f, 1f);
+    public Vector4 SaveModsGold  => new(0.8f, 0.68f, 0.05f, 1f);
 
     // ── Apply — muted forest green accent ───────────
     public Vector4 ApplyBtn       => new(0.34f, 0.48f, 0.36f, 1f);

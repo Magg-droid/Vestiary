@@ -1,6 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using Dalamud.Plugin.Services;
 using Wardrobe.Models;
 
 namespace Wardrobe.Services;
@@ -20,6 +21,8 @@ public class ModStateService
 
     public void CaptureState(Guid designId)
     {
+        if (!configuration.EnableSaveMods) return;
+        var sw = Stopwatch.StartNew();
         var collection = penumbra.GetPlayerCollection();
         if (collection == null) return;
 
@@ -28,7 +31,12 @@ public class ModStateService
         if (itemNames.Count == 0) return;
 
         var modList = penumbra.GetModList();
-        var snapshot = new ModSnapshot { DesignId = designId };
+        var snapshot = new ModSnapshot
+        {
+            DesignId = designId,
+            ItemNames = itemNames.ToList()
+        };
+        int enabled = 0, disabled = 0;
 
         foreach (var (dir, modName) in modList)
         {
@@ -36,11 +44,14 @@ public class ModStateService
             if (!changedItems.Keys.Any(key => itemNames.Contains(key))) continue;
 
             var settings = penumbra.GetModSettings(collection.Value.Id, dir, modName);
+            var modEnabled = settings?.Enabled ?? false;
+            if (modEnabled) enabled++; else disabled++;
+
             snapshot.Mods.Add(new ModEntry
             {
                 DirName = dir,
                 ModName = modName,
-                Enabled = settings?.Enabled ?? false,
+                Enabled = modEnabled,
                 Priority = settings?.Priority ?? 0,
                 Settings = settings?.Settings ?? new()
             });
@@ -50,6 +61,8 @@ public class ModStateService
         configuration.ModSnapshots.RemoveAll(s => s.DesignId == designId);
         configuration.ModSnapshots.Add(snapshot);
         configuration.Save();
+
+        Plugin.Log.Information($"[SaveMods] 💾 {snapshot.Mods.Count} mods saved ({enabled} enabled, {disabled} disabled) ({sw.ElapsedMilliseconds}ms)");
     }
 
     public bool HasSnapshot(Guid designId) =>
@@ -58,49 +71,107 @@ public class ModStateService
     public ModSnapshot? GetSnapshot(Guid designId) =>
         configuration.ModSnapshots?.FirstOrDefault(s => s.DesignId == designId);
 
-    /// <summary>
-    /// Restores saved mod state for a design. Called after Glamourer apply.
-    /// </summary>
-    public void RestoreState(Guid designId, IPluginLog log)
+    public void ClearSnapshot(Guid designId)
     {
+        configuration.ModSnapshots?.RemoveAll(s => s.DesignId == designId);
+        configuration.Save();
+        Plugin.Log.Information("[SaveMods] Mods cleared.");
+    }
+
+    public void RestoreState(Guid designId)
+    {
+        if (!configuration.EnableSaveMods) return;
         var snapshot = GetSnapshot(designId);
         if (snapshot == null) return;
+
+        var sw = Stopwatch.StartNew();
 
         var collection = penumbra.GetPlayerCollection();
         if (collection == null) return;
 
-        log.Information($"[ModSnapshot] Restoring {snapshot.Mods.Count} mods...");
-
         int enabled = 0, disabled = 0, unchanged = 0, errors = 0;
-        foreach (var mod in snapshot.Mods)
-        {
-            var ec = penumbra.TrySetMod(collection.Value.Id, mod.DirName, mod.Enabled, mod.ModName);
-            if (ec == 0)
-            {
-                if (mod.Enabled) { enabled++; log.Information($"[ModSnapshot]   ✅ Enabled  [{mod.DirName}]"); }
-                else           { disabled++; log.Information($"[ModSnapshot]   ❌ Disabled [{mod.DirName}]"); }
 
-                if (mod.Enabled)
+        if (snapshot.ItemNames.Count > 0)
+        {
+            var snapshotMods = new Dictionary<string, ModEntry>(StringComparer.OrdinalIgnoreCase);
+            foreach (var m in snapshot.Mods)
+                snapshotMods[m.DirName] = m;
+
+            var itemNames = new HashSet<string>(snapshot.ItemNames, StringComparer.OrdinalIgnoreCase);
+
+            // Use bulk IPC for changed items
+            var allMods = penumbra.GetAllModChangedItems();
+            var matchingMods = allMods
+                .Where(m => m.ChangedItems.Keys.Any(key => itemNames.Contains(key)))
+                .Select(m => m.ModDirectory)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            var modList = penumbra.GetModList();
+
+            foreach (var (dir, modName) in modList)
+            {
+                if (!matchingMods.Contains(dir)) continue;
+
+                if (snapshotMods.TryGetValue(dir, out var entry))
                 {
-                    penumbra.TrySetModPriority(collection.Value.Id, mod.DirName, mod.Priority, mod.ModName);
-                    foreach (var (group, values) in mod.Settings)
+                    var ec = penumbra.TrySetMod(collection.Value.Id, dir, entry.Enabled, modName);
+                    if (ec == 0)
                     {
-                        if (values.Count == 1)
-                            penumbra.TrySetModSetting(collection.Value.Id, mod.DirName, group, values[0], mod.ModName);
-                        else if (values.Count > 1)
-                            penumbra.TrySetModSettings(collection.Value.Id, mod.DirName, group, values, mod.ModName);
+                        if (entry.Enabled) enabled++; else disabled++;
+                        if (entry.Enabled)
+                        {
+                            penumbra.TrySetModPriority(collection.Value.Id, dir, entry.Priority, modName);
+                            foreach (var (group, values) in entry.Settings)
+                            {
+                                if (values.Count == 1)
+                                    penumbra.TrySetModSetting(collection.Value.Id, dir, group, values[0], modName);
+                                else if (values.Count > 1)
+                                    penumbra.TrySetModSettings(collection.Value.Id, dir, group, values, modName);
+                            }
+                        }
                     }
+                    else if (ec == 1) unchanged++;
+                    else errors++;
+                }
+                else
+                {
+                    var ec = penumbra.TrySetMod(collection.Value.Id, dir, false, modName);
+                    if (ec == 0)
+                    {
+                        disabled++;
+                        Plugin.Log.Information($"[SaveMods]   🆕 Disabled new mod [{dir}]");
+                    }
+                    else if (ec == 1) unchanged++;
+                    else errors++;
                 }
             }
-            else if (ec == 1)
-                unchanged++;
-            else
+        }
+        else
+        {
+            // Legacy: restore from snapshot mods directly
+            foreach (var mod in snapshot.Mods)
             {
-                errors++;
-                log.Warning($"[ModSnapshot]   ⚠ Failed [{mod.DirName}]: ec={ec}");
+                var ec = penumbra.TrySetMod(collection.Value.Id, mod.DirName, mod.Enabled, mod.ModName);
+                if (ec == 0)
+                {
+                    if (mod.Enabled) enabled++; else disabled++;
+                    if (mod.Enabled)
+                    {
+                        penumbra.TrySetModPriority(collection.Value.Id, mod.DirName, mod.Priority, mod.ModName);
+                        foreach (var (group, values) in mod.Settings)
+                        {
+                            if (values.Count == 1)
+                                penumbra.TrySetModSetting(collection.Value.Id, mod.DirName, group, values[0], mod.ModName);
+                            else if (values.Count > 1)
+                                penumbra.TrySetModSettings(collection.Value.Id, mod.DirName, group, values, mod.ModName);
+                        }
+                    }
+                }
+                else if (ec == 1) unchanged++;
+                else errors++;
             }
         }
 
-        log.Information($"[ModSnapshot] Done: {enabled} enabled, {disabled} disabled, {unchanged} unchanged, {errors} errors");
+        Plugin.Log.Information($"[SaveMods] 🔄 Restored — {enabled} enabled, {disabled} disabled, {unchanged} unchanged, {errors} errors ({sw.ElapsedMilliseconds}ms)");
     }
 }

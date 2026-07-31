@@ -8,6 +8,7 @@ public class ModSnapshot
 {
     public Guid DesignId { get; set; }
     public DateTime CapturedAt { get; set; } = DateTime.UtcNow;
+    public List<string> ItemNames { get; set; } = new();
     public List<ModEntry> Mods { get; set; } = new();
 }
 

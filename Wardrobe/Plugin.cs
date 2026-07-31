@@ -68,7 +68,7 @@ public sealed class Plugin : IDalamudPlugin
         var clipboardIconPath = Path.Combine(pluginDir, "clipboard_icon.png");
         var viewIconPath = Path.Combine(pluginDir, "view.png");
         var hiddenIconPath = Path.Combine(pluginDir, "hidden.png");
-        var lockIconPath = Path.Combine(pluginDir, "lock_icon.png");
+        var saveModsIconPath = Path.Combine(pluginDir, "save_mods_icon.png");
         var starEmptyPath = Path.Combine(pluginDir, "star_empty.png");
         var starFilledPath = Path.Combine(pluginDir, "star_filled.png");
         var searchIconPath = Path.Combine(pluginDir, "search_icon.png");
@@ -77,7 +77,7 @@ public sealed class Plugin : IDalamudPlugin
         MainWindow = new MainWindow(this, UtilityService, goatImagePath, CollectionService,
             DesignMetadataService, HiddenDesignService, FavoriteService, noPreviewImagePath,
             cameraIconPath, uploadIconPath, clipboardIconPath, viewIconPath, hiddenIconPath,
-            starEmptyPath, starFilledPath, searchIconPath, lockIconPath);
+            starEmptyPath, starFilledPath, searchIconPath, saveModsIconPath);
         CollectionEditorWindow = new CollectionEditorWindow(this, CollectionService);
         DesignEditorWindow = new DesignEditorWindow(this, UtilityService, DesignMetadataService, GlamourerService);
         CameraWindow = new CameraWindow(this, UtilityService);

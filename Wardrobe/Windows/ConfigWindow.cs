@@ -46,6 +46,15 @@ public class ConfigWindow : Window, IDisposable
         if (ImGui.IsItemHovered())
             ImGui.SetTooltip(Strings.SettingsShowHiddenTooltip);
 
+        var enableSaveMods = configuration.EnableSaveMods;
+        if (ImGui.Checkbox(Strings.SettingsEnableSaveMods, ref enableSaveMods))
+        {
+            configuration.EnableSaveMods = enableSaveMods;
+            configuration.Save();
+        }
+        if (ImGui.IsItemHovered())
+            ImGui.SetTooltip(Strings.SettingsEnableSaveModsTooltip);
+
         ImGui.Spacing();
         ImGui.Separator();
         ImGui.Spacing();

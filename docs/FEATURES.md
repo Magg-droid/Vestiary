@@ -45,8 +45,13 @@
 ## Design Cards
 
 - Inline rename — double-click the design name to set a nickname (clear to reset)
-- Action icons: camera snapshot, file upload, clipboard paste, favourite star
+- Action icons: camera snapshot, file upload, clipboard paste
 - **Favourites** — star icon (top-left), golden when favourited, auto-creates "Favorites" collection tab
+- **Save Mods** — floppy disk icon (top-left, below star), golden when saved
+  - Left-click: capture current Penumbra mod state for this outfit
+  - Right-click: clear saved mods
+  - Auto-restore on apply — enables/disables mods to match saved state
+  - Catches new mods — disables mods added since capture
 - Tooltips on all actions
 - Card hover highlights and icon highlights with interaction gating (no bleed-through from overlaying windows)
 

@@ -145,6 +145,8 @@ public class PenumbraService
         catch (Exception ex) { log.Error($"[ModSnapshot] TrySetModSettings failed for [{dirName}]: {ex.Message}"); return -1; }
     }
 
+    private const uint MaxValidItemId = 1000000;
+
     /// <summary>
     /// Convert equipment ItemIds to item names using game data.
     /// Skips invalid IDs and "The Emperor's New" items.
@@ -155,7 +157,7 @@ public class PenumbraService
         var itemSheet = dataManager.GetExcelSheet<Lumina.Excel.Sheets.Item>();
         foreach (var (_, itemId) in equipment)
         {
-            if (itemId == 0 || itemId > 1000000) continue;
+            if (itemId == 0 || itemId > MaxValidItemId) continue;
             var name = itemSheet.GetRow(itemId).Name.ToString();
             if (string.IsNullOrEmpty(name)) continue;
             if (name.StartsWith("The Emperor's New", StringComparison.OrdinalIgnoreCase)) continue;

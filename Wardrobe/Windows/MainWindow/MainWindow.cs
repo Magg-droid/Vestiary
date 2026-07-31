@@ -17,7 +17,7 @@ public partial class MainWindow : Window, IDisposable
     private readonly string clipboardIconPath;
     private readonly string viewIconPath;
     private readonly string hiddenIconPath;
-    private readonly string lockIconPath;
+    private readonly string saveModsIconPath;
     private readonly string starEmptyPath;
     private readonly string starFilledPath;
     private readonly string searchIconPath;
@@ -51,7 +51,7 @@ public partial class MainWindow : Window, IDisposable
         string starEmptyPath,
         string starFilledPath,
         string searchIconPath,
-        string lockIconPath
+        string saveModsIconPath
     )
         : base("Wardrobe##With a hidden ID", ImGuiWindowFlags.None)
     {
@@ -71,7 +71,7 @@ public partial class MainWindow : Window, IDisposable
         this.starEmptyPath = starEmptyPath;
         this.starFilledPath = starFilledPath;
         this.searchIconPath = searchIconPath;
-        this.lockIconPath = lockIconPath;
+        this.saveModsIconPath = saveModsIconPath;
         this.plugin = plugin;
         this.utility = utility;
         this.collectionService = collectionService;

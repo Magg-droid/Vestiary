@@ -21,8 +21,11 @@ public static class Strings
     public const string TooltipSettings     = "Open Settings";
     public const string TooltipEyeShowHidden  = "Show hidden designs";
     public const string TooltipEyeShowVisible = "Show visible designs";
-    public const string TooltipLockSave        = "Save current state of your mods";
-    public const string TooltipLockResave      = "Mod snapshot saved — click to re-capture";
+    public const string SettingsEnableSaveMods = "Enable Save Mods";
+    public const string SettingsEnableSaveModsTooltip = "Save and restore Penumbra mod state per outfit";
+    public const string TooltipSaveModsSave   = "Save mods for this outfit";
+    public const string TooltipSaveModsReSave = "Mods saved — click to re-save";
+    public const string TooltipSaveModsClear  = "Right-click to clear saved mods";
 
     // ── Main window · Empty state ───────────────────
     public const string EmptyHeading       = "No collections yet";

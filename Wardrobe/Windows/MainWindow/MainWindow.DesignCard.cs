@@ -179,43 +179,56 @@ public partial class MainWindow
             favoriteService.Toggle(designId);
         });
 
-        // Lock — bottom of action icon column
-        var lockMin = new Vector2(iconMin.X + 6f, clipMax.Y + iconGap);
-        var lockMax = new Vector2(iconMax.X + 6f, lockMin.Y + iconSize);
-        bool isLockHovered = windowHovered && ImGui.IsMouseHoveringRect(lockMin, lockMax);
-        bool hasSnapshot = plugin.ModStateService.HasSnapshot(designId);
-
-        var lockTex = plugin.TextureCache.GetOrLoadTexture(lockIconPath)?.GetWrapOrDefault();
-        if (lockTex != null)
+        // Save Mods — below favourite star (only if enabled in settings)
+        _lastSaveModsHovered = false;
+        if (plugin.Configuration.EnableSaveMods)
         {
-            uint lockTint;
-            if (isLockHovered)
-                lockTint = ImGui.GetColorU32(ThemeManager.Current.IconHovered);
-            else if (hasSnapshot)
-                lockTint = ImGui.GetColorU32(ThemeManager.Current.LockGold);
-            else
-                lockTint = ImGui.GetColorU32(ThemeManager.Current.IconDefault);
+            var saveMin = new Vector2(thumbStartPos.X + 4f, favMax.Y + iconGap);
+            var saveMax = new Vector2(saveMin.X + iconSize, saveMin.Y + iconSize);
+            bool isSaveHovered = windowHovered && ImGui.IsMouseHoveringRect(saveMin, saveMax);
+            bool hasSnapshot = plugin.ModStateService.HasSnapshot(designId);
 
-            ImGui.GetWindowDrawList().AddImage(lockTex.Handle, lockMin, lockMax, Vector2.Zero, Vector2.One, lockTint);
+            var saveTex = plugin.TextureCache.GetOrLoadTexture(saveModsIconPath)?.GetWrapOrDefault();
+            if (saveTex != null)
+            {
+                uint saveTint;
+                if (isSaveHovered)
+                    saveTint = ImGui.GetColorU32(ThemeManager.Current.IconHovered);
+                else if (hasSnapshot)
+                    saveTint = ImGui.GetColorU32(ThemeManager.Current.SaveModsGold);
+                else
+                    saveTint = ImGui.GetColorU32(ThemeManager.Current.IconDefault);
+
+                ImGui.GetWindowDrawList().AddImage(saveTex.Handle, saveMin, saveMax, Vector2.Zero, Vector2.One, saveTint);
+            }
+
+            if (isSaveHovered)
+            {
+                var tooltip = hasSnapshot
+                    ? Strings.TooltipSaveModsReSave + "\n" + Strings.TooltipSaveModsClear
+                    : Strings.TooltipSaveModsSave;
+                ImGui.SetTooltip(tooltip);
+
+                if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+                {
+                    plugin.ModStateService.CaptureState(designId);
+                    plugin.PenumbraService.LogModsForDesign(designId, plugin.GlamourerService);
+                }
+                else if (ImGui.IsMouseClicked(ImGuiMouseButton.Right) && hasSnapshot)
+                {
+                    plugin.ModStateService.ClearSnapshot(designId);
+                }
+            }
+
+            _lastSaveModsHovered = isSaveHovered;
         }
-
-        if (isLockHovered)
-            ImGui.SetTooltip(hasSnapshot ? Strings.TooltipLockResave : Strings.TooltipLockSave);
-        if (isLockHovered && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
-        {
-            plugin.ModStateService.CaptureState(designId);
-            plugin.PenumbraService.LogModsForDesign(designId, plugin.GlamourerService);
-        }
-
-        // Note: lock icon is drawn manually so its hover state can be returned.
-        _lastLockHovered = isLockHovered;
     }
 
     private bool _isCameraHovered;
     private bool _isUploadHovered;
     private bool _isClipboardHovered;
     private bool _isFavHovered;
-    private bool _lastLockHovered;
+    private bool _lastSaveModsHovered;
 
     private bool DrawActionIcon(Vector2 min, Vector2 max, string iconPath, string tooltip,
         bool windowHovered, Action<string> onClick)
@@ -241,7 +254,7 @@ public partial class MainWindow
             return;
 
         bool thumbHovered = ImGui.IsMouseHoveringRect(thumbStartPos, thumbEndPos);
-        bool anyIconHovered = _isCameraHovered || _isUploadHovered || _isClipboardHovered || _lastLockHovered || _isFavHovered;
+        bool anyIconHovered = _isCameraHovered || _isUploadHovered || _isClipboardHovered || _lastSaveModsHovered || _isFavHovered;
         if (thumbHovered && !anyIconHovered)
         {
             ImGui.SetTooltip(Strings.TooltipThumbnail);
@@ -250,7 +263,7 @@ public partial class MainWindow
                 plugin.CloseSubWindows();
                 plugin.GlamourerService.ApplyDesign(designId,
                     plugin.Configuration.ApplyEquipmentOnly || ImGui.GetIO().KeyCtrl);
-                plugin.ModStateService.RestoreState(designId, Plugin.Log);
+                plugin.ModStateService.RestoreState(designId);
             }
         }
     }
@@ -323,7 +336,7 @@ public partial class MainWindow
             plugin.CloseSubWindows();
             plugin.GlamourerService.ApplyDesign(designId,
                 plugin.Configuration.ApplyEquipmentOnly || ImGui.GetIO().KeyCtrl);
-            plugin.ModStateService.RestoreState(designId, Plugin.Log);
+            plugin.ModStateService.RestoreState(designId);
         }
         if (ImGui.IsItemHovered())
         {
@@ -404,4 +417,5 @@ public partial class MainWindow
         if (isHidden)
             ImGui.PopStyleVar(); // pop Alpha
     }
+    // te
 }
