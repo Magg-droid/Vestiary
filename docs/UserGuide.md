@@ -122,4 +122,4 @@ Double-click the design name below the thumbnail to set a nickname. Clear the ni
 
 ---
 
-*Need help? Found a bug? Let us know on Discord.*
+*Need help? Found a bug? Let me know on Discord.*

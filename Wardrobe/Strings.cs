@@ -31,6 +31,7 @@ public static class Strings
     public const string EmptyHeading       = "No collections yet";
     public const string EmptyDescription   = "Collections let you organize your Glamourer designs into groups.";
     public const string EmptyCtaButton     = "+  Create Your First Collection";
+    public const string EmptyGuideButton   = "View Guide";
     public const string EmptyHint          = "You can also use the + button above the tabs.";
 
     // ── Main window · Gallery ───────────────────────

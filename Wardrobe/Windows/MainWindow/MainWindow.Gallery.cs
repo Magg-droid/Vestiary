@@ -96,6 +96,19 @@ public partial class MainWindow
 
         ImGui.Spacing();
 
+        ImGui.SetCursorPosX(Math.Max(0, (availW - btnWidth) / 2f));
+        ImGui.PushStyleColor(ImGuiCol.Button, ThemeManager.Current.TextSubtle);
+        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ThemeManager.Current.TextMuted);
+        ImGui.PushStyleColor(ImGuiCol.ButtonActive, ThemeManager.Current.TextMuted);
+        ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 8f);
+        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(28f, 10f));
+        if (ImGui.Button(Strings.EmptyGuideButton, new Vector2(btnWidth, 0)))
+            plugin.GuideWin.Toggle();
+        ImGui.PopStyleVar(2);
+        ImGui.PopStyleColor(3);
+
+        ImGui.Spacing();
+
         ImGui.PushStyleColor(ImGuiCol.Text, ThemeManager.Current.TextSubtle);
         var hintSize = ImGui.CalcTextSize(Strings.EmptyHint);
         ImGui.SetCursorPosX(Math.Max(0, (availW - hintSize.X) / 2f));

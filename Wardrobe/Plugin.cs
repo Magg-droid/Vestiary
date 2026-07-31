@@ -20,12 +20,14 @@ public sealed class Plugin : IDalamudPlugin
 
     private const string CommandName = "/wardrobe";
     private const string ShortCommandName = "/wr";
+    private const string GuideCommandName = "/wrguide";
 
     public Configuration Configuration { get; init; }
 
     public readonly WindowSystem WindowSystem = new("Wardrobe");
     private ConfigWindow ConfigWindow { get; init; }
     private MainWindow MainWindow { get; init; }
+    internal GuideWindow GuideWin { get; init; }
     private CollectionEditorWindow CollectionEditorWindow { get; init; }
     private DesignEditorWindow DesignEditorWindow { get; init; }
     private CameraWindow CameraWindow { get; init; }
@@ -81,12 +83,16 @@ public sealed class Plugin : IDalamudPlugin
         CollectionEditorWindow = new CollectionEditorWindow(this, CollectionService);
         DesignEditorWindow = new DesignEditorWindow(this, UtilityService, DesignMetadataService, GlamourerService);
         CameraWindow = new CameraWindow(this, UtilityService);
+        GuideWin = new GuideWindow(TextureCache,
+            cameraIconPath, uploadIconPath, clipboardIconPath,
+            starFilledPath, saveModsIconPath, viewIconPath);
 
         WindowSystem.AddWindow(ConfigWindow);
         WindowSystem.AddWindow(MainWindow);
         WindowSystem.AddWindow(CollectionEditorWindow);
         WindowSystem.AddWindow(DesignEditorWindow);
         WindowSystem.AddWindow(CameraWindow);
+        WindowSystem.AddWindow(GuideWin);
 
         MainWindow.SetCollectionEditorWindow(CollectionEditorWindow);
 
@@ -97,6 +103,10 @@ public sealed class Plugin : IDalamudPlugin
         CommandManager.AddHandler(ShortCommandName, new CommandInfo(OnCommand)
         {
             HelpMessage = "Open the Wardrobe plugin (shortcut)"
+        });
+        CommandManager.AddHandler(GuideCommandName, new CommandInfo(OnGuideCommand)
+        {
+            HelpMessage = "Open the Wardrobe user guide"
         });
 
         PluginInterface.UiBuilder.Draw += WindowSystem.Draw;
@@ -117,10 +127,12 @@ public sealed class Plugin : IDalamudPlugin
         ConfigWindow.Dispose();
         MainWindow.Dispose();
         CameraWindow.Dispose();
+        GuideWin.Dispose();
         TextureCache.Dispose();
 
         CommandManager.RemoveHandler(CommandName);
         CommandManager.RemoveHandler(ShortCommandName);
+        CommandManager.RemoveHandler(GuideCommandName);
     }
 
     private void OnCommand(string command, string args)
@@ -136,6 +148,11 @@ public sealed class Plugin : IDalamudPlugin
         }
 
         MainWindow.Toggle();
+    }
+
+    private void OnGuideCommand(string command, string args)
+    {
+        GuideWin.Toggle();
     }
 
     public void ToggleConfigUi() => ConfigWindow.Toggle();

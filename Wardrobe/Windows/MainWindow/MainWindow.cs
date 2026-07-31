@@ -91,7 +91,18 @@ public partial class MainWindow : Window, IDisposable
     {
         var fav = collectionService.GetCollections().FirstOrDefault(c => c.Id == collectionId);
         if (fav != null && fav.Name == "Favorites")
-            return favoriteService.GetFavoritesFromAllCollections(collectionService.GetDesignsByCollection);
+        {
+            var favDesigns = favoriteService.GetFavoritesFromAllCollections(collectionService.GetDesignsByCollection);
+            // Auto-clean: if no designs left, clear stale favorites
+            if (favDesigns.Count == 0 && plugin.Configuration.FavoriteDesignIds.Count > 0)
+            {
+                plugin.Configuration.FavoriteDesignIds.Clear();
+                plugin.Configuration.Collections.RemoveAll(c => c.Name == "Favorites");
+                plugin.Configuration.Save();
+                selectedCollectionId = plugin.Configuration.Collections.Count > 0 ? plugin.Configuration.Collections[0].Id : Guid.Empty;
+            }
+            return favDesigns;
+        }
         return collectionService.GetDesignsByCollection(collectionId);
     }
 
