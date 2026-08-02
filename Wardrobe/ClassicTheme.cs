@@ -94,4 +94,23 @@ public class ClassicTheme : ITheme
     public Vector4 CamCancelBtn   => new(0.50f, 0.30f, 0.30f, 0.9f);
     public Vector4 CamCancelHov   => new(0.58f, 0.38f, 0.38f, 1f);
     public Vector4 CamCancelAct   => new(0.65f, 0.44f, 0.44f, 1f);
+
+    // ── Browse rail (left sidebar) ───────────────────
+    public Vector4 RailBg          => new(0.07f, 0.07f, 0.09f, 1f);
+    public Vector4 RailItemBgActive => new(0.18f, 0.18f, 0.20f, 1f);
+    public Vector4 RailItemBgHovered => new(0.13f, 0.13f, 0.15f, 0.8f);
+    public Vector4 RailTextActive  => new(0.92f, 0.90f, 0.86f, 1f);
+    public Vector4 RailTextIdle    => new(0.55f, 0.53f, 0.50f, 0.9f);
+    public Vector4 RailDivider     => new(0.20f, 0.20f, 0.22f, 0.6f);
+
+    // ── Collection chips ─────────────────────────────
+    public Vector4 ChipBg          => new(0.11f, 0.11f, 0.13f, 0.95f);
+    public Vector4 ChipBgActive    => new(0.25f, 0.25f, 0.28f, 1f);
+    public Vector4 ChipBgHovered   => new(0.17f, 0.17f, 0.19f, 0.9f);
+    public Vector4 ChipText        => new(0.62f, 0.60f, 0.58f, 0.9f);
+    public Vector4 ChipTextActive  => new(0.92f, 0.90f, 0.86f, 1f);
+    public Vector4 ChipBorder      => new(0.27f, 0.27f, 0.28f, 0.6f);
+
+    // ── Window chrome ────────────────────────────────
+    public Vector4 WindowBg => new(0.06f, 0.06f, 0.08f, 1f);
 }

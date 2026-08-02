@@ -21,14 +21,14 @@ public partial class MainWindow
         float availableWidth = ImGui.GetContentRegionAvail().X;
         int columnsPerRow = Math.Max(1, (int)((availableWidth - cardSpacing) / (cardWidth + cardSpacing)));
         float totalRowWidth = cardWidth * columnsPerRow + cardSpacing * (columnsPerRow - 1);
-        float centerOffset = Math.Max(0, (availableWidth - totalRowWidth) / 2);
+        const float leftMargin = 8f;
 
         int designIndex = 0;
         foreach (var entry in designs)
         {
             int columnIndex = designIndex % columnsPerRow;
             if (columnIndex == 0)
-                ImGui.SetCursorPosX(ImGui.GetCursorPosX() + centerOffset);
+                ImGui.SetCursorPosX(ImGui.GetCursorPosX() + leftMargin);
 
             DrawDesignCard(entry.Key, entry.Value.DisplayName, cardWidth, cardHeight, isHidden);
 
@@ -51,7 +51,8 @@ public partial class MainWindow
 
         var cardStartPos = ImGui.GetCursorScreenPos();
         var cardEndPos = cardStartPos + new Vector2(width, height);
-        bool isCardHovered = ImGui.IsWindowHovered(ImGuiHoveredFlags.ChildWindows)
+        bool isCardHovered = !IsInteractionBlocked
+            && ImGui.IsWindowHovered(ImGuiHoveredFlags.ChildWindows)
             && ImGui.IsMouseHoveringRect(cardStartPos, cardEndPos);
 
         var drawList = ImGui.GetWindowDrawList();
@@ -233,7 +234,7 @@ public partial class MainWindow
     private bool DrawActionIcon(Vector2 min, Vector2 max, string iconPath, string tooltip,
         bool windowHovered, Action<string> onClick)
     {
-        bool hovered = windowHovered && ImGui.IsMouseHoveringRect(min, max);
+        bool hovered = !IsInteractionBlocked && windowHovered && ImGui.IsMouseHoveringRect(min, max);
         uint tint = ImGui.GetColorU32(hovered ? ThemeManager.Current.IconHovered : ThemeManager.Current.IconDefault);
         var tex = plugin.TextureCache.GetOrLoadTexture(iconPath)?.GetWrapOrDefault();
         if (tex != null)

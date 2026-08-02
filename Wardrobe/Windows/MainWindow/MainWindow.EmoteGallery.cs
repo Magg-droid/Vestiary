@@ -14,49 +14,18 @@ public partial class MainWindow
     {
         var cards = plugin.EmoteService.GetCards();
 
-        // Tab bar + header (matches glamour exactly)
-        const float tabPadX = 14f; const float tabPadY = 6f; const float tabRounding = 6f;
-        var tabText = "All Emotes";
-        var textSize = ImGui.CalcTextSize(tabText);
-        float tabW = textSize.X + tabPadX * 2;
-        float tabH = textSize.Y + tabPadY * 2 + 2f; // +2f selected tab
-        float rightMargin = 16f;
-
-        ImGui.Spacing();
-        var dl = ImGui.GetWindowDrawList();
-        var tabBarStart = ImGui.GetCursorScreenPos();
-
-        // Tab — extends to border
-        dl.AddRectFilled(tabBarStart, new Vector2(tabBarStart.X + tabW, tabBarStart.Y + tabH + 3f),
-            ImGui.GetColorU32(ThemeManager.Current.TabSelected), tabRounding, ImDrawFlags.RoundCornersTop);
-        dl.AddText(new Vector2(tabBarStart.X + tabPadX, tabBarStart.Y + tabPadY + 2f),
-            ImGui.GetColorU32(ThemeManager.Current.TabTextActive), tabText);
-
-        // Settings button — right aligned, matching glamour header pattern
-        float btnW = 90f; float btnH = 26f;
-        float btnY = tabBarStart.Y + (tabH + 3f - btnH) / 2f;
-        float totalRightW = btnW + rightMargin;
-        float btnX = tabBarStart.X + ImGui.GetWindowWidth() - totalRightW;
-
-        var savedCursor = ImGui.GetCursorScreenPos();
-        ImGui.SetCursorScreenPos(new Vector2(btnX, btnY));
-        ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 4f);
-        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(8f, 1f));
-        ImGui.PushStyleColor(ImGuiCol.Button, ThemeManager.Current.EditBtn);
-        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ThemeManager.Current.EditBtnHover);
-        ImGui.PushStyleColor(ImGuiCol.ButtonActive, ThemeManager.Current.EditBtnActive);
-        if (ImGui.Button("Settings", new Vector2(btnW, btnH))) plugin.ToggleConfigUi();
-        ImGui.PopStyleColor(3);
-        ImGui.PopStyleVar(2);
-
-        // Bottom border line
-        float lineY = tabBarStart.Y + tabH + 3f;
-        dl.AddLine(new Vector2(tabBarStart.X, lineY),
-            new Vector2(tabBarStart.X + ImGui.GetContentRegionAvail().X, lineY),
-            ImGui.GetColorU32(ThemeManager.Current.TabBorderLine), 1.5f);
-
-        ImGui.SetCursorScreenPos(new Vector2(tabBarStart.X, lineY));
-        ImGui.Dummy(new Vector2(0, 38f));
+        // Filter by search text (name first, then emote name)
+        if (!string.IsNullOrWhiteSpace(searchText))
+        {
+            var q = searchText.Trim().ToLower();
+            cards = cards
+                .Where(c =>
+                    (!string.IsNullOrEmpty(c.Name) && c.Name.ToLower().Contains(q)) ||
+                    (!string.IsNullOrEmpty(c.EmoteName) && c.EmoteName.ToLower().Contains(q)))
+                .OrderBy(c =>
+                    (!string.IsNullOrEmpty(c.Name) && c.Name.ToLower().Contains(q)) ? 0 : 1)
+                .ToList();
+        }
 
         // ── Gallery ──
         var emoteSheet = Plugin.DataManager.GetExcelSheet<Lumina.Excel.Sheets.Emote>();
@@ -72,6 +41,9 @@ public partial class MainWindow
         }
         sortedEmotes.Sort(StringComparer.OrdinalIgnoreCase);
 
+        ImGui.BeginChild("##EmoteGalleryScroll", new Vector2(-1, -1), false, ImGuiWindowFlags.None);
+
+        ImGui.Dummy(new Vector2(0, 10f));
 
         const float cardWidth = 260f;
         const float cardHeight = 400f;
@@ -79,7 +51,8 @@ public partial class MainWindow
         var availW = ImGui.GetContentRegionAvail().X;
         int cols = Math.Max(1, (int)((availW - cardSpacing) / (cardWidth + cardSpacing)));
         float totalRowW = cardWidth * cols + cardSpacing * (cols - 1);
-        float startX = (availW - totalRowW) / 2;
+        const float leftMargin = 8f;
+        float startX = leftMargin;
 
         int col = 0;
         foreach (var card in cards)
@@ -94,13 +67,15 @@ public partial class MainWindow
         if (col == 0) ImGui.SetCursorPosX(startX);
         else ImGui.SameLine(0, cardSpacing);
         DrawAddEmoteCard(cardWidth, cardHeight);
+
+        ImGui.EndChild();
     }
 
     private void DrawEmoteCard(Models.EmoteCard card, float width, float height, List<string> emoteNames, Dictionary<string, string> emoteCommands)
     {
         var cardStart = ImGui.GetCursorScreenPos();
         var cardEnd = cardStart + new Vector2(width, height);
-        bool hovered = ImGui.IsMouseHoveringRect(cardStart, cardEnd);
+        bool hovered = !IsInteractionBlocked && ImGui.IsMouseHoveringRect(cardStart, cardEnd);
         bool editing = _editingCardId == card.Id;
 
         var dl = ImGui.GetWindowDrawList();
@@ -142,7 +117,7 @@ public partial class MainWindow
         {
             var saveMin = new Vector2(thumbStart.X + 6f, thumbStart.Y + 6f);
             var saveMax = new Vector2(saveMin.X + iconSize, saveMin.Y + iconSize);
-            bool isSaveHovered = ImGui.IsMouseHoveringRect(saveMin, saveMax);
+            bool isSaveHovered = !IsInteractionBlocked && ImGui.IsMouseHoveringRect(saveMin, saveMax);
             bool hasState = plugin.EmoteService.HasState(card.Id);
             var saveTex = plugin.TextureCache.GetOrLoadTexture(saveModsIconPath)?.GetWrapOrDefault();
             if (saveTex != null)
@@ -254,7 +229,7 @@ public partial class MainWindow
     private void DrawAddEmoteCard(float width, float height)
     {
         var cardStart = ImGui.GetCursorScreenPos(); var cardEnd = cardStart + new Vector2(width, height);
-        bool hovered = ImGui.IsMouseHoveringRect(cardStart, cardEnd);
+        bool hovered = !IsInteractionBlocked && ImGui.IsMouseHoveringRect(cardStart, cardEnd);
         var dl = ImGui.GetWindowDrawList();
         dl.AddRectFilled(cardStart, cardEnd,
             ImGui.GetColorU32(hovered ? ThemeManager.Current.CardBgHovered : ThemeManager.Current.CardBg), 12f);
@@ -278,7 +253,7 @@ public partial class MainWindow
 
     private void DrawEmoteIcon(Vector2 min, Vector2 max, string iconPath, string tooltip, Action<string> onClick)
     {
-        bool hovered = ImGui.IsMouseHoveringRect(min, max);
+        bool hovered = !IsInteractionBlocked && ImGui.IsMouseHoveringRect(min, max);
         var tex = plugin.TextureCache.GetOrLoadTexture(iconPath)?.GetWrapOrDefault();
         if (tex != null)
             ImGui.GetWindowDrawList().AddImage(tex.Handle, min, max, Vector2.Zero, Vector2.One,

@@ -92,4 +92,23 @@ public interface ITheme
     Vector4 CamCancelBtn { get; }
     Vector4 CamCancelHov { get; }
     Vector4 CamCancelAct { get; }
+
+    // ── Browse rail (left sidebar) ───────────────────
+    Vector4 RailBg { get; }
+    Vector4 RailItemBgActive { get; }
+    Vector4 RailItemBgHovered { get; }
+    Vector4 RailTextActive { get; }
+    Vector4 RailTextIdle { get; }
+    Vector4 RailDivider { get; }
+
+    // ── Collection chips ─────────────────────────────
+    Vector4 ChipBg { get; }
+    Vector4 ChipBgActive { get; }
+    Vector4 ChipBgHovered { get; }
+    Vector4 ChipText { get; }
+    Vector4 ChipTextActive { get; }
+    Vector4 ChipBorder { get; }
+
+    // ── Window chrome ────────────────────────────────
+    Vector4 WindowBg { get; }
 }

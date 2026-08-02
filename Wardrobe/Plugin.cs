@@ -46,6 +46,7 @@ public sealed class Plugin : IDalamudPlugin
     public UtilityService UtilityService { get; init; }
     public TextureCache TextureCache { get; init; }
 
+    public bool IsConfigOpen => ConfigWindow.IsOpen;
     public bool IsCameraActive { get; private set; }
     private bool wasMainWindowOpen;
     private bool wasDesignEditorOpen;

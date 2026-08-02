@@ -15,8 +15,15 @@ public static class Strings
     public const string Yes    = "Yes";
     public const string No     = "No";
 
+    // ── Main window · Browse rail ──────────────────
+    public const string RailGlamour  = "Glamour";
+    public const string RailEmotes   = "Emotes";
+    public const string RailHelp     = "Help";
+    public const string BrowseHeading = "Browse";
+
     // ── Main window · Tab bar ───────────────────────
     public const string SearchHint        = "Search...";
+    public const string ShowHiddenLabel   = "Show hidden";
     public const string TabRightClickTooltip = "Right-click for options";
     public const string TooltipSettings     = "Open Settings";
     public const string TooltipEyeShowHidden  = "Show hidden designs";
@@ -39,6 +46,12 @@ public static class Strings
     // ── Main window · Gallery ───────────────────────
     public const string NoDesigns           = "No designs in this collection.";
     public const string GlamourerNotFound   = "Glamourer not found or not installed";
+
+    public static string DesignCount(int count) =>
+        $"{count} designs";
+
+    public static string DesignCountWithHidden(int visible, int hidden) =>
+        $"{visible} designs ({hidden} hidden)";
 
     // ── Main window · Design card ───────────────────
     public const string CardApply          = "Apply";

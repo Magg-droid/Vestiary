@@ -5,7 +5,7 @@
   </ItemGroup>
   <PropertyGroup>
     <TargetFramework>net10.0-windows</TargetFramework>
-    <Version>1.0.0.2</Version>
+    <Version>1.0.0.3</Version>
     <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
     <IsPackable>false</IsPackable>
     <UseWindowsForms>true</UseWindowsForms>

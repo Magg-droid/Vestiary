@@ -116,6 +116,12 @@ public partial class MainWindow : Window, IDisposable
     public void Dispose() { }
 
     /// <summary>
+    /// True when a sub-window (config, guide) is open and should block main window interaction.
+    /// </summary>
+    private bool IsInteractionBlocked =>
+        plugin.IsConfigOpen || plugin.GuideWin.IsOpen;
+
+    /// <summary>
     /// Filters designs by search text. Matches nickname first, then Glamourer display name. Case-insensitive.
     /// </summary>
     private Dictionary<Guid, (string, string, uint, bool)> FilterBySearch(
@@ -141,52 +147,6 @@ public partial class MainWindow : Window, IDisposable
         {
             if (!plugin.Configuration.EnableEmotes) _currentView = 0;
 
-            // Segmented pill control (only if emotes enabled)
-            if (plugin.Configuration.EnableEmotes)
-            {
-                ImGui.Spacing();
-                float pillW = 180f; float pillH = 32f; float inset = 2f;
-            var pillStart = ImGui.GetCursorScreenPos();
-            var pillEnd = pillStart + new Vector2(pillW, pillH);
-
-            var pillDl = ImGui.GetWindowDrawList();
-            pillDl.AddRectFilled(pillStart, pillEnd, ImGui.GetColorU32(ThemeManager.Current.CardBg), pillH / 2);
-            pillDl.AddRect(pillStart, pillEnd, ImGui.GetColorU32(ThemeManager.Current.CardBorder), pillH / 2, 0, 1f);
-
-            ImGui.SetCursorScreenPos(pillStart + new Vector2(inset, inset));
-            float innerW = (pillW - inset * 2) / 2;
-            float innerH = pillH - inset * 2;
-
-            ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, innerH / 2);
-            ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(0, 2f));
-            ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(0, 0));
-
-            if (_currentView == 0) { ImGui.PushStyleColor(ImGuiCol.Button, ThemeManager.Current.TabSelected); ImGui.PushStyleColor(ImGuiCol.Text, ThemeManager.Current.TabTextActive); }
-            else { ImGui.PushStyleColor(ImGuiCol.Button, Vector4.Zero with { W = 0 }); ImGui.PushStyleColor(ImGuiCol.Text, ThemeManager.Current.TextSubtle); }
-            if (ImGui.Button("Glamour", new Vector2(innerW, innerH))) _currentView = 0;
-            ImGui.PopStyleColor(2);
-
-            ImGui.SameLine(0, 0);
-
-            if (_currentView == 1) { ImGui.PushStyleColor(ImGuiCol.Button, ThemeManager.Current.TabSelected); ImGui.PushStyleColor(ImGuiCol.Text, ThemeManager.Current.TabTextActive); }
-            else { ImGui.PushStyleColor(ImGuiCol.Button, Vector4.Zero with { W = 0 }); ImGui.PushStyleColor(ImGuiCol.Text, ThemeManager.Current.TextSubtle); }
-            if (ImGui.Button("Emotes", new Vector2(innerW, innerH))) _currentView = 1;
-            ImGui.PopStyleColor(2);
-
-            ImGui.PopStyleVar(3);
-            ImGui.Spacing();
-            ImGui.Dummy(new Vector2(0, 2f));
-
-            // Separator below pill
-            var sepY = ImGui.GetCursorScreenPos().Y;
-            pillDl.AddLine(new Vector2(pillStart.X, sepY),
-                new Vector2(pillStart.X + ImGui.GetContentRegionAvail().X, sepY),
-                ImGui.GetColorU32(ThemeManager.Current.TabBorderLine), 1.5f);
-            ImGui.Spacing();
-
-            if (_currentView == 1) { DrawEmoteGallery(); return; }
-        }
-
             var collections = collectionService.GetCollections();
 
             if (selectedCollectionId == Guid.Empty && collections.Count > 0)
@@ -198,14 +158,43 @@ public partial class MainWindow : Window, IDisposable
             var sortedCollections = collections.OrderBy(c => c.Order).ToList();
             var dl = ImGui.GetWindowDrawList();
 
+            // ── Full-width top bar: WARDROBE + search ──
+            DrawTopBar();
             ImGui.Spacing();
-            var (maxTabH, tabBarStart) = DrawTabBar(sortedCollections, dl);
-            ImGui.NewLine();
 
-            DrawHeaderRow(dl, maxTabH, tabBarStart);
-            ImGui.Dummy(new Vector2(0, 8f));
+            // Separator line
+            var sepPos = ImGui.GetCursorScreenPos();
+            dl.AddLine(
+                new Vector2(sepPos.X, sepPos.Y),
+                new Vector2(sepPos.X + ImGui.GetContentRegionAvail().X, sepPos.Y),
+                ImGui.GetColorU32(ThemeManager.Current.RailDivider), 1f);
+            ImGui.Spacing();
 
+            // ── Split: left rail + right content ──
+            DrawRail();
+
+            ImGui.SameLine();
+
+            ImGui.BeginChild("##MainContent", Vector2.Zero, false, ImGuiWindowFlags.NoScrollbar);
+
+            // Emote view: skip chips + status, go straight to gallery
+            if (_currentView == 1)
+            {
+                ImGui.Dummy(new Vector2(0, 4f));
+                DrawEmoteGallery();
+                ImGui.EndChild();
+                return;
+            }
+
+            // Chip row + status row on one line: chips left, hidden+count right
+            ImGui.Dummy(new Vector2(0, 5f));
+            DrawChipAndStatusRow(sortedCollections);
+            ImGui.Dummy(new Vector2(0, 16f));
+
+            // Gallery
             DrawGalleryContent();
+
+            ImGui.EndChild();
         }
         catch (Exception)
         {
