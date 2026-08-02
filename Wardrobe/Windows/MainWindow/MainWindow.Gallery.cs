@@ -25,9 +25,17 @@ public partial class MainWindow
 
         if (designsToShow.Count > 0)
         {
-            ImGui.BeginChild("##DesignGalleryScroll", new Vector2(-1, -1), false, ImGuiWindowFlags.None);
-            DrawDesignGallery(designsToShow, hiddenDesignService.ShowHidden);
-            ImGui.EndChild();
+            if (plugin.Configuration.IsMinimized)
+            {
+                // No inner child — let window itself scroll, avoids scrollbar gap
+                DrawDesignGallery(designsToShow, hiddenDesignService.ShowHidden);
+            }
+            else
+            {
+                ImGui.BeginChild("##DesignGalleryScroll", new Vector2(-1, -1), false, ImGuiWindowFlags.None);
+                DrawDesignGallery(designsToShow, hiddenDesignService.ShowHidden);
+                ImGui.EndChild();
+            }
         }
         else
         {

@@ -19,7 +19,16 @@ public static class Strings
     public const string RailGlamour  = "Glamour";
     public const string RailEmotes   = "Emotes";
     public const string RailHelp     = "Help";
+    public const string RailMinimize = "Minimize";
+    public const string RailExpand   = "Expand";
     public const string BrowseHeading = "Browse";
+
+    // ── Main window · Emote cards ──────────────────
+    public const string EmotePlaceholder      = "Emote";
+    public const string EmoteDefaultName      = "Emote Name";
+    public const string EmoteNoneSelected     = "No emote selected";
+    public const string EmotePickHint         = "Pick emote...";
+    public const string EmoteDoubleClickTip   = "Double-click to restore mods";
 
     // ── Main window · Tab bar ───────────────────────
     public const string SearchHint        = "Search...";

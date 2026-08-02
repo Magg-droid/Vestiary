@@ -58,6 +58,29 @@ public partial class MainWindow
         // Help
         DrawRailItem(Strings.RailHelp, false, () => plugin.GuideWin.Toggle());
 
+        ImGui.Spacing();
+
+        // Divider before minimize
+        var div3Start = ImGui.GetCursorScreenPos();
+        dl.AddLine(
+            new Vector2(div3Start.X + 12f, div3Start.Y),
+            new Vector2(div3Start.X + railW - 12f, div3Start.Y),
+            ImGui.GetColorU32(ThemeManager.Current.RailDivider), 1f);
+
+        ImGui.Spacing();
+        ImGui.Spacing();
+
+        // Minimize / Expand
+        bool minimized = plugin.Configuration.IsMinimized;
+        DrawRailItem(
+            minimized ? Strings.RailExpand : Strings.RailMinimize,
+            false,
+            () =>
+            {
+                plugin.Configuration.IsMinimized = !plugin.Configuration.IsMinimized;
+                plugin.Configuration.Save();
+            });
+
         ImGui.EndChild();
     }
 

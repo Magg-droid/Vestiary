@@ -13,15 +13,21 @@ public partial class MainWindow
         Dictionary<Guid, (string DisplayName, string FullPath, uint DisplayColor, bool ShownInQdb)> designs,
         bool isHidden = false)
     {
+        bool minimized = plugin.Configuration.IsMinimized;
         const float cardWidth = 260f;
         const float cardHeight = 400f;
         const float cardSpacing = 25f;
         const float verticalGap = 25f;
 
+        float actualCardW = minimized ? 88f : cardWidth;
+        float actualCardH = minimized ? 108f : cardHeight;
+        float actualSpacing = minimized ? 6f : cardSpacing;
+        float actualVGap = minimized ? 6f : verticalGap;
+
         float availableWidth = ImGui.GetContentRegionAvail().X;
-        int columnsPerRow = Math.Max(1, (int)((availableWidth - cardSpacing) / (cardWidth + cardSpacing)));
-        float totalRowWidth = cardWidth * columnsPerRow + cardSpacing * (columnsPerRow - 1);
-        const float leftMargin = 8f;
+        int columnsPerRow = Math.Max(1, (int)((availableWidth - actualSpacing) / (actualCardW + actualSpacing)));
+        float totalRowWidth = actualCardW * columnsPerRow + actualSpacing * (columnsPerRow - 1);
+        float leftMargin = plugin.Configuration.IsMinimized ? 6f : 8f;
 
         int designIndex = 0;
         foreach (var entry in designs)
@@ -30,12 +36,12 @@ public partial class MainWindow
             if (columnIndex == 0)
                 ImGui.SetCursorPosX(ImGui.GetCursorPosX() + leftMargin);
 
-            DrawDesignCard(entry.Key, entry.Value.DisplayName, cardWidth, cardHeight, isHidden);
+            DrawDesignCard(entry.Key, entry.Value.DisplayName, actualCardW, actualCardH, isHidden);
 
             if (columnIndex < columnsPerRow - 1 && designIndex < designs.Count - 1)
-                ImGui.SameLine(0, cardSpacing);
+                ImGui.SameLine(0, actualSpacing);
             else
-                ImGui.Dummy(new Vector2(0, verticalGap));
+                ImGui.Dummy(new Vector2(0, actualVGap));
 
             designIndex++;
         }
@@ -64,12 +70,15 @@ public partial class MainWindow
             cornerRounding, 0, borderThickness);
 
         ImGui.BeginChild($"##DesignCard_{designId}", new Vector2(width, height), false, ImGuiWindowFlags.None);
-        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 8f);
+
+        bool minimized = plugin.Configuration.IsMinimized;
+
+        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + (minimized ? 4f : 8f));
 
         // Thumbnail
-        const float thumbWidth = 240f;
-        const float thumbHeight = 300f;
-        float thumbPadX = 10f;
+        float thumbWidth = minimized ? 80f : 240f;
+        float thumbHeight = minimized ? 100f : 300f;
+        float thumbPadX = minimized ? 4f : 10f;
         ImGui.SetCursorPosX(thumbPadX);
         var thumbStartPos = ImGui.GetCursorScreenPos();
         var thumbEndPos = thumbStartPos + new Vector2(thumbWidth, thumbHeight);
@@ -80,22 +89,38 @@ public partial class MainWindow
             ImGui.GetColorU32(ThemeManager.Current.ThumbBorder), 4f, 0, 1f);
 
         DrawThumbnailImage(designId, thumbStartPos, thumbEndPos, thumbWidth, thumbHeight);
-        DrawThumbnailIcons(designId, thumbStartPos, thumbEndPos);
+
+        if (!plugin.Configuration.IsMinimized)
+            DrawThumbnailIcons(designId, thumbStartPos, thumbEndPos);
+
         DrawThumbnailDoubleClick(designId, thumbStartPos, thumbEndPos);
 
         ImGui.Dummy(new Vector2(thumbWidth, thumbHeight));
 
-        // Border line
-        drawList.AddLine(
-            new Vector2(cardStartPos.X, thumbEndPos.Y + 8f),
-            new Vector2(cardEndPos.X, thumbEndPos.Y + 8f),
-            ImGui.GetColorU32(ThemeManager.Current.CardLine), 1.5f);
+        if (!minimized)
+        {
+            // Border line
+            drawList.AddLine(
+                new Vector2(cardStartPos.X, thumbEndPos.Y + 8f),
+                new Vector2(cardEndPos.X, thumbEndPos.Y + 8f),
+                ImGui.GetColorU32(ThemeManager.Current.CardLine), 1.5f);
 
-        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 12f);
+            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 12f);
+        }
 
-        DrawDesignName(designId, width);
-        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 4f);
-        DrawDesignButtons(designId, width, isHidden);
+        if (!minimized)
+            DrawDesignName(designId, width);
+
+        if (minimized && ImGui.IsMouseHoveringRect(thumbStartPos, thumbEndPos))
+        {
+            ImGui.SetTooltip(designMetadataService.GetDisplayName(designId));
+        }
+
+        if (!minimized)
+        {
+            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 4f);
+            DrawDesignButtons(designId, width, isHidden);
+        }
 
         ImGui.EndChild();
     }
