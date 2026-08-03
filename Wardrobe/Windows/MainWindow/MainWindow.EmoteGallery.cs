@@ -308,6 +308,9 @@ public partial class MainWindow
             ImGui.GetColorU32(ThemeManager.Current.TextSubtle), label);
         if (hovered && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
             plugin.EmoteService.CreateCard(Strings.EmoteDefaultName, "");
+
+        // Reserve the card's footprint as a real item so scroll content bounds include it
+        ImGui.Dummy(new Vector2(width, height));
     }
 
     /// <summary>
