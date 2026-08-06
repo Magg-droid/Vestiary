@@ -129,6 +129,11 @@ Instead it focuses on making large outfit libraries easier to browse and manage 
 
 ---
 
+## Contact -
+Discord - megunim.
+
+---
+
 ## Credits
 
 - Dalamud
