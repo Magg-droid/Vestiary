@@ -65,14 +65,17 @@ public partial class MainWindow
     /// </summary>
     private void DrawChipAndStatusRow(System.Collections.Generic.List<Wardrobe.Models.Collection> sortedCollections)
     {
-        if (selectedCollectionId == Guid.Empty) return;
+        if (!IsGlobalSearchActive && selectedCollectionId == Guid.Empty)
+            return;
 
         var dl = ImGui.GetWindowDrawList();
         var start = ImGui.GetCursorScreenPos();
         float availW = ImGui.GetContentRegionAvail().X;
 
         // ── Right side: hidden checkbox | count ──
-        var allDesigns = GetDesignsForCollection(selectedCollectionId);
+        var allDesigns = IsGlobalSearchActive
+            ? GetDesignsAcrossCollections(sortedCollections)
+            : GetDesignsForCollection(selectedCollectionId);
         var visibleDesigns = hiddenDesignService.GetVisibleDesigns(allDesigns);
         var hiddenDesigns = hiddenDesignService.GetHiddenDesigns(allDesigns);
         var visibleFiltered = FilterBySearch(visibleDesigns);
@@ -113,6 +116,57 @@ public partial class MainWindow
             hiddenDesignService.ShowHidden = showHidden;
         ImGui.PopStyleColor(3);
 
+        float randomX = checkboxX;
+        if (!IsGlobalSearchActive)
+        {
+            bool canRandom = selectedCollectionId != Guid.Empty && visibleDesigns.Count > 0;
+            float randomW = Math.Max(102f, ImGui.CalcTextSize(Strings.RandomButton).X + 24f);
+            const float randomH = 28f;
+            randomX = checkboxX - 12f - randomW;
+
+            ImGui.SetCursorScreenPos(new Vector2(randomX, start.Y + 5f));
+            ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 4f);
+            ImGui.PushStyleColor(ImGuiCol.Button, ThemeManager.Current.ChipBgActive);
+            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ThemeManager.Current.ChipBgActive);
+            ImGui.PushStyleColor(ImGuiCol.ButtonActive, ThemeManager.Current.ChipBgActive);
+
+            ImGui.BeginDisabled(!canRandom);
+            if (ImGui.Button(Strings.RandomButton + "##random_glamour", new Vector2(randomW, randomH)))
+                ApplyRandomVisibleDesignFromSelectedCollection();
+            ImGui.EndDisabled();
+
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip(canRandom ? Strings.TooltipRandomButton : Strings.TooltipRandomButtonDisabled);
+
+            ImGui.PopStyleColor(3);
+            ImGui.PopStyleVar();
+        }
+
+        if (IsGlobalSearchActive)
+        {
+            const float searchChipPadX = 14f;
+            const float searchChipPadY = 5f;
+            const float searchChipRounding = 16f;
+
+            var textSize = ImGui.CalcTextSize(Strings.SearchResultsChip);
+            float chipW = textSize.X + searchChipPadX * 2;
+            float chipH = textSize.Y + searchChipPadY * 2;
+            var chipMin = new Vector2(start.X, start.Y);
+            var chipMax = new Vector2(start.X + chipW, start.Y + chipH);
+
+            dl.AddRectFilled(chipMin, chipMax, ImGui.GetColorU32(ThemeManager.Current.ChipBgActive), searchChipRounding);
+            dl.AddRect(chipMin, chipMax, ImGui.GetColorU32(ThemeManager.Current.ChipBorder), searchChipRounding, 0, 1f);
+            dl.AddText(new Vector2(chipMin.X + searchChipPadX, chipMin.Y + searchChipPadY),
+                ImGui.GetColorU32(ThemeManager.Current.ChipTextActive), Strings.SearchResultsChip);
+
+            ImGui.SetCursorScreenPos(chipMin);
+            ImGui.InvisibleButton("##search_results_chip", new Vector2(chipW, chipH));
+
+            ImGui.SetCursorScreenPos(new Vector2(start.X, start.Y + chipH));
+            ImGui.Dummy(new Vector2(availW, 0));
+            return;
+        }
+
         // ── Left side: collection chips ──
         const float chipPadX = 14f;
         const float chipPadY = 5f;
@@ -122,7 +176,7 @@ public partial class MainWindow
 
         float cursorX = start.X;
         float maxH = ImGui.CalcTextSize("+").Y + chipPadY * 2;
-        float chipRightLimit = checkboxX - 16f; // don't overlap status
+        float chipRightLimit = randomX - 12f; // don't overlap random button or status
         int renderedCount = 0;
         bool overflowed = false;
 

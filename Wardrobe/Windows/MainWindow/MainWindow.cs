@@ -37,10 +37,15 @@ public partial class MainWindow : Window, IDisposable
     private string _emoteModSearch = string.Empty;
     private Guid _justOpenedModCombo;
     private Guid _editingCardId;
+    private Guid _selectedEmoteCollectionId = Guid.Empty;
+    private Guid _editingEmoteCollectionId = Guid.Empty;
+    private string _editingEmoteCollectionName = string.Empty;
+    private string _newEmoteCollectionName = string.Empty;
     internal string _pendingEmoteCommand = string.Empty; // which card is in edit mode // which card's mod dropdown is open
     private Vector2 _lastWindowSize;
     private int _stableFrames;
     private bool _minimizedMenuOpen;
+    private bool _popupInteractionBlocked;
 
     public MainWindow(
         Plugin plugin,
@@ -122,7 +127,7 @@ public partial class MainWindow : Window, IDisposable
     /// True when a sub-window (config, guide) is open and should block main window interaction.
     /// </summary>
     private bool IsInteractionBlocked =>
-        plugin.IsConfigOpen || plugin.GuideWin.IsOpen || _minimizedMenuOpen;
+        plugin.IsConfigOpen || plugin.GuideWin.IsOpen || _minimizedMenuOpen || _popupInteractionBlocked;
 
     /// <summary>
     /// Filters designs by search text. Matches nickname first, then Glamourer display name. Case-insensitive.
@@ -139,6 +144,41 @@ public partial class MainWindow : Window, IDisposable
             var nick = designMetadataService.GetDisplayName(d.Key);
             return nick.ToLower().Contains(q) || d.Value.DisplayName.ToLower().Contains(q);
         }).ToDictionary(d => d.Key, d => d.Value);
+    }
+
+    private bool IsGlobalSearchActive => !string.IsNullOrWhiteSpace(searchText);
+
+    private Dictionary<Guid, (string, string, uint, bool)> GetDesignsAcrossCollections(
+        IEnumerable<Wardrobe.Models.Collection> collections)
+    {
+        var merged = new Dictionary<Guid, (string, string, uint, bool)>();
+        foreach (var collection in collections)
+        {
+            foreach (var entry in GetDesignsForCollection(collection.Id))
+            {
+                // De-duplicate designs that appear in more than one collection.
+                if (!merged.ContainsKey(entry.Key))
+                    merged.Add(entry.Key, entry.Value);
+            }
+        }
+
+        return merged;
+    }
+
+    private void ApplyRandomVisibleDesignFromSelectedCollection()
+    {
+        if (selectedCollectionId == Guid.Empty)
+            return;
+
+        var allDesigns = GetDesignsForCollection(selectedCollectionId);
+        var visibleDesigns = hiddenDesignService.GetVisibleDesigns(allDesigns);
+        if (visibleDesigns.Count == 0)
+            return;
+
+        var designId = visibleDesigns.Keys.ElementAt(Random.Shared.Next(visibleDesigns.Count));
+        plugin.CloseSubWindows();
+        plugin.GlamourerService.ApplyDesign(designId, plugin.Configuration.ApplyEquipmentOnly);
+        plugin.ModStateService.RestoreState(designId);
     }
 
     public override void Draw()
@@ -163,6 +203,8 @@ public partial class MainWindow : Window, IDisposable
 
         try
         {
+            _popupInteractionBlocked = false;
+
             if (!plugin.Configuration.EnableEmotes) _currentView = 0;
 
             var collections = collectionService.GetCollections();
@@ -174,6 +216,11 @@ public partial class MainWindow : Window, IDisposable
                 selectedCollectionId = collections.Count > 0 ? collections[0].Id : Guid.Empty;
 
             var sortedCollections = collections.OrderBy(c => c.Order).ToList();
+            var emoteCollections = plugin.EmoteService.GetCollections();
+            if (_selectedEmoteCollectionId == Guid.Empty && emoteCollections.Count > 0)
+                _selectedEmoteCollectionId = emoteCollections[0].Id;
+            if (_selectedEmoteCollectionId != Guid.Empty && !emoteCollections.Any(c => c.Id == _selectedEmoteCollectionId))
+                _selectedEmoteCollectionId = emoteCollections.Count > 0 ? emoteCollections[0].Id : Guid.Empty;
             var dl = ImGui.GetWindowDrawList();
 
             // ── Minimized mode: skip all chrome, just show gallery ──
@@ -194,7 +241,7 @@ public partial class MainWindow : Window, IDisposable
                     float contentW = ImGui.GetContentRegionAvail().X;
                     int n = Math.Max(2, (int)Math.Round((contentW - margin * 2 + gap) / (cardW + gap)));
                     int totalCards = _currentView == 1
-                        ? plugin.EmoteService.GetCards().Count
+                        ? GetFilteredEmoteCards().Count
                         : GetDesignsForCollection(selectedCollectionId).Count;
                     if (totalCards > 0) n = Math.Min(n, totalCards);
                     float neededW = margin * 2 + n * cardW + (n - 1) * gap;
@@ -257,10 +304,32 @@ public partial class MainWindow : Window, IDisposable
                         }
                         ImGui.EndMenu();
                     }
-                    if (plugin.Configuration.EnableEmotes && ImGui.MenuItem(Strings.RailEmotes))
+
+                    if (plugin.Configuration.EnableEmotes && ImGui.BeginMenu(Strings.RailEmotes))
                     {
-                        _currentView = 1;
-                        ImGui.CloseCurrentPopup();
+                        if (emoteCollections.Count == 0)
+                        {
+                            if (ImGui.MenuItem(Strings.RailEmotes))
+                            {
+                                _currentView = 1;
+                                ImGui.CloseCurrentPopup();
+                            }
+                        }
+                        else
+                        {
+                            foreach (var emoteCollection in emoteCollections)
+                            {
+                                if (ImGui.MenuItem(emoteCollection.Name, string.Empty,
+                                        _selectedEmoteCollectionId == emoteCollection.Id))
+                                {
+                                    _currentView = 1;
+                                    _selectedEmoteCollectionId = emoteCollection.Id;
+                                    ImGui.CloseCurrentPopup();
+                                }
+                            }
+                        }
+
+                        ImGui.EndMenu();
                     }
                     ImGui.EndPopup();
                 }
@@ -333,7 +402,19 @@ public partial class MainWindow : Window, IDisposable
             // Emote view: skip chips + status, go straight to gallery
             if (_currentView == 1)
             {
-                ImGui.Dummy(new Vector2(0, 4f));
+                if (IsGlobalSearchActive)
+                {
+                    ImGui.Dummy(new Vector2(0, 5f));
+                    DrawEmoteSearchStatusRow(GetFilteredEmoteCards().Count);
+                    ImGui.Dummy(new Vector2(0, 12f));
+                }
+                else
+                {
+                    ImGui.Dummy(new Vector2(0, 5f));
+                    DrawEmoteCollectionRow(emoteCollections);
+                    ImGui.Dummy(new Vector2(0, 12f));
+                }
+
                 DrawEmoteGallery();
                 ImGui.EndChild();
                 return;

@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Dalamud.Game.Command;
 using Dalamud.IoC;
 using Dalamud.Plugin;
@@ -24,6 +26,7 @@ public sealed class Plugin : IDalamudPlugin
     private const string ShortCommandName = "/wr";
     private const string GuideCommandName = "/wrguide";
     private const string EmotesCommandName = "/wremotes";
+    private const string RandomCommandName = "/wrrandom";
 
     public Configuration Configuration { get; init; }
 
@@ -105,19 +108,23 @@ public sealed class Plugin : IDalamudPlugin
 
         CommandManager.AddHandler(CommandName, new CommandInfo(OnCommand)
         {
-            HelpMessage = "Open the Wardrobe plugin"
+            HelpMessage = Strings.CommandHelpOpenPlugin
         });
         CommandManager.AddHandler(ShortCommandName, new CommandInfo(OnCommand)
         {
-            HelpMessage = "Open the Wardrobe plugin (shortcut)"
+            HelpMessage = Strings.CommandHelpOpenPluginShortcut
         });
         CommandManager.AddHandler(GuideCommandName, new CommandInfo(OnGuideCommand)
         {
-            HelpMessage = "Open the Wardrobe user guide"
+            HelpMessage = Strings.CommandHelpOpenGuide
         });
         CommandManager.AddHandler(EmotesCommandName, new CommandInfo(OnEmotesCommand)
         {
-            HelpMessage = "Open Wardrobe in Emotes view"
+            HelpMessage = Strings.CommandHelpOpenEmotes
+        });
+        CommandManager.AddHandler(RandomCommandName, new CommandInfo(OnRandomCommand)
+        {
+            HelpMessage = Strings.CommandHelpRandom
         });
 
         PluginInterface.UiBuilder.Draw += WindowSystem.Draw;
@@ -151,6 +158,7 @@ public sealed class Plugin : IDalamudPlugin
         CommandManager.RemoveHandler(ShortCommandName);
         CommandManager.RemoveHandler(GuideCommandName);
         CommandManager.RemoveHandler(EmotesCommandName);
+        CommandManager.RemoveHandler(RandomCommandName);
 
     }
 
@@ -188,6 +196,101 @@ public sealed class Plugin : IDalamudPlugin
         if (!Configuration.EnableEmotes) return;
         MainWindow.ShowEmotes();
         MainWindow.Toggle();
+    }
+
+    private void OnRandomCommand(string command, string args)
+    {
+        try
+        {
+            if (!TryPickRandomDesign(args, out var designId, out var sourceLabel, out var reason))
+            {
+                Log.Warning($"[Random] {reason}");
+                return;
+            }
+
+            CloseSubWindows();
+            GlamourerService.ApplyDesign(designId, Configuration.ApplyEquipmentOnly);
+            ModStateService.RestoreState(designId);
+            Log.Information($"[Random] Applied design {designId} from {sourceLabel}.");
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "[Random] Failed to apply random design.");
+        }
+    }
+
+    private bool TryPickRandomDesign(string args, out Guid designId, out string sourceLabel, out string reason)
+    {
+        designId = Guid.Empty;
+        sourceLabel = string.Empty;
+        reason = string.Empty;
+
+        var collections = CollectionService.GetCollections()
+            .OrderBy(c => c.Order)
+            .ToList();
+        if (collections.Count == 0)
+        {
+            reason = Strings.RandomCommandNoCollections;
+            return false;
+        }
+
+        Dictionary<Guid, (string DisplayName, string FullPath, uint DisplayColor, bool ShownInQdb)> pool;
+        var requestedName = args.Trim();
+
+        if (string.IsNullOrWhiteSpace(requestedName))
+        {
+            var nonFavoriteCollections = collections
+                .Where(c => !string.Equals(c.Name, "Favorites", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            if (nonFavoriteCollections.Count == 0)
+            {
+                reason = Strings.RandomCommandNoNonFavoriteCollections;
+                return false;
+            }
+
+            var merged = new Dictionary<Guid, (string DisplayName, string FullPath, uint DisplayColor, bool ShownInQdb)>();
+            foreach (var collection in nonFavoriteCollections)
+            {
+                foreach (var entry in CollectionService.GetDesignsByCollection(collection.Id))
+                {
+                    if (!merged.ContainsKey(entry.Key))
+                        merged.Add(entry.Key, entry.Value);
+                }
+            }
+
+            pool = merged;
+            sourceLabel = "all collections (excluding Favorites)";
+        }
+        else
+        {
+            var matches = collections
+                .Where(c => string.Equals(c.Name, requestedName, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            if (matches.Count == 0)
+            {
+                reason = Strings.RandomCommandCollectionNotFound(requestedName);
+                return false;
+            }
+            if (matches.Count > 1)
+            {
+                reason = Strings.RandomCommandDuplicateCollection(requestedName);
+                return false;
+            }
+
+            var target = matches[0];
+            pool = CollectionService.GetDesignsByCollection(target.Id);
+            sourceLabel = $"collection '{target.Name}'";
+        }
+
+        var visiblePool = HiddenDesignService.GetVisibleDesigns(pool);
+        if (visiblePool.Count == 0)
+        {
+            reason = Strings.RandomCommandNoVisibleDesigns(sourceLabel);
+            return false;
+        }
+
+        designId = visiblePool.Keys.ElementAt(Random.Shared.Next(visiblePool.Count));
+        return true;
     }
 
     public void ToggleConfigUi() => ConfigWindow.Toggle();

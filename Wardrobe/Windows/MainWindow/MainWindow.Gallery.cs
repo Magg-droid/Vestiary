@@ -8,13 +8,15 @@ public partial class MainWindow
 {
     private void DrawGalleryContent()
     {
-        if (selectedCollectionId == Guid.Empty)
+        if (!IsGlobalSearchActive && selectedCollectionId == Guid.Empty)
         {
             DrawEmptyCollectionsState();
             return;
         }
 
-        var allDesigns = GetDesignsForCollection(selectedCollectionId);
+        var allDesigns = IsGlobalSearchActive
+            ? GetDesignsAcrossCollections(collectionService.GetCollections())
+            : GetDesignsForCollection(selectedCollectionId);
         var visibleDesigns = hiddenDesignService.GetVisibleDesigns(allDesigns);
         var hiddenDesigns = hiddenDesignService.GetHiddenDesigns(allDesigns);
         var visibleFiltered = FilterBySearch(visibleDesigns);
@@ -42,9 +44,11 @@ public partial class MainWindow
             ImGui.Spacing();
             ImGui.Spacing();
             float availW = ImGui.GetContentRegionAvail().X;
-            string msg = hiddenDesignService.ShowHidden
-                ? "No hidden designs"
-                : Strings.NoDesigns;
+            string msg = IsGlobalSearchActive
+                ? Strings.NoSearchResults
+                : hiddenDesignService.ShowHidden
+                    ? "No hidden designs"
+                    : Strings.NoDesigns;
             ImGui.SetWindowFontScale(1.5f);
             ImGui.PushStyleColor(ImGuiCol.Text, ThemeManager.Current.TextHeading);
             var size = ImGui.CalcTextSize(msg);

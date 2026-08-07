@@ -149,9 +149,27 @@ public partial class MainWindow
         }
         else
         {
-            var textSize = ImGui.CalcTextSize("No Preview");
-            var textPos = thumbStartPos + new Vector2((thumbWidth - textSize.X) / 2, (thumbHeight - textSize.Y) / 2);
-            ImGui.GetWindowDrawList().AddText(textPos, ImGui.GetColorU32(ThemeManager.Current.ThumbNoPreview), "No Preview");
+            if (plugin.Configuration.IsMinimized)
+            {
+                var line1 = "No";
+                var line2 = "Preview";
+                var line1Size = ImGui.CalcTextSize(line1);
+                var line2Size = ImGui.CalcTextSize(line2);
+                float gap = 2f;
+                float totalH = line1Size.Y + gap + line2Size.Y;
+                float startY = thumbStartPos.Y + (thumbHeight - totalH) / 2f;
+
+                var line1Pos = new Vector2(thumbStartPos.X + (thumbWidth - line1Size.X) / 2f, startY);
+                var line2Pos = new Vector2(thumbStartPos.X + (thumbWidth - line2Size.X) / 2f, startY + line1Size.Y + gap);
+                ImGui.GetWindowDrawList().AddText(line1Pos, ImGui.GetColorU32(ThemeManager.Current.ThumbNoPreview), line1);
+                ImGui.GetWindowDrawList().AddText(line2Pos, ImGui.GetColorU32(ThemeManager.Current.ThumbNoPreview), line2);
+            }
+            else
+            {
+                var textSize = ImGui.CalcTextSize("No Preview");
+                var textPos = thumbStartPos + new Vector2((thumbWidth - textSize.X) / 2, (thumbHeight - textSize.Y) / 2);
+                ImGui.GetWindowDrawList().AddText(textPos, ImGui.GetColorU32(ThemeManager.Current.ThumbNoPreview), "No Preview");
+            }
         }
     }
 

@@ -27,13 +27,42 @@ public static class Strings
     public const string EmotePlaceholder      = "Emote";
     public const string EmoteDefaultName      = "Emote Name";
     public const string EmoteNoneSelected     = "No emote selected";
+    public const string EmoteDefaultCollectionName = "Emotes";
     public const string EmotePickHint         = "Pick emote...";
     public const string EmoteDoubleClickTip   = "Double-click to restore mods";
+    public const string NoEmoteCards          = "No emote cards yet.";
+    public const string NoEmoteSearchResults  = "No matching emote cards.";
+    public const string ThumbNoPreviewLine1   = "No";
+    public const string ThumbNoPreviewLine2   = "Preview";
+    public const string CreateEmoteCardLabel  = "Create Emote Card";
+    public const string EmoteCollectionNameHint = "Collection name...";
+    public const string EmoteCollectionCreateButton = "Create Collection";
+    public const string EmoteMoveToCollection = "Move to collection";
+
+    public static string EmoteCardCount(int count) =>
+        $"{count} cards";
 
     // ── Main window · Tab bar ───────────────────────
     public const string SearchHint        = "Search...";
+    public const string SearchResultsChip = "Search Results";
+    public const string RandomButton      = "Random Pick";
     public const string ShowHiddenLabel   = "Show hidden";
     public const string TabRightClickTooltip = "Right-click for options";
+    public const string TooltipRandomButton = "Apply a random visible design from this collection";
+    public const string TooltipRandomButtonDisabled = "No visible designs available in this collection";
+    public const string CommandHelpOpenPlugin = "Open the Wardrobe plugin";
+    public const string CommandHelpOpenPluginShortcut = "Open the Wardrobe plugin (shortcut)";
+    public const string CommandHelpOpenGuide = "Open the Wardrobe user guide";
+    public const string CommandHelpOpenEmotes = "Open Wardrobe in Emotes view";
+    public const string CommandHelpRandom = "Apply a random visible design. Usage: /wrrandom [Collection Name]";
+    public const string RandomCommandNoCollections = "No collections are available.";
+    public const string RandomCommandNoNonFavoriteCollections = "No non-favorites collections are available.";
+    public static string RandomCommandCollectionNotFound(string collectionName) =>
+        $"Collection '{collectionName}' was not found.";
+    public static string RandomCommandDuplicateCollection(string collectionName) =>
+        $"Multiple collections named '{collectionName}' found. Please rename one and try again.";
+    public static string RandomCommandNoVisibleDesigns(string sourceLabel) =>
+        $"No visible designs found in {sourceLabel}.";
     public const string TooltipSettings     = "Open Settings";
     public const string TooltipEyeShowHidden  = "Show hidden designs";
     public const string TooltipEyeShowVisible = "Show visible designs";
@@ -54,6 +83,7 @@ public static class Strings
 
     // ── Main window · Gallery ───────────────────────
     public const string NoDesigns           = "No designs in this collection.";
+    public const string NoSearchResults     = "No matching designs across collections.";
     public const string GlamourerNotFound   = "Glamourer not found or not installed";
 
     public static string DesignCount(int count) =>

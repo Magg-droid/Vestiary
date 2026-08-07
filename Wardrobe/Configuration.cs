@@ -20,6 +20,7 @@ public class Configuration : IPluginConfiguration
     public List<Guid> HiddenDesignIds { get; set; } = new();
     public List<ModSnapshot>? ModSnapshots { get; set; } = new();
     public List<EmoteCard> EmoteCards { get; set; } = new();
+    public List<EmoteCollection> EmoteCollections { get; set; } = new();
     public List<Guid> FavoriteDesignIds { get; set; } = new();
     public List<Collection> Collections { get; set; } = new();
     public List<DesignMetadata> DesignMetadata { get; set; } = new();
