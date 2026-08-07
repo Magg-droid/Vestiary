@@ -1,142 +1,96 @@
 # Wardrobe
 
-🅰️ **ALPHA RELEASE v0.1.0**
+A visual companion for Glamourer.
 
-*A visual companion for Glamourer.*
+Wardrobe turns your Glamourer design list into a visual gallery so you can browse, organize, and apply outfits faster.
 
-Wardrobe transforms your Glamourer design library into a visual wardrobe with thumbnails, collections, and one-click outfit application.
+- Current internal plugin version: 1.0.0.6
 
-Instead of scrolling through hundreds of design names, browse your outfits like a gallery.
+## What Wardrobe Does
 
-> **⚠️ ALPHA STATUS**: This is an early release. Expect bugs and please report them.
-> 
-> **Wardrobe does not replace Glamourer.**  
-> It works alongside Glamourer, using your existing designs while providing a visual browsing experience.
-
----
-
-## Features
-
-### 🖼 Visual Gallery
-
-- Browse Glamourer designs as image cards
-- Upload custom outfit thumbnails
-- Responsive grid layout
-- Smooth scrolling with cached textures
-
-### 📁 Collections
-
-Organize your wardrobe into custom collections based on Glamourer folder paths.
-
-Examples:
-
-- 👗 Dresses
-- 👕 Casual
-- 🏖 Beachwear
-- 💍 Wedding
-- 🎄 Seasonal
-
-Each collection can reference one or multiple Glamourer folders.
-
-### ⚡ One-Click Actions
-
-Every outfit card includes quick actions:
-
-- **Apply** – Equip the outfit instantly
-- **Edit** – Rename or customize Wardrobe metadata
-- **Delete** – Remove the Glamourer design (Ctrl+Click safety)
-
-### 📷 Thumbnail Support
-
-Add thumbnails using:
-
-- File picker
-- Clipboard paste
-- Windows Snipping Tool (`Win + Shift + S`)
-
-Images are stored locally and automatically remembered.
-
----
-
-## Screenshots
-
-> *(Replace these with actual screenshots before release.)*
-
-### Gallery
-
-![Gallery](docs/images/gallery.png)
-
-### Collections
-
-![Collections](docs/images/collections.png)
-
-### Design Card
-
-![Design Card](docs/images/design-card.png)
-
----
+- Shows Glamourer designs as thumbnail cards
+- Lets you organize outfits into collections
+- Supports favorites, hide/unhide, and search
+- Applies outfits with one click or double-click
+- Supports equipment-only apply mode
+- Can save/restore Penumbra mod state per outfit
+- Includes Emotes view with emote collections and emote cards
 
 ## Requirements
 
 - XIVLauncher / Dalamud
-- **Glamourer** (required)
+- Glamourer (required)
+- Penumbra (recommended for Save Mods and emote state restore features)
 
-Wardrobe uses Glamourer's IPC interface and requires Glamourer to be installed and enabled.
-
----
+Wardrobe does not replace Glamourer. Glamourer remains the source of truth for designs.
 
 ## Installation
 
-1. Install **Glamourer**
-2. Install **Wardrobe**
-3. Open with:
+Add this repo in Dalamud custom repositories:
 
-```
-/wardrobe
-```
+https://raw.githubusercontent.com/Magg-droid/plugin-collection/main/pluginmaster.json
 
----
+1. Open Dalamud settings
+2. Go to Experimental / Custom Plugin Repositories
+3. Add the raw pluginmaster URL above
+4. Open Plugin Installer and install Wardrobe
 
-## Philosophy
+## Commands
 
-Wardrobe follows one simple principle:
+- /wardrobe: Open Wardrobe
+- /wr: Shortcut to open Wardrobe
+- /wrguide: Open Wardrobe guide window
+- /wremotes: Open directly to Emotes view
+- /wrrandom: Apply random visible outfit from all non-Favorites collections
+- /wrrandom [Collection Name]: Apply random visible outfit from a specific collection
 
-> **Glamourer owns the designs. Wardrobe owns the presentation.**
+Random command behavior:
 
-Wardrobe never attempts to replace Glamourer's editing workflow.
+- Hidden outfits are always excluded
+- /wrrandom excludes Favorites by design
+- Apply Equipment Only setting is respected
 
-Instead it focuses on making large outfit libraries easier to browse and manage visually.
+## Main Features
 
----
+### Glamour Gallery
 
-## Roadmap & Planned Features
+- Visual card grid with thumbnail preview
+- Upload thumbnail from file or clipboard
+- Snapshot capture flow
+- Favorites collection support
+- Hide/Unhide without deleting from Glamourer
+- Optional delete from Glamourer with safety flow
+- Search across collections
+- Random Pick button for selected collection
 
-- Bug fixes from community feedback
-- Performance optimization
-- Search & filtering within collections
-- UI refinements
-- Favorites & outfit history
-- Built-in screenshot capture
-- Additional gallery layouts
+### Emotes View
 
----
+- Emote cards with optional thumbnails
+- Save and restore Penumbra mod state per emote card
+- Emote collections with chip tabs and + create chip
+- Move cards between emote collections
+- Search support
 
-## Feedback & Support
+### UI / Quality of Life
 
-🐛 **Found a bug?** Please report it with steps to reproduce.  
-💡 **Have a suggestion?** We'd love to hear it!  
-❓ **Questions?** Check the troubleshooting section below.
+- Full view and minimized view
+- Minimized menu navigation for both Glamour and Emotes collections
+- Multiple themes
+- Keyboard-assisted equipment-only apply (Ctrl)
 
----
+## Troubleshooting
 
-## Contact -
-Discord - megunim.
+- If cards do not appear, verify Glamourer is installed and enabled.
+- If Save Mods does not restore as expected, verify Penumbra is running and your player collection is available.
 
----
+## Feedback
+
+- Discord: megunim.
+- Bug reports and suggestions: https://github.com/Magg-droid/Wardrobe/issues
 
 ## Credits
 
 - Dalamud
 - Glamourer
 - Penumbra
-- FFXIV Plugin Community
+- FFXIV plugin community
