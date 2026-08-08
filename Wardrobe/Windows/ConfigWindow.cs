@@ -12,10 +12,15 @@ public class ConfigWindow : Window, IDisposable
 
     public ConfigWindow(Plugin plugin) : base("Wardrobe Settings##WardrobeConfig")
     {
-        Flags = ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoScrollbar |
-                ImGuiWindowFlags.NoScrollWithMouse;
+        Flags = ImGuiWindowFlags.NoCollapse;
 
-        Size = new Vector2(300, 270);
+        SizeConstraints = new WindowSizeConstraints
+        {
+            MinimumSize = new Vector2(320, 260),
+            MaximumSize = new Vector2(900, 2000),
+        };
+
+        Size = new Vector2(360, 380);
         SizeCondition = ImGuiCond.Appearing;
 
         this.plugin = plugin;
@@ -27,6 +32,8 @@ public class ConfigWindow : Window, IDisposable
     public override void Draw()
     {
         if (plugin.IsCameraActive) return;
+
+        ImGui.BeginChild("##SettingsScroll", Vector2.Zero, false, ImGuiWindowFlags.AlwaysVerticalScrollbar);
 
         var eqOnly = configuration.ApplyEquipmentOnly;
         if (ImGui.Checkbox(Strings.SettingsApplyEquipmentOnly, ref eqOnly))
@@ -64,6 +71,19 @@ public class ConfigWindow : Window, IDisposable
         if (ImGui.IsItemHovered())
             ImGui.SetTooltip(Strings.SettingsEnableEmotesTooltip);
 
+        var enableRoulette = configuration.EnableGlamourRoulette;
+        if (ImGui.Checkbox(Strings.SettingsEnableGlamourRoulette, ref enableRoulette))
+        {
+            configuration.EnableGlamourRoulette = enableRoulette;
+            if (!enableRoulette && configuration.RouletteActive)
+            {
+                configuration.RouletteActive = false;
+            }
+            configuration.Save();
+        }
+        if (ImGui.IsItemHovered())
+            ImGui.SetTooltip(Strings.SettingsEnableGlamourRouletteTooltip);
+
         ImGui.Spacing();
         ImGui.Separator();
         ImGui.Spacing();
@@ -86,6 +106,8 @@ public class ConfigWindow : Window, IDisposable
             SetTheme("Midnight Purple");
         if (ImGui.RadioButton(Strings.SettingsThemeForest, ref selectedTheme, 3))
             SetTheme("Forest");
+
+        ImGui.EndChild();
     }
 
     private void SetTheme(string name)

@@ -18,10 +18,29 @@ public static class Strings
     // ── Main window · Browse rail ──────────────────
     public const string RailGlamour  = "Glamour";
     public const string RailEmotes   = "Emotes";
+    public const string RailRoulette = "Roulette";
     public const string RailHelp     = "Help";
     public const string RailMinimize = "Minimize";
     public const string RailExpand   = "Expand";
     public const string BrowseHeading = "Browse";
+
+    // ── Glamour Roulette ───────────────────────────
+    public const string RouletteHeading               = "Glamour Roulette";
+    public const string RouletteSubheading            = "Automated periodic outfit randomizer";
+    public const string RouletteStatusActive          = "ROULETTE ACTIVE";
+    public const string RouletteStatusInactive        = "ROULETTE INACTIVE";
+    public const string RouletteStatusActiveSub        = "(Click to Stop Roulette)";
+    public const string RouletteStatusInactiveSub      = "(Click to Start Roulette)";
+    public const string RouletteSwapNow               = "Swap Now";
+    public const string RouletteTimerHeading          = "Timer Interval";
+    public const string RoulettePresetsLabel          = "Quick Select:";
+    public const string RouletteCollectionsHeading    = "Included Collections";
+    public const string RouletteExcludeFavorites      = "Exclude Favorites Collection";
+    public const string RouletteSelectCollectionsHint = "Select collections to include in the random pool (if none selected, all non-favorites are included):";
+    public const string TooltipRouletteSwapNow         = "Trigger immediate random outfit swap and reset timer";
+    public const string TooltipRouletteMinimizedInactive = "Glamour Roulette: Off (Click to start)";
+    public static string TooltipRouletteMinimizedActive(string remaining) =>
+        $"Glamour Roulette: Active (Next in {remaining})";
 
     // ── Main window · Emote cards ──────────────────
     public const string EmotePlaceholder      = "Emote";
@@ -50,6 +69,7 @@ public static class Strings
     public const string TabRightClickTooltip = "Right-click for options";
     public const string TooltipRandomButton = "Apply a random visible design from this collection";
     public const string TooltipRandomButtonDisabled = "No visible designs available in this collection";
+    public const string TooltipRandomButtonGlamourOnly = "Only available for glamour";
     public const string CommandHelpOpenPlugin = "Open the Wardrobe plugin";
     public const string CommandHelpOpenPluginShortcut = "Open the Wardrobe plugin (shortcut)";
     public const string CommandHelpOpenGuide = "Open the Wardrobe user guide";
@@ -70,6 +90,8 @@ public static class Strings
     public const string SettingsEnableSaveModsTooltip = "Save and restore Penumbra mod state per outfit";
     public const string SettingsEnableEmotes = "Enable Emotes (Beta)";
     public const string SettingsEnableEmotesTooltip = "Experimental emote gallery with mod capture and auto-play";
+    public const string SettingsEnableGlamourRoulette = "Enable Glamour Roulette";
+    public const string SettingsEnableGlamourRouletteTooltip = "Automated timer-based outfit randomizer";
     public const string TooltipSaveModsSave   = "Save mods for this outfit";
     public const string TooltipSaveModsReSave = "Mods saved — click to re-save";
     public const string TooltipSaveModsClear  = "Right-click to clear saved mods";

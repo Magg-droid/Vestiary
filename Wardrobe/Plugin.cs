@@ -21,6 +21,7 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static ICommandManager CommandManager { get; private set; } = null!;
     [PluginService] internal static IPluginLog Log { get; private set; } = null!;
     [PluginService] internal static IDataManager DataManager { get; private set; } = null!;
+    [PluginService] internal static IFramework Framework { get; private set; } = null!;
 
     private const string CommandName = "/wardrobe";
     private const string ShortCommandName = "/wr";
@@ -47,12 +48,14 @@ public sealed class Plugin : IDalamudPlugin
     public EmoteService EmoteService { get; init; }
     public FavoriteService FavoriteService { get; init; }
     public UtilityService UtilityService { get; init; }
+    public RouletteService RouletteService { get; init; }
     public TextureCache TextureCache { get; init; }
 
     public bool IsConfigOpen => ConfigWindow.IsOpen;
     public bool IsCameraActive { get; private set; }
     private bool wasMainWindowOpen;
     private bool wasDesignEditorOpen;
+    private Guid lastRandomCommandDesignId = Guid.Empty;
 
     public Plugin()
     {
@@ -71,6 +74,7 @@ public sealed class Plugin : IDalamudPlugin
         EmoteService = new EmoteService(Configuration, PenumbraService);
         FavoriteService = new FavoriteService(Configuration, CollectionService);
         UtilityService = new UtilityService(pluginDir, Log, Configuration);
+        RouletteService = new RouletteService(Configuration, GlamourerService, ModStateService, CollectionService, HiddenDesignService, Framework);
         TextureCache = new TextureCache(TextureProvider);
 
         var goatImagePath = Path.Combine(pluginDir, "goat.png");
@@ -150,6 +154,7 @@ public sealed class Plugin : IDalamudPlugin
         MainWindow.Dispose();
         CameraWindow.Dispose();
         GuideWin.Dispose();
+        RouletteService.Dispose();
         TextureCache.Dispose();
 
         ECommonsMain.Dispose();
@@ -289,7 +294,12 @@ public sealed class Plugin : IDalamudPlugin
             return false;
         }
 
-        designId = visiblePool.Keys.ElementAt(Random.Shared.Next(visiblePool.Count));
+        if (!RandomSelectionHelper.TryPickDesign(visiblePool, ref lastRandomCommandDesignId, out designId))
+        {
+            reason = Strings.RandomCommandNoVisibleDesigns(sourceLabel);
+            return false;
+        }
+
         return true;
     }
 

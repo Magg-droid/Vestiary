@@ -93,7 +93,26 @@ Your outfits can remember their Penumbra mod setup. When you apply the outfit la
 | **Apply Equipment Only** | Skip customization when applying outfits |
 | **Show Hidden** | Reveal hidden designs tab |
 | **Enable Save Mods** | Turn on Penumbra mod saving (default: off) |
+| **Enable Glamour Roulette** | Turn on the Roulette section in Browse |
 | **Theme** | Pick from Classic, Ocean, Midnight Purple, or Forest |
+
+---
+
+## 🎲 Glamour Roulette
+
+Glamour Roulette applies random visible outfits on a timer.
+
+### Setup
+1. Enable **Glamour Roulette** in Settings
+2. Open **Roulette** from the Browse rail
+3. Pick your timer interval and included collections
+4. Toggle Roulette Active
+
+### Notes
+- Hidden designs are excluded from the roulette pool
+- **Apply Equipment Only** is respected
+- Immediate repeat picks are avoided when more than one design is available
+- **Swap Now** triggers an instant swap and resets the timer
 
 ---
 
@@ -122,4 +141,6 @@ Double-click the design name below the thumbnail to set a nickname. Clear the ni
 
 ---
 
-*Need help? Found a bug? Let me know on Discord.*
+*Need help? Open Help in the Browse rail (or run /wrguide).*
+
+*Found a bug or want a feature? Use GitHub Issues: https://github.com/Magg-droid/Wardrobe/issues* 

@@ -41,6 +41,7 @@ public partial class MainWindow : Window, IDisposable
     private Guid _editingEmoteCollectionId = Guid.Empty;
     private string _editingEmoteCollectionName = string.Empty;
     private string _newEmoteCollectionName = string.Empty;
+    private Guid _lastRandomButtonDesignId = Guid.Empty;
     internal string _pendingEmoteCommand = string.Empty; // which card is in edit mode // which card's mod dropdown is open
     private Vector2 _lastWindowSize;
     private int _stableFrames;
@@ -175,7 +176,9 @@ public partial class MainWindow : Window, IDisposable
         if (visibleDesigns.Count == 0)
             return;
 
-        var designId = visibleDesigns.Keys.ElementAt(Random.Shared.Next(visibleDesigns.Count));
+        if (!RandomSelectionHelper.TryPickDesign(visibleDesigns, ref _lastRandomButtonDesignId, out var designId))
+            return;
+
         plugin.CloseSubWindows();
         plugin.GlamourerService.ApplyDesign(designId, plugin.Configuration.ApplyEquipmentOnly);
         plugin.ModStateService.RestoreState(designId);
@@ -366,6 +369,117 @@ public partial class MainWindow : Window, IDisposable
                     ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
                 }
 
+                // ── Random Pick button (left, beside expand) ──
+                bool isEmotes = _currentView == 1;
+                bool canRandom = false;
+                if (!isEmotes && selectedCollectionId != Guid.Empty)
+                {
+                    var allDesigns = GetDesignsForCollection(selectedCollectionId);
+                    var visibleDesigns = hiddenDesignService.GetVisibleDesigns(allDesigns);
+                    canRandom = visibleDesigns.Count > 0;
+                }
+
+                var rndPos = new Vector2(barMin.X + (btnSize * 2f) + 12f, btnY);
+                var rndEnd = rndPos + new Vector2(btnSize, btnSize);
+                bool rndHovered = ImGui.IsMouseHoveringRect(rndPos, rndEnd, false);
+                bool rndEnabled = !isEmotes && canRandom;
+
+                dl.AddRectFilled(rndPos, rndEnd,
+                    ImGui.GetColorU32(rndHovered && rndEnabled ? ThemeManager.Current.ChipBgHovered : ThemeManager.Current.ChipBg), 4f);
+                dl.AddRect(rndPos, rndEnd,
+                    ImGui.GetColorU32(ThemeManager.Current.ChipBorder), 4f, 0, 1f);
+
+                // Dice icon: centered 11x11 square with 3 diagonal dots
+                float rcx = rndPos.X + btnSize / 2f;
+                float rcy = rndPos.Y + btnSize / 2f;
+                uint rndCol = ImGui.GetColorU32(!rndEnabled
+                    ? ThemeManager.Current.TextSubtle
+                    : (rndHovered ? ThemeManager.Current.RailTextActive : ThemeManager.Current.RailTextIdle));
+
+                dl.AddRect(new Vector2(rcx - 5.5f, rcy - 5.5f), new Vector2(rcx + 5.5f, rcy + 5.5f), rndCol, 2f, 0, 1.2f);
+                dl.AddCircleFilled(new Vector2(rcx - 2.5f, rcy - 2.5f), 1.1f, rndCol);
+                dl.AddCircleFilled(new Vector2(rcx, rcy), 1.1f, rndCol);
+                dl.AddCircleFilled(new Vector2(rcx + 2.5f, rcy + 2.5f), 1.1f, rndCol);
+
+                ImGui.SetCursorScreenPos(rndPos);
+                ImGui.BeginDisabled(!rndEnabled);
+                ImGui.InvisibleButton("##randomBtnMinimized", new Vector2(btnSize, btnSize));
+                if (ImGui.IsItemClicked() && rndEnabled)
+                {
+                    ApplyRandomVisibleDesignFromSelectedCollection();
+                }
+                ImGui.EndDisabled();
+
+                if (rndHovered)
+                {
+                    if (isEmotes)
+                        ImGui.SetTooltip(Strings.TooltipRandomButtonGlamourOnly);
+                    else if (canRandom)
+                        ImGui.SetTooltip(Strings.TooltipRandomButton);
+                    else
+                        ImGui.SetTooltip(Strings.TooltipRandomButtonDisabled);
+
+                    if (rndEnabled)
+                        ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+                }
+
+                // ── Roulette button (left, beside random pick) ──
+                if (plugin.Configuration.EnableGlamourRoulette)
+                {
+                    var rltPos = new Vector2(barMin.X + (btnSize * 3f) + 16f, btnY);
+                    var rltEnd = rltPos + new Vector2(btnSize, btnSize);
+                    bool rltHovered = ImGui.IsMouseHoveringRect(rltPos, rltEnd, false);
+                    bool rltEnabled = !isEmotes;
+                    bool rltActive = plugin.RouletteService.IsActive;
+
+                    uint rltBg = rltActive
+                        ? ImGui.GetColorU32(ThemeManager.Current.ApplyBtn)
+                        : ImGui.GetColorU32(rltHovered && rltEnabled ? ThemeManager.Current.ChipBgHovered : ThemeManager.Current.ChipBg);
+                    dl.AddRectFilled(rltPos, rltEnd, rltBg, 4f);
+                    dl.AddRect(rltPos, rltEnd, ImGui.GetColorU32(ThemeManager.Current.ChipBorder), 4f, 0, 1f);
+
+                    // Slot machine icon: 3 vertical reel lines inside a box
+                    float slx = rltPos.X + btnSize / 2f;
+                    float sly = rltPos.Y + btnSize / 2f;
+                    uint slCol = ImGui.GetColorU32(!rltEnabled
+                        ? ThemeManager.Current.TextSubtle
+                        : (rltActive ? ThemeManager.Current.TabTextActive : (rltHovered ? ThemeManager.Current.RailTextActive : ThemeManager.Current.RailTextIdle)));
+
+                    dl.AddRect(new Vector2(slx - 6f, sly - 5f), new Vector2(slx + 6f, sly + 5f), slCol, 2f, 0, 1.2f);
+                    dl.AddLine(new Vector2(slx - 2f, sly - 5f), new Vector2(slx - 2f, sly + 5f), slCol, 1f);
+                    dl.AddLine(new Vector2(slx + 2f, sly - 5f), new Vector2(slx + 2f, sly + 5f), slCol, 1f);
+
+                    ImGui.SetCursorScreenPos(rltPos);
+                    ImGui.BeginDisabled(!rltEnabled);
+                    ImGui.InvisibleButton("##rouletteBtnMinimized", new Vector2(btnSize, btnSize));
+                    if (ImGui.IsItemClicked() && rltEnabled)
+                    {
+                        plugin.RouletteService.ToggleRoulette();
+                    }
+                    ImGui.EndDisabled();
+
+                    if (rltHovered)
+                    {
+                        if (isEmotes)
+                        {
+                            ImGui.SetTooltip(Strings.TooltipRandomButtonGlamourOnly);
+                        }
+                        else if (rltActive)
+                        {
+                            var rem = plugin.RouletteService.RemainingTime;
+                            string remStr = $"{rem.Minutes:D2}m {rem.Seconds:D2}s";
+                            ImGui.SetTooltip(Strings.TooltipRouletteMinimizedActive(remStr));
+                        }
+                        else
+                        {
+                            ImGui.SetTooltip(Strings.TooltipRouletteMinimizedInactive);
+                        }
+
+                        if (rltEnabled)
+                            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+                    }
+                }
+
                 // Push content below the fixed toolbar — auto-height child clips content
                 ImGui.SetCursorPos(new Vector2(0, barH + 2f));
                 ImGui.BeginChild("##MinimizedContent", new Vector2(-1, 0), false,
@@ -416,6 +530,14 @@ public partial class MainWindow : Window, IDisposable
                 }
 
                 DrawEmoteGallery();
+                ImGui.EndChild();
+                return;
+            }
+
+            // Roulette view: render roulette dashboard
+            if (_currentView == 2)
+            {
+                DrawRouletteView();
                 ImGui.EndChild();
                 return;
             }

@@ -32,6 +32,8 @@ public class GuideWindow : Window, IDisposable
             "Delete a collection — right-click the tab and choose Delete.\n\n" +
             "A collection with no folders will show uncategorized designs."),
 
+        ("Glamour Roulette", null),
+
         ("Thumbnails", null),
 
         ("Search & Rename",
@@ -55,8 +57,11 @@ public class GuideWindow : Window, IDisposable
             "Enable Save Mods — save and restore your Penumbra mod settings when applying designs.\n\n" +
             "Theme — choose between Classic, Ocean, Midnight Purple, and Forest. The theme changes immediately."),
 
-        ("Need help?",
-            "Found a bug or have a suggestion? Contact me on Discord."),
+        ("Help & Support",
+            "Open this guide anytime from the Browse rail via Help or with /wrguide.\n\n" +
+            "Report bugs or share suggestions on GitHub Issues:\n" +
+            "https://github.com/Magg-droid/Wardrobe/issues\n\n" +
+            "You can also message me on Discord: megunim."),
     ];
 
     private int _selectedIndex;
@@ -134,11 +139,13 @@ public class GuideWindow : Window, IDisposable
         ImGui.Spacing();
         ImGui.Spacing();
 
-        if (_selectedIndex == 2) // Thumbnails — render with icons
+        if (_selectedIndex == 2) // Glamour Roulette
+            DrawRouletteSection();
+        else if (_selectedIndex == 3) // Thumbnails — render with icons
             DrawThumbnailsSection();
-        else if (_selectedIndex == 4) // Favorites — render with icon
+        else if (_selectedIndex == 5) // Favorites — render with icon
             DrawFavoritesSection();
-        else if (_selectedIndex == 6) // Save Mods — render with icons
+        else if (_selectedIndex == 7) // Save Mods — render with icons
             DrawSaveModsSection();
         else if (body != null)
         {
@@ -163,6 +170,27 @@ public class GuideWindow : Window, IDisposable
         ImGui.Spacing();
         ImGui.Spacing();
         ImGui.TextWrapped("Thumbnails are saved locally and persist across updates.");
+        ImGui.PopTextWrapPos();
+    }
+
+    private void DrawRouletteSection()
+    {
+        ImGui.PushTextWrapPos();
+
+        ImGui.TextWrapped("Glamour Roulette automatically applies random visible outfits on a timer.");
+        ImGui.Spacing();
+        ImGui.TextWrapped("Setup:");
+        ImGui.TextWrapped("  1. Open Settings and enable Glamour Roulette");
+        ImGui.TextWrapped("  2. Open Roulette from the left Browse rail");
+        ImGui.TextWrapped("  3. Choose timer interval and included collections");
+        ImGui.TextWrapped("  4. Toggle Roulette Active to start swapping");
+        ImGui.Spacing();
+        ImGui.TextWrapped("Behavior:");
+        ImGui.TextWrapped("  - Hidden designs are excluded from the roulette pool");
+        ImGui.TextWrapped("  - Apply Equipment Only setting is respected");
+        ImGui.TextWrapped("  - Immediate repeat picks are avoided when more than one design is available");
+        ImGui.TextWrapped("  - Swap Now triggers an instant roll and resets the timer");
+
         ImGui.PopTextWrapPos();
     }
 

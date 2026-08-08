@@ -1,4 +1,4 @@
-﻿using Dalamud.Configuration;
+using Dalamud.Configuration;
 using System;
 using System.Collections.Generic;
 using Wardrobe.Models;
@@ -15,6 +15,11 @@ public class Configuration : IPluginConfiguration
     public bool ShowHidden { get; set; }
     public bool EnableSaveMods { get; set; } = false;
     public bool EnableEmotes { get; set; } = false;
+    public bool EnableGlamourRoulette { get; set; } = false;
+    public bool RouletteActive { get; set; } = false;
+    public int RouletteIntervalMinutes { get; set; } = 15;
+    public bool RouletteExcludeFavorites { get; set; } = true;
+    public List<Guid> RouletteCollectionIds { get; set; } = new();
     public bool IsMinimized { get; set; } = false;
     public string ThemeName { get; set; } = "Classic";
     public List<Guid> HiddenDesignIds { get; set; } = new();

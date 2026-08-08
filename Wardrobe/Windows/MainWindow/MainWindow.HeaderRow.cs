@@ -114,6 +114,8 @@ public partial class MainWindow
         ImGui.PushStyleColor(ImGuiCol.Text, ThemeManager.Current.TextSubtle);
         if (ImGui.Checkbox(Strings.ShowHiddenLabel, ref showHidden))
             hiddenDesignService.ShowHidden = showHidden;
+        var checkboxMin = ImGui.GetItemRectMin();
+        var checkboxMax = ImGui.GetItemRectMax();
         ImGui.PopStyleColor(3);
 
         float randomX = checkboxX;
@@ -121,14 +123,15 @@ public partial class MainWindow
         {
             bool canRandom = selectedCollectionId != Guid.Empty && visibleDesigns.Count > 0;
             float randomW = Math.Max(102f, ImGui.CalcTextSize(Strings.RandomButton).X + 24f);
-            const float randomH = 28f;
+            const float randomH = 30f;
             randomX = checkboxX - 12f - randomW;
 
-            ImGui.SetCursorScreenPos(new Vector2(randomX, start.Y + 5f));
+            float rowCenterY = (checkboxMin.Y + checkboxMax.Y) * 0.5f;
+            ImGui.SetCursorScreenPos(new Vector2(randomX, rowCenterY - randomH / 2f));
             ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 4f);
             ImGui.PushStyleColor(ImGuiCol.Button, ThemeManager.Current.ChipBgActive);
-            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ThemeManager.Current.ChipBgActive);
-            ImGui.PushStyleColor(ImGuiCol.ButtonActive, ThemeManager.Current.ChipBgActive);
+            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ThemeManager.Current.ApplyBtnHover);
+            ImGui.PushStyleColor(ImGuiCol.ButtonActive, ThemeManager.Current.ApplyBtnActive);
 
             ImGui.BeginDisabled(!canRandom);
             if (ImGui.Button(Strings.RandomButton + "##random_glamour", new Vector2(randomW, randomH)))

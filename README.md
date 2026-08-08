@@ -15,6 +15,7 @@ Wardrobe turns your Glamourer design list into a visual gallery so you can brows
 - Supports equipment-only apply mode
 - Can save/restore Penumbra mod state per outfit
 - Includes Emotes view with emote collections and emote cards
+- Includes Glamour Roulette for timed outfit randomization
 
 ## Requirements
 
@@ -49,6 +50,7 @@ Random command behavior:
 - Hidden outfits are always excluded
 - /wrrandom excludes Favorites by design
 - Apply Equipment Only setting is respected
+- Immediate repeat picks are avoided when more than one outfit is available
 
 ## Main Features
 
@@ -71,6 +73,15 @@ Random command behavior:
 - Move cards between emote collections
 - Search support
 
+### Glamour Roulette
+
+- Timer-based random outfit swapping
+- Manual Swap Now trigger
+- Collection include/exclude controls
+- Hidden designs excluded from the pool
+- Respects Apply Equipment Only
+- Avoids immediate repeat picks when possible
+
 ### UI / Quality of Life
 
 - Full view and minimized view
@@ -82,6 +93,12 @@ Random command behavior:
 
 - If cards do not appear, verify Glamourer is installed and enabled.
 - If Save Mods does not restore as expected, verify Penumbra is running and your player collection is available.
+
+## Guide & Help
+
+- Open the in-plugin guide from the Browse rail via Help
+- Command alternative: /wrguide
+- Report issues and requests: https://github.com/Magg-droid/Wardrobe/issues
 
 ## Feedback
 

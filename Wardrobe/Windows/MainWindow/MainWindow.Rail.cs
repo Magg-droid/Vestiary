@@ -38,6 +38,13 @@ public partial class MainWindow
             ImGui.Spacing();
         }
 
+        // Roulette (only if enabled)
+        if (plugin.Configuration.EnableGlamourRoulette)
+        {
+            DrawRailItem(Strings.RailRoulette, _currentView == 2, () => _currentView = 2);
+            ImGui.Spacing();
+        }
+
         ImGui.Spacing();
 
         // Divider before settings
