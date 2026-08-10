@@ -1,12 +1,12 @@
-# Wardrobe
+# Vestiary
 
 A visual companion for Glamourer.
 
-Wardrobe turns your Glamourer design list into a visual gallery so you can browse, organize, and apply outfits faster.
+Vestiary turns your Glamourer design list into a visual gallery so you can browse, organize, and apply outfits faster.
 
 - Current internal plugin version: 1.0.0.6
 
-## What Wardrobe Does
+## What Vestiary Does
 
 - Shows Glamourer designs as thumbnail cards
 - Lets you organize outfits into collections
@@ -23,7 +23,7 @@ Wardrobe turns your Glamourer design list into a visual gallery so you can brows
 - Glamourer (required)
 - Penumbra (recommended for Save Mods and emote state restore features)
 
-Wardrobe does not replace Glamourer. Glamourer remains the source of truth for designs.
+Vestiary does not replace Glamourer. Glamourer remains the source of truth for designs.
 
 ## Installation
 
@@ -34,7 +34,7 @@ https://raw.githubusercontent.com/Magg-droid/plugin-collection/main/pluginmaster
 1. Open Dalamud settings
 2. Go to Experimental / Custom Plugin Repositories
 3. Add the raw pluginmaster URL above
-4. Open Plugin Installer and install Wardrobe
+4. Open Plugin Installer and install Vestiary
 
 ## Commands
 
@@ -98,12 +98,12 @@ Random command behavior:
 
 - Open the in-plugin guide from the Browse rail via Help
 - Command alternative: /vsguide
-- Report issues and requests: https://github.com/Magg-droid/Wardrobe/issues
+- Report issues and requests: [GitHub Issues](https://github.com/Magg-droid/Wardrobe/issues)
 
 ## Feedback
 
 - Discord: megunim.
-- Bug reports and suggestions: https://github.com/Magg-droid/Wardrobe/issues
+- Bug reports and suggestions: [GitHub Issues](https://github.com/Magg-droid/Wardrobe/issues)
 
 ## Credits
 
