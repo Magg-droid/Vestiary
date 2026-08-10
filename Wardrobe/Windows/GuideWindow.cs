@@ -18,11 +18,11 @@ public class GuideWindow : Window, IDisposable
     private static readonly (string Title, string? Body)[] Sections =
     [
         ("Getting Started",
-            "Open Wardrobe with /wardrobe or /wr. Your Glamourer designs will appear as visual cards.\n\n" +
+            "Open Vestiary with /vestiary or /vs. Your Glamourer designs will appear as visual cards.\n\n" +
             "Double-click a card to apply the outfit.\n" +
             "Or click the Apply button.\n" +
             "Hold Ctrl while applying to change equipment only.\n\n" +
-            "Type /wrguide to open this guide at any time."),
+            "Type /vsguide to open this guide at any time."),
 
         ("Collections",
             "Collections let you group your designs into separate tabs.\n\n" +
@@ -58,7 +58,7 @@ public class GuideWindow : Window, IDisposable
             "Theme — choose between Classic, Ocean, Midnight Purple, and Forest. The theme changes immediately."),
 
         ("Help & Support",
-            "Open this guide anytime from the Browse rail via Help or with /wrguide.\n\n" +
+            "Open this guide anytime from the Browse rail via Help or with /vsguide.\n\n" +
             "Report bugs or share suggestions on GitHub Issues:\n" +
             "https://github.com/Magg-droid/Wardrobe/issues\n\n" +
             "You can also message me on Discord: megunim."),
@@ -71,7 +71,7 @@ public class GuideWindow : Window, IDisposable
         TextureCache textureCache,
         string cameraIconPath, string uploadIconPath, string clipboardIconPath,
         string starFilledPath, string saveModsIconPath)
-        : base("Wardrobe Guide##WRGuide", ImGuiWindowFlags.NoScrollbar)
+        : base("Vestiary Guide##WRGuide", ImGuiWindowFlags.NoScrollbar)
     {
         this.textureCache = textureCache;
         this.cameraIconPath = cameraIconPath;

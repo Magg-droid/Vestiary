@@ -10,7 +10,7 @@
 - Apply a design — double-click the thumbnail or click the Apply button
 - Equipment-only mode: toggle in Settings, or hold Ctrl while applying
 - Search bar — filter designs in the current tab by nickname or name
-- `/wardrobe` and `/wr` slash commands to open the plugin
+- `/vestiary` and `/vs` slash commands to open the plugin
 
 ---
 

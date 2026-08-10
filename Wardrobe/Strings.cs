@@ -70,11 +70,11 @@ public static class Strings
     public const string TooltipRandomButton = "Apply a random visible design from this collection";
     public const string TooltipRandomButtonDisabled = "No visible designs available in this collection";
     public const string TooltipRandomButtonGlamourOnly = "Only available for glamour";
-    public const string CommandHelpOpenPlugin = "Open the Wardrobe plugin";
-    public const string CommandHelpOpenPluginShortcut = "Open the Wardrobe plugin (shortcut)";
-    public const string CommandHelpOpenGuide = "Open the Wardrobe user guide";
-    public const string CommandHelpOpenEmotes = "Open Wardrobe in Emotes view";
-    public const string CommandHelpRandom = "Apply a random visible design. Usage: /wrrandom [Collection Name]";
+    public const string CommandHelpOpenPlugin = "Open the Vestiary plugin";
+    public const string CommandHelpOpenPluginShortcut = "Open the Vestiary plugin (shortcut)";
+    public const string CommandHelpOpenGuide = "Open the Vestiary user guide";
+    public const string CommandHelpOpenEmotes = "Open Vestiary in Emotes view";
+    public const string CommandHelpRandom = "Apply a random visible design. Usage: /vsrandom [Collection Name]";
     public const string RandomCommandNoCollections = "No collections are available.";
     public const string RandomCommandNoNonFavoriteCollections = "No non-favorites collections are available.";
     public static string RandomCommandCollectionNotFound(string collectionName) =>

@@ -210,7 +210,7 @@ If the user is on the Emotes view and minimizes, the same rules apply:
 - [ ] Toggle minimize from rail → window shrinks, chrome hides, cards resize
 - [ ] Toggle expand → window restores, chrome returns, cards resize
 - [ ] Double-click card in minimized mode → outfit applies
-- [ ] State persists across `/wardrobe` close/reopen
+- [ ] State persists across `/vestiary` close/reopen
 - [ ] State persists across plugin reload
 - [ ] Works with collections (shows correct collection's designs)
 - [ ] Works with emote gallery

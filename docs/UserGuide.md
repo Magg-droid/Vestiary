@@ -6,7 +6,7 @@
 
 ## Getting Started
 
-Open Wardrobe with `/wardrobe` or `/wr`.
+Open Vestiary with `/vestiary` or `/vs`.
 
 Your Glamourer designs appear as visual cards. Double-click a card (or click **Apply**) to equip that outfit.
 
@@ -141,6 +141,6 @@ Double-click the design name below the thumbnail to set a nickname. Clear the ni
 
 ---
 
-*Need help? Open Help in the Browse rail (or run /wrguide).*
+*Need help? Open Help in the Browse rail (or run /vsguide).*
 
 *Found a bug or want a feature? Use GitHub Issues: https://github.com/Magg-droid/Wardrobe/issues* 

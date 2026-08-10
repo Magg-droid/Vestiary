@@ -89,7 +89,7 @@ EmoteCard
 | Emote gallery panel | Flat grid |
 | Emote editor | Create/edit card UI |
 | View toggle | Glamour ↔ Emotes in header |
-| `/wremotes` command | Quick open to emote view |
+| `/vsemotes` command | Quick open to emote view |
 
 ---
 
@@ -114,5 +114,5 @@ EmoteCard
 | 5 | 💾 icon on emote cards (capture) |
 | 6 | Double-click restore on emote cards |
 | 7 | Create/Edit emote window (mod dropdown + name + thumbnail) |
-| 8 | `/wremotes` command |
+| 8 | `/vsemotes` command |
 | 9 | Coding standards review, bump, release |

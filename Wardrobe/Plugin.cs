@@ -23,15 +23,15 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static IDataManager DataManager { get; private set; } = null!;
     [PluginService] internal static IFramework Framework { get; private set; } = null!;
 
-    private const string CommandName = "/wardrobe";
-    private const string ShortCommandName = "/wr";
-    private const string GuideCommandName = "/wrguide";
-    private const string EmotesCommandName = "/wremotes";
-    private const string RandomCommandName = "/wrrandom";
+    private const string CommandName = "/vestiary";
+    private const string ShortCommandName = "/vs";
+    private const string GuideCommandName = "/vsguide";
+    private const string EmotesCommandName = "/vsemotes";
+    private const string RandomCommandName = "/vsrandom";
 
     public Configuration Configuration { get; init; }
 
-    public readonly WindowSystem WindowSystem = new("Wardrobe");
+    public readonly WindowSystem WindowSystem = new("Vestiary");
     private ConfigWindow ConfigWindow { get; init; }
     private MainWindow MainWindow { get; init; }
     internal GuideWindow GuideWin { get; init; }
@@ -172,7 +172,7 @@ public sealed class Plugin : IDalamudPlugin
         try
         {
             var designs = GlamourerService.GetDesignList();
-            Log.Information($"Wardrobe found {designs.Count} Glamourer designs.");
+            Log.Information($"Vestiary found {designs.Count} Glamourer designs.");
         }
         catch (Exception ex)
         {

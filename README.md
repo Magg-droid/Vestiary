@@ -38,17 +38,17 @@ https://raw.githubusercontent.com/Magg-droid/plugin-collection/main/pluginmaster
 
 ## Commands
 
-- /wardrobe: Open Wardrobe
-- /wr: Shortcut to open Wardrobe
-- /wrguide: Open Wardrobe guide window
-- /wremotes: Open directly to Emotes view
-- /wrrandom: Apply random visible outfit from all non-Favorites collections
-- /wrrandom [Collection Name]: Apply random visible outfit from a specific collection
+- /vestiary: Open Vestiary
+- /vs: Shortcut to open Vestiary
+- /vsguide: Open Vestiary guide window
+- /vsemotes: Open directly to Emotes view
+- /vsrandom: Apply random visible outfit from all non-Favorites collections
+- /vsrandom [Collection Name]: Apply random visible outfit from a specific collection
 
 Random command behavior:
 
 - Hidden outfits are always excluded
-- /wrrandom excludes Favorites by design
+- /vsrandom excludes Favorites by design
 - Apply Equipment Only setting is respected
 - Immediate repeat picks are avoided when more than one outfit is available
 
@@ -97,7 +97,7 @@ Random command behavior:
 ## Guide & Help
 
 - Open the in-plugin guide from the Browse rail via Help
-- Command alternative: /wrguide
+- Command alternative: /vsguide
 - Report issues and requests: https://github.com/Magg-droid/Wardrobe/issues
 
 ## Feedback

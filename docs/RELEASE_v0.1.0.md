@@ -175,7 +175,7 @@ None - this is the first release.
 1. Download Wardrobe.dll from the release
 2. Place in `%AppData%\XIVLauncher\plugins\Wardrobe\`
 3. Reload plugins in Dalamud
-4. Open Wardrobe with `/wardrobe`
+4. Open Vestiary with `/vestiary`
 
 ---
 
