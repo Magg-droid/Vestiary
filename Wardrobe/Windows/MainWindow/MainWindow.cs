@@ -67,7 +67,7 @@ public partial class MainWindow : Window, IDisposable
         string searchIconPath,
         string saveModsIconPath
     )
-        : base("Wardrobe##With a hidden ID", ImGuiWindowFlags.None)
+        : base("Vestiary##With a hidden ID", ImGuiWindowFlags.None)
     {
         SizeConstraints = new WindowSizeConstraints
         {

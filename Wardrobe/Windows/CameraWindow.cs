@@ -36,7 +36,7 @@ public class CameraWindow : Window, IDisposable
     private const float HandleR = 14f, MinW = 120f, MinH = 150f;
     private const float Ratio = 4f / 5f, Inset = 8f;
 
-    public CameraWindow(Plugin plugin, UtilityService utility) : base("Wardrobe Camera##CameraOverlay")
+    public CameraWindow(Plugin plugin, UtilityService utility) : base("Vestiary Camera##CameraOverlay")
     {
         this.plugin = plugin;
         this.utility = utility;

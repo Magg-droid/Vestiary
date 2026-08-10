@@ -10,7 +10,7 @@ public class ConfigWindow : Window, IDisposable
     private readonly Plugin plugin;
     private readonly Configuration configuration;
 
-    public ConfigWindow(Plugin plugin) : base("Wardrobe Settings##WardrobeConfig")
+    public ConfigWindow(Plugin plugin) : base("Vestiary Settings##WardrobeConfig")
     {
         Flags = ImGuiWindowFlags.NoCollapse;
 
