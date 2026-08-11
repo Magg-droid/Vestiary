@@ -4,7 +4,7 @@ A visual companion for Glamourer.
 
 Vestiary turns your Glamourer design list into a visual gallery so you can browse, organize, and apply outfits faster.
 
-- Current internal plugin version: 1.1.0.0
+- Current internal plugin version: 1.1.2.0
 
 ## What Vestiary Does
 
@@ -54,45 +54,32 @@ Random command behavior:
 
 ## Main Features
 
+### Create Collection 
+When you first land on the plugin you will be greeted by this screen, create a new collection to get started
+
+<img width="458" height="370" alt="image" src="https://github.com/user-attachments/assets/2b3b7de7-008c-4c24-ad59-f9d358feafad" />
+
 ### Glamour Gallery
 
-- Visual card grid with thumbnail preview
-- Upload thumbnail from file or clipboard
-- Snapshot capture flow
-- Favorites collection support
-- Hide/Unhide without deleting from Glamourer
-- Optional delete from Glamourer with safety flow
-- Search across collections
-- Random Pick button for selected collection
+<img width="1375" height="1144" alt="ChatGPT Image Aug 10, 2026, 10_00_08 PM" src="https://github.com/user-attachments/assets/4f67586e-e6b9-44ae-925e-fdc5a22a2cb4" />
+
 
 ### Emotes View
 
-- Emote cards with optional thumbnails
-- Save and restore Penumbra mod state per emote card
-- Emote collections with chip tabs and + create chip
-- Move cards between emote collections
-- Search support
+<img width="689" height="524" alt="image" src="https://github.com/user-attachments/assets/67fa93e3-1b71-4811-a80e-aa5ac97b6e50" />
+
 
 ### Glamour Roulette
+<img width="686" height="523" alt="image" src="https://github.com/user-attachments/assets/d769cb93-652d-4f4d-b0ae-bd7a1d059f43" />
 
-- Timer-based random outfit swapping
-- Manual Swap Now trigger
-- Collection include/exclude controls
-- Hidden designs excluded from the pool
-- Respects Apply Equipment Only
-- Avoids immediate repeat picks when possible
 
 ### UI / Quality of Life
 
-- Full view and minimized view
 - Minimized menu navigation for both Glamour and Emotes collections
 - Multiple themes
-- Keyboard-assisted equipment-only apply (Ctrl)
 
-## Troubleshooting
+<img width="506" height="466" alt="image" src="https://github.com/user-attachments/assets/12bda415-c881-4633-b4be-fea4c2ea50f2" />
 
-- If cards do not appear, verify Glamourer is installed and enabled.
-- If Save Mods does not restore as expected, verify Penumbra is running and your player collection is available.
 
 ## Guide & Help
 
