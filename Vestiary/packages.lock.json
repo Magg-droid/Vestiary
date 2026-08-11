@@ -17,8 +17,14 @@
       "ECommons": {
         "type": "Direct",
         "requested": "[*, )",
-        "resolved": "3.2.1.16",
-        "contentHash": "Ifq1cHrBXL9h+94hWhocehklrl3DamafhYTfxgwzOGc6yc/3AkDvwLjYQG2EHEv1Rrgrf5FkdxlnJzcVfiBesQ=="
+        "resolved": "3.2.1.17",
+        "contentHash": "gIjvCFzqJApeyncqDegjvs2QFAVoXuwkrfFimhXWhu6x8zAloh8Wyu1Qu8BSym79HuTu4v5/U/HhNqkFy6uwoA=="
+      },
+      "Newtonsoft.Json": {
+        "type": "Direct",
+        "requested": "[13.0.3, )",
+        "resolved": "13.0.3",
+        "contentHash": "HrC5BXdl00IP9zeV+0Z848QWPAoCr9P3bDEZguI+gkLcBKAOxix/tLEAAHC+UvDNPv4a2d18lOReHMOagPa+zQ=="
       }
     }
   }

@@ -9,6 +9,7 @@ public class ConfigWindow : Window, IDisposable
 {
     private readonly Plugin plugin;
     private readonly Configuration configuration;
+    private bool migrationDone;
 
     public ConfigWindow(Plugin plugin) : base("Vestiary Settings##VestiaryConfig")
     {
@@ -106,6 +107,36 @@ public class ConfigWindow : Window, IDisposable
             SetTheme("Midnight Purple");
         if (ImGui.RadioButton(Strings.SettingsThemeForest, ref selectedTheme, 3))
             SetTheme("Forest");
+
+        if (!migrationDone && plugin.UtilityService.CanMigrateFromWardrobe)
+        {
+            ImGui.Spacing();
+            ImGui.Separator();
+            ImGui.Spacing();
+
+            ImGui.TextColored(ThemeManager.Current.TextHeading, Strings.SettingsMigrationHeading);
+            ImGui.Spacing();
+            ImGui.PushTextWrapPos();
+            ImGui.TextColored(ThemeManager.Current.TextMuted, Strings.SettingsMigrationDescription);
+            ImGui.PopTextWrapPos();
+            ImGui.Spacing();
+
+            if (ImGui.Button(Strings.SettingsMigrationButton, new Vector2(ImGui.GetContentRegionAvail().X, 0)))
+            {
+                plugin.UtilityService.MigrateFromWardrobe(configuration, force: true);
+                migrationDone = true;
+            }
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip(Strings.SettingsMigrationTooltip);
+        }
+
+        if (migrationDone)
+        {
+            ImGui.Spacing();
+            ImGui.Separator();
+            ImGui.Spacing();
+            ImGui.TextColored(ThemeManager.Current.TextSuccess, Strings.SettingsMigrationSuccess);
+        }
 
         ImGui.EndChild();
     }

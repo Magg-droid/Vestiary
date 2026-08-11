@@ -2,10 +2,11 @@
 <Project Sdk="Dalamud.NET.Sdk/15.0.0">
   <ItemGroup>
     <PackageReference Include="ECommons" Version="*" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
   <PropertyGroup>
     <TargetFramework>net10.0-windows</TargetFramework>
-    <Version>1.1.1.0</Version>
+    <Version>1.1.2.0</Version>
     <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
     <IsPackable>false</IsPackable>
     <UseWindowsForms>true</UseWindowsForms>

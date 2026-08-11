@@ -184,6 +184,13 @@ public static class Strings
     public const string SettingsThemePurple  = "Midnight Purple";
     public const string SettingsThemeForest  = "Forest";
 
+    // ── Migration ───────────────────────────────────
+    public const string SettingsMigrationHeading = "Migrate from Wardrobe";
+    public const string SettingsMigrationDescription = "Found data from the old Wardrobe plugin. Click below to migrate your collections, thumbnails, and settings. Your current Vestiary data will be replaced.";
+    public const string SettingsMigrationButton = "Migrate from Wardrobe";
+    public const string SettingsMigrationSuccess = "✓ Migration complete! Your data is now visible.";
+    public const string SettingsMigrationTooltip = "Copies all your collections, design metadata, favorites, hidden designs, thumbnails, and settings from the old Wardrobe plugin.";
+
     // ── Camera window ───────────────────────────────
     public const string CameraCapture       = "Capture";
     public const string CameraCancel        = "Cancel";
