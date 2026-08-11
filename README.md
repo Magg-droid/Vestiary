@@ -1,113 +1,82 @@
-# Vestiary
+# 🧥 Vestiary
 
-A visual companion for Glamourer.
+**A visual gallery for your Glamourer outfits.**
 
-Vestiary turns your Glamourer design list into a visual gallery so you can browse, organize, and apply outfits faster.
+Tired of scrolling through a long text list of designs? Vestiary turns your Glamourer library into a beautiful grid of thumbnail cards — browse, organize, and swap outfits in one click.
 
-- Current internal plugin version: 1.1.0.0
+<br>
 
-## What Vestiary Does
+<p align="center">
+  <sub>Built for <a href="https://github.com/goatcorp/Dalamud">Dalamud</a> · Companion to <a href="https://github.com/Ottermandias/Glamourer">Glamourer</a></sub>
+</p>
 
-- Shows Glamourer designs as thumbnail cards
-- Lets you organize outfits into collections
-- Supports favorites, hide/unhide, and search
-- Applies outfits with one click or double-click
-- Supports equipment-only apply mode
-- Can save/restore Penumbra mod state per outfit
-- Includes Emotes view with emote collections and emote cards
-- Includes Glamour Roulette for timed outfit randomization
+---
 
-## Requirements
+## ✨ At a Glance
 
-- XIVLauncher / Dalamud
-- Glamourer (required)
-- Penumbra (recommended for Save Mods and emote state restore features)
+| Feature | |
+|---|---|
+| 🖼️ **Visual gallery** | Every design gets a card with a thumbnail you can customize |
+| 📁 **Collections** | Group outfits however you like — Dresses, Tanks, Seasonal, whatever |
+| ⭐ **Favorites** | Star the ones you reach for most |
+| 🙈 **Hide designs** | Clean up your gallery without deleting anything from Glamourer |
+| 🎲 **Random Pick** | Feeling indecisive? Hit one button |
+| 🎰 **Glamour Roulette** | Timer-based auto-swapping through your wardrobe |
+| 🎭 **Emotes view** | Emote cards with per-emote Penumbra mod states |
+| 💾 **Save Mods** | Outfits remember their Penumbra setup and restore it on apply |
+| 🎨 **Themes** | Classic, Ocean, Midnight Purple, Forest |
+| ⚡ **Minimized mode** | Compact floating bar for quick swaps |
 
-Vestiary does not replace Glamourer. Glamourer remains the source of truth for designs.
+---
 
-## Installation
+## 📦 Installation
 
-Add this repo in Dalamud custom repositories:
+1. In Dalamud, go to **Settings → Experimental → Custom Plugin Repositories**
+2. Paste this URL and click **+** :
 
-https://raw.githubusercontent.com/Magg-droid/plugin-collection/main/pluginmaster.json
+   ```
+   https://raw.githubusercontent.com/Magg-droid/plugin-collection/main/pluginmaster.json
+   ```
 
-1. Open Dalamud settings
-2. Go to Experimental / Custom Plugin Repositories
-3. Add the raw pluginmaster URL above
-4. Open Plugin Installer and install Vestiary
+3. Open the **Plugin Installer**, search for **Vestiary**, and install
 
-## Commands
+> **Requires:** Glamourer · **Recommended:** Penumbra (for Save Mods and emote state restore)
 
-- /vestiary: Open Vestiary
-- /vs: Shortcut to open Vestiary
-- /vsguide: Open Vestiary guide window
-- /vsemotes: Open directly to Emotes view
-- /vsrandom: Apply random visible outfit from all non-Favorites collections
-- /vsrandom [Collection Name]: Apply random visible outfit from a specific collection
+---
 
-Random command behavior:
+## ⌨️ Commands
 
-- Hidden outfits are always excluded
-- /vsrandom excludes Favorites by design
-- Apply Equipment Only setting is respected
-- Immediate repeat picks are avoided when more than one outfit is available
+| Command | What it does |
+|---|---|
+| `/vestiary` or `/vs` | Open Vestiary |
+| `/vsguide` | Open the built-in guide |
+| `/vsemotes` | Jump straight to Emotes view |
+| `/vsrandom` | Apply a random outfit from all collections |
+| `/vsrandom Dresses` | Apply a random outfit from the named collection |
 
-## Main Features
+Hidden designs are always skipped · Favorites get excluded from random by default · Holds Ctrl on apply for equipment-only swap.
 
-### Glamour Gallery
+---
 
-- Visual card grid with thumbnail preview
-- Upload thumbnail from file or clipboard
-- Snapshot capture flow
-- Favorites collection support
-- Hide/Unhide without deleting from Glamourer
-- Optional delete from Glamourer with safety flow
-- Search across collections
-- Random Pick button for selected collection
+## 🎯 How It Works
 
-### Emotes View
+Vestiary **does not touch** your Glamourer designs. It reads them through Glamourer's IPC, displays them as cards, and applies them when you click. Collections, nicknames, thumbnails, favorites — that's all Vestiary. Your Glamourer setup stays exactly as you left it.
 
-- Emote cards with optional thumbnails
-- Save and restore Penumbra mod state per emote card
-- Emote collections with chip tabs and + create chip
-- Move cards between emote collections
-- Search support
+---
 
-### Glamour Roulette
+## 🐛 Help & Feedback
 
-- Timer-based random outfit swapping
-- Manual Swap Now trigger
-- Collection include/exclude controls
-- Hidden designs excluded from the pool
-- Respects Apply Equipment Only
-- Avoids immediate repeat picks when possible
+- Open the in-plugin guide from the sidebar, or type `/vsguide`
+- Report bugs or suggest features on [GitHub Issues](https://github.com/Magg-droid/Vestiary/issues)
+- Reach me on Discord: **megunim.**
 
-### UI / Quality of Life
+---
 
-- Full view and minimized view
-- Minimized menu navigation for both Glamour and Emotes collections
-- Multiple themes
-- Keyboard-assisted equipment-only apply (Ctrl)
+## 🙏 Credits
 
-## Troubleshooting
+Vestiary wouldn't exist without these incredible projects:
 
-- If cards do not appear, verify Glamourer is installed and enabled.
-- If Save Mods does not restore as expected, verify Penumbra is running and your player collection is available.
-
-## Guide & Help
-
-- Open the in-plugin guide from the Browse rail via Help
-- Command alternative: /vsguide
-- Report issues and requests: [GitHub Issues](https://github.com/Magg-droid/Vestiary/issues)
-
-## Feedback
-
-- Discord: megunim.
-- Bug reports and suggestions: [GitHub Issues](https://github.com/Magg-droid/Vestiary/issues)
-
-## Credits
-
-- Dalamud
-- Glamourer
-- Penumbra
-- FFXIV plugin community
+- [Dalamud](https://github.com/goatcorp/Dalamud) — XIVLauncher's plugin framework
+- [Glamourer](https://github.com/Ottermandias/Glamourer) — the source of truth for designs
+- [Penumbra](https://github.com/xivdev/Penumbra) — runtime modding
+- The FFXIV plugin community 💜

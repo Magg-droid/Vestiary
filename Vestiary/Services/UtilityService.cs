@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -66,6 +67,7 @@ public class UtilityService
         Directory.CreateDirectory(ThumbnailsDirectory);
         log.Information($"Thumbnails directory: {ThumbnailsDirectory}");
 
+        MigrateFromWardrobe(configuration);
         MigrateThumbnails(configuration);
     }
 
@@ -207,22 +209,121 @@ public class UtilityService
 
     // ── Migration ───────────────────────────────────
 
+    /// <summary>
+    /// One-time migration from old Wardrobe config folder to Vestiary.
+    /// Copies all thumbnails, updates image paths in metadata and emote cards.
+    /// </summary>
+    private void MigrateFromWardrobe(Configuration configuration)
+    {
+        try
+        {
+            var oldConfigDir = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "XIVLauncher", "pluginConfigs",
+                "Wardrobe");
+
+            if (!Directory.Exists(oldConfigDir))
+                return;
+
+            var newConfigDir = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "XIVLauncher", "pluginConfigs",
+                "Vestiary");
+
+            var oldThumbsDir = Path.Combine(oldConfigDir, "thumbnails");
+            var markerPath = Path.Combine(newConfigDir, ".migrated_from_wardrobe");
+
+            // Already migrated — skip
+            if (File.Exists(markerPath))
+                return;
+
+            log.Information("[Migration] Wardrobe config found — migrating to Vestiary...");
+
+            // Ensure new directories exist
+            Directory.CreateDirectory(newConfigDir);
+            Directory.CreateDirectory(ThumbnailsDirectory);
+
+            // Copy all thumbnail files
+            if (Directory.Exists(oldThumbsDir))
+            {
+                foreach (var file in Directory.GetFiles(oldThumbsDir))
+                {
+                    var dest = Path.Combine(ThumbnailsDirectory, Path.GetFileName(file));
+                    if (!File.Exists(dest))
+                    {
+                        File.Copy(file, dest);
+                        log.Information($"[Migration]   Thumbnail: {Path.GetFileName(file)}");
+                    }
+                }
+            }
+
+            // Update all CustomImagePath references in DesignMetadata
+            foreach (var meta in configuration.DesignMetadata)
+            {
+                if (string.IsNullOrEmpty(meta.CustomImagePath)) continue;
+
+                // Only fix paths pointing into the old Wardrobe config directory
+                if (meta.CustomImagePath.Contains("pluginConfigs" + Path.DirectorySeparatorChar + "Wardrobe"))
+                {
+                    var fileName = Path.GetFileName(meta.CustomImagePath);
+                    meta.CustomImagePath = Path.Combine(ThumbnailsDirectory, fileName);
+                    log.Information($"[Migration]   Updated image path for design {meta.DesignId}");
+                }
+            }
+
+            // Update thumbnail paths in EmoteCards
+            foreach (var card in configuration.EmoteCards)
+            {
+                if (string.IsNullOrEmpty(card.ThumbnailPath)) continue;
+
+                if (card.ThumbnailPath.Contains("pluginConfigs" + Path.DirectorySeparatorChar + "Wardrobe"))
+                {
+                    var fileName = Path.GetFileName(card.ThumbnailPath);
+                    card.ThumbnailPath = Path.Combine(ThumbnailsDirectory, fileName);
+                    log.Information($"[Migration]   Updated emote card thumbnail: {card.Name}");
+                }
+            }
+
+            configuration.Save();
+
+            // Write marker so we never run this again
+            File.WriteAllText(markerPath, DateTime.UtcNow.ToString("O"));
+            log.Information("[Migration] Wardrobe → Vestiary migration complete.");
+        }
+        catch (Exception ex)
+        {
+            log.Warning(ex, "[Migration] Wardrobe → Vestiary migration error (non-fatal)");
+        }
+    }
+
     private void MigrateThumbnails(Configuration configuration)
     {
         try
         {
-            var oldDir = Path.Combine(pluginDir, "thumbnails");
-            if (!Directory.Exists(oldDir)) return;
+            // Check both old Wardrobe plugin dir and current Vestiary plugin dir
+            var parentDir = Directory.GetParent(pluginDir)?.Parent?.FullName;
+            var oldWardrobePluginDir = parentDir != null
+                ? Path.Combine(parentDir, "Wardrobe", "bin", "Release", "thumbnails")
+                : null;
+
+            var candidates = new List<string> { Path.Combine(pluginDir, "thumbnails") };
+            if (oldWardrobePluginDir != null)
+                candidates.Add(oldWardrobePluginDir);
 
             var migrated = false;
-            foreach (var file in Directory.GetFiles(oldDir))
+            foreach (var oldDir in candidates)
             {
-                var dest = Path.Combine(ThumbnailsDirectory, Path.GetFileName(file));
-                if (!File.Exists(dest))
+                if (!Directory.Exists(oldDir)) continue;
+
+                foreach (var file in Directory.GetFiles(oldDir))
                 {
-                    File.Copy(file, dest, overwrite: false);
-                    log.Information($"Migrated thumbnail to config: {Path.GetFileName(file)}");
-                    migrated = true;
+                    var dest = Path.Combine(ThumbnailsDirectory, Path.GetFileName(file));
+                    if (!File.Exists(dest))
+                    {
+                        File.Copy(file, dest, overwrite: false);
+                        log.Information($"Migrated thumbnail to config: {Path.GetFileName(file)}");
+                        migrated = true;
+                    }
                 }
             }
 
