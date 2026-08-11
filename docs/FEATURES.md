@@ -1,4 +1,4 @@
-# Wardrobe — Feature List
+# Vestiary — Feature List
 
 > What the user gets. Updated with each release.
 

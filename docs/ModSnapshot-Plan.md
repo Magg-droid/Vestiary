@@ -83,5 +83,5 @@ Restore (on apply):
 | `MainWindow.cs` | Added saveModsIconPath parameter |
 | `MainWindow.DesignCard.cs` | Save Mods icon rendering + capture/restore hooks |
 | `Data/save_mods_icon.png` | Floppy disk icon (white, 32x32) |
-| `Wardrobe.csproj` | Added save_mods_icon.png, bumped version |
-| `Wardrobe.json` | Bumped to 0.8.1.0 |
+| `Vestiary.csproj` | Added save_mods_icon.png, bumped version |
+| `Vestiary.json` | Bumped to 0.8.1.0 |

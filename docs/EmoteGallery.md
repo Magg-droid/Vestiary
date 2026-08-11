@@ -1,6 +1,6 @@
 # Emote Gallery — Plan
 
-> Extension of Wardrobe beyond Glamourer designs.  
+> Extension of Vestiary beyond Glamourer designs.  
 > v1.1.0 planning phase.
 
 ---

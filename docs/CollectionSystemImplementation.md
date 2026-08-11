@@ -1,4 +1,4 @@
-# Plan: Collections System Implementation for Wardrobe
+# Plan: Collections System Implementation for Vestiary
 
 > ⚠️ **ARCHIVED**: This was the original implementation plan. All tasks are now complete. See [CollectionSystem.md](CollectionSystem.md) for current status. Kept for historical reference.
 
@@ -68,7 +68,7 @@ Implement a Collections feature to organize Glamourer designs by user-defined ca
 ### TASK 1: Create Collection Data Model
 **Objective**: Create the `Collection.cs` class that will hold collection data  
 **Details**:
-- Create new file: `Wardrobe/Models/Collection.cs`
+- Create new file: `Vestiary/Models/Collection.cs`
 - Properties: `Id` (Guid), `Name` (string), `FolderPaths` (List<string>), `Order` (int)
 - Make it `[Serializable]` for Configuration persistence
 - Status: **PENDING** → Ready to start

@@ -1,4 +1,4 @@
-# Wardrobe Coding Standards
+# Vestiary Coding Standards
 
 > 📁 **Context:** [Architecture.md](Architecture.md)
 
@@ -99,7 +99,7 @@ public class GalleryState
 
 ## 1. Theme Colors
 
-**All UI colors live in `Wardrobe/RoseGoldTheme.cs`.**
+**All UI colors live in `Vestiary/RoseGoldTheme.cs`.**
 
 - Never hardcode a `Vector4` color in window code.
 - Import `RoseGoldTheme` and use its named constants.
@@ -124,7 +124,7 @@ ImGui.TextColored(RoseGoldTheme.TextHeading, "Hello");
 
 ## 2. User-Facing Strings
 
-**All user-facing strings live in `Wardrobe/Strings.cs`.**
+**All user-facing strings live in `Vestiary/Strings.cs`.**
 
 - Labels, tooltips, button text, hint text, error messages — everything.
 - For strings with dynamic values, use a method:
@@ -147,7 +147,7 @@ ImGui.Text(Strings.ColDesignsMatch(count));
 ## 3. File Organization
 
 ```
-Wardrobe/
+Vestiary/
 ├── RoseGoldTheme.cs      ← all colors
 ├── Strings.cs            ← all user-facing strings
 ├── Plugin.cs             ← plugin lifecycle (keep lean)

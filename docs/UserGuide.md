@@ -1,4 +1,4 @@
-# Wardrobe — User Guide
+# Vestiary — User Guide
 
 *A visual companion for Glamourer. Browse your designs as a gallery, organize them into collections, and let your outfits remember their Penumbra mods.*
 
@@ -143,4 +143,4 @@ Double-click the design name below the thumbnail to set a nickname. Clear the ni
 
 *Need help? Open Help in the Browse rail (or run /vsguide).*
 
-*Found a bug or want a feature? Use GitHub Issues: https://github.com/Magg-droid/Wardrobe/issues* 
+*Found a bug or want a feature? Use GitHub Issues: https://github.com/Magg-droid/Vestiary/issues* 

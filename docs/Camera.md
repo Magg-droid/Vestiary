@@ -46,7 +46,7 @@ SendInput / VK_SCROLL press → 30ms sleep → release
 
 ## CameraWindow Architecture
 
-**File:** `Wardrobe/Windows/CameraWindow.cs`  
+**File:** `Vestiary/Windows/CameraWindow.cs`  
 **Class:** `CameraWindow : Window, IDisposable`
 
 ### ImGui Flags
@@ -326,7 +326,7 @@ Plugin.ShowCameraOverlay(callback)
 
 | File | Role |
 |------|------|
-| `Wardrobe/Windows/CameraWindow.cs` | Full camera overlay implementation |
-| `Wardrobe/Plugin.cs` | Orchestration: `ShowCameraOverlay()`, `OnCameraClosed()`, `ToggleGameUI()` |
-| `Wardrobe/Windows/DesignEditorWindow.cs` | Triggers the camera and handles the returned image |
-| `Wardrobe/Services/DesignMetadataService.cs` | Stores the `CustomImagePath` in design metadata |
+| `Vestiary/Windows/CameraWindow.cs` | Full camera overlay implementation |
+| `Vestiary/Plugin.cs` | Orchestration: `ShowCameraOverlay()`, `OnCameraClosed()`, `ToggleGameUI()` |
+| `Vestiary/Windows/DesignEditorWindow.cs` | Triggers the camera and handles the returned image |
+| `Vestiary/Services/DesignMetadataService.cs` | Stores the `CustomImagePath` in design metadata |

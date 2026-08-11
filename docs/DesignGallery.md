@@ -10,7 +10,7 @@
 ## Context
 - Glamourer provides: DisplayName, FullPath, DisplayColor, ShownInQdb per design (Guid key)
 - We can fetch design base64 images via Glamourer.GetDesignBase64(designId)
-- Need to store Wardrobe-specific metadata (Nickname, custom image path) separately
+- Need to store Vestiary-specific metadata (Nickname, custom image path) separately
 
 ## Implementation Status
 

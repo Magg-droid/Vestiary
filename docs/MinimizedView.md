@@ -12,7 +12,7 @@ A toggleable compact mode that strips the main window down to just thumbnails. T
 
 ## User Flow
 
-1. User clicks a "Minimize" button in the rail (or presses a shortcut like `/wrm` for "Wardrobe mini")
+1. User clicks a "Minimize" button in the rail (or presses a shortcut like `/wrm` for "Vestiary mini")
 2. Window shrinks: rail, top bar, chips, search, status row all disappear
 3. Only the card grid remains, with cards at ~50% normal size
 4. A small "Expand" button in the top-right corner restores normal mode

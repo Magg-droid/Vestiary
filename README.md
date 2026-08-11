@@ -4,7 +4,7 @@ A visual companion for Glamourer.
 
 Vestiary turns your Glamourer design list into a visual gallery so you can browse, organize, and apply outfits faster.
 
-- Current internal plugin version: 1.0.0.6
+- Current internal plugin version: 1.1.0.0
 
 ## What Vestiary Does
 
@@ -98,12 +98,12 @@ Random command behavior:
 
 - Open the in-plugin guide from the Browse rail via Help
 - Command alternative: /vsguide
-- Report issues and requests: [GitHub Issues](https://github.com/Magg-droid/Wardrobe/issues)
+- Report issues and requests: [GitHub Issues](https://github.com/Magg-droid/Vestiary/issues)
 
 ## Feedback
 
 - Discord: megunim.
-- Bug reports and suggestions: [GitHub Issues](https://github.com/Magg-droid/Wardrobe/issues)
+- Bug reports and suggestions: [GitHub Issues](https://github.com/Magg-droid/Vestiary/issues)
 
 ## Credits
 

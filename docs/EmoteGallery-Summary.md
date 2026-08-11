@@ -86,7 +86,7 @@ When off: no pill, no emote view, plugin behaves exactly as v1.0.0.0
 ```
 Plugin.cs: ECommonsMain.Init / Dispose
 EmoteGallery.cs: Chat.SendMessage via pending queue
-Wardrobe.csproj: <PackageReference Include="ECommons" Version="*" />
+Vestiary.csproj: <PackageReference Include="ECommons" Version="*" />
 ```
 
 ---

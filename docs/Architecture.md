@@ -1,4 +1,4 @@
-# Wardrobe Architecture
+# Vestiary Architecture
 
 > **Read this first when returning after a break.**
 > It explains what we built, why, and how the pieces connect.
@@ -7,7 +7,7 @@
 
 ## What Is This?
 
-Wardrobe is a **Dalamud plugin** for FFXIV. It's a visual browser for Glamourer outfit designs.
+Vestiary is a **Dalamud plugin** for FFXIV. It's a visual browser for Glamourer outfit designs.
 
 Instead of scrolling through a text list of hundreds of designs, you see outfit cards with thumbnails, organized into collections. One click applies the outfit.
 
@@ -18,7 +18,7 @@ Instead of scrolling through a text list of hundreds of designs, you see outfit 
 | Principle | What it means |
 |---|---|
 | **Glamourer owns the designs** | We never create or modify Glamourer designs. We only read and apply. |
-| **Wardrobe owns the presentation** | Collections, thumbnails, nicknames — all ours. None of it touches Glamourer. |
+| **Vestiary owns the presentation** | Collections, thumbnails, nicknames — all ours. None of it touches Glamourer. |
 | **Non-destructive** | Deleting a collection or thumbnail never affects the Glamourer design. |
 | **Lightweight & optional** | Nothing is automatic. Users opt into collections, thumbnails, etc. |
 
@@ -27,7 +27,7 @@ Instead of scrolling through a text list of hundreds of designs, you see outfit 
 ## File Map
 
 ```
-Wardrobe/
+Vestiary/
 ├── Plugin.cs                         ← Entry point, lifecycle, P/Invoke, clipboard, file picker
 ├── Configuration.cs                  ← Persisted settings (collections, metadata, version)
 ├── RoseGoldTheme.cs                  ← All 56 UI colors — change here to re-theme
@@ -59,7 +59,7 @@ Wardrobe/
 
 ```
 ┌──────────────┐     IPC      ┌──────────────┐
-│  Glamourer   │ ←──────────→ │   Wardrobe   │
+│  Glamourer   │ ←──────────→ │   Vestiary   │
 │  (external)  │              │              │
 │              │  GetDesignList│              │
 │  - designs   │─────────────→│  Glamourer   │
@@ -115,7 +115,7 @@ Planned to upgrade to checkbox-based picker in future version.
 Current text input is simple, works, but assumes users know their folder paths.
 
 ### Why persistent config folder for thumbnails?
-`%appdata%/XIVLauncher/pluginConfigs/Wardrobe/thumbnails/`
+`%appdata%/XIVLauncher/pluginConfigs/Vestiary/thumbnails/`
 Not inside the plugin version folder. Reason: Dalamud creates a new folder for each version,
 so thumbnails would be lost on every update if stored there.
 

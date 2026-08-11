@@ -1,6 +1,6 @@
-# Wardrobe — Data Flow
+# Vestiary — Data Flow
 
-> How data moves between Glamourer, Wardrobe services, and the UI.
+> How data moves between Glamourer, Vestiary services, and the UI.
 
 ---
 
@@ -21,7 +21,7 @@
            │
            ▼
 ┌──────────────────────────────────────────────────────┐
-│  Wardrobe (our data)                                 │
+│  Vestiary (our data)                                 │
 │                                                      │
 │  Configuration.cs (persisted to disk)                │
 │  ├── Collections[]          (user-created tabs)      │
@@ -51,7 +51,7 @@
 
 ## Key Data Shapes
 
-### Glamourer → Wardrobe
+### Glamourer → Vestiary
 
 ```
 DesignInfo {
@@ -62,7 +62,7 @@ DesignInfo {
 }
 ```
 
-### Wardrobe → UI (augmented DesignInfo)
+### Vestiary → UI (augmented DesignInfo)
 
 ```
 CardData = DesignInfo + DesignMetadata + favorites + hidden

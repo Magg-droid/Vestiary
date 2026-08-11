@@ -14,11 +14,11 @@ This feature is gated behind a settings flag (`EnableGlamourRoulette`) and appea
 
 ## UI Layout Wireframe (Full Main Window Context)
 
-Below is the layout of the Wardrobe window when **Roulette** is selected in the **Left Side Rail**:
+Below is the layout of the Vestiary window when **Roulette** is selected in the **Left Side Rail**:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│ Wardrobe — Glamour Roulette                                                                           ─  □  ✕  │
+│ Vestiary — Glamour Roulette                                                                           ─  □  ✕  │
 ├─────────────────┬───────────────────────────────────────────────────────────────────────────────────────────────┤
 │                 │                                                                                               │
 │  [Glamour]      │   Glamour Roulette                                                                            │
@@ -72,7 +72,7 @@ Below is the layout of the Wardrobe window when **Roulette** is selected in the 
 
 ## Architecture & Service Design
 
-Following Wardrobe's **Thin Windows, Fat Services** architecture:
+Following Vestiary's **Thin Windows, Fat Services** architecture:
 
 ```
 MainWindow (Left Rail Navigation)

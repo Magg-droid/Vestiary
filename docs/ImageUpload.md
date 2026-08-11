@@ -12,7 +12,7 @@
 ### ✅ COMPLETED
 
 **Phase 1: Setup & Infrastructure**
-- ✅ Thumbnails folder created at persistent config path (`%appdata%/XIVLauncher/pluginConfigs/Wardrobe/thumbnails/`) on plugin init
+- ✅ Thumbnails folder created at persistent config path (`%appdata%/XIVLauncher/pluginConfigs/Vestiary/thumbnails/`) on plugin init
 - ✅ `Plugin.OpenImageFilePicker()` implemented using Windows.Forms on STA thread
 - ✅ `Plugin.CopyImageFromClipboard()` implemented with dual-workflow support:
   - Windows+Shift+S screenshots (Clipboard.ContainsImage)
@@ -24,7 +24,7 @@
 - ✅ DesignEditorWindow shows "Choose Image" and "From Clipboard" buttons
 - ✅ File picker filter: PNG/JPG/BMP/GIF/WEBP
 - ✅ `OnImageSelected()` callback implemented
-- ✅ Images copied to persistent config folder (`pluginConfigs/Wardrobe/thumbnails/`)
+- ✅ Images copied to persistent config folder (`pluginConfigs/Vestiary/thumbnails/`)
 - ✅ Metadata updated via DesignMetadataService
 - ✅ Thread-safe operations with try-catch
 

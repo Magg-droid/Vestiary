@@ -1,5 +1,5 @@
 {
-  "comment": "Wardrobe Configuration (persisted to disk by Dalamud)",
+  "comment": "Vestiary Configuration (persisted to disk by Dalamud)",
   "type": "Configuration.cs",
   "sample": {
     "Version": 1,
@@ -37,7 +37,7 @@
       {
         "DesignId": "a1b2c3d4-1234-5678-9abc-def012345678",
         "Nickname": "My fav outfit",
-        "CustomImagePath": "C:/Users/.../Wardrobe/thumbnails/clipboard_20260727_142536.png",
+        "CustomImagePath": "C:/Users/.../Vestiary/thumbnails/clipboard_20260727_142536.png",
         "Order": 0
       },
       {

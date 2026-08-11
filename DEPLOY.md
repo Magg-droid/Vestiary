@@ -6,22 +6,22 @@ Update the version number in these **two files**:
 
 | File | Key |
 |------|-----|
-| `Wardrobe/Wardrobe.csproj` | `<Version>X.X.X.X</Version>` |
-| `Wardrobe/Wardrobe.json` | `"AssemblyVersion": "X.X.X.X"` |
+| `Vestiary/Vestiary.csproj` | `<Version>X.X.X.X</Version>` |
+| `Vestiary/Vestiary.json` | `"AssemblyVersion": "X.X.X.X"` |
 
 ## 2. Build (Release)
 
 ```bash
-dotnet clean Wardrobe/Wardrobe.csproj -c Release
-dotnet build Wardrobe/Wardrobe.csproj -c Release
+dotnet clean Vestiary/Vestiary.csproj -c Release
+dotnet build Vestiary/Vestiary.csproj -c Release
 ```
 
 ## 3. Generate latest.zip
 
 ```bash
-cd Wardrobe/bin/Release
+cd Vestiary/bin/Release
 
-powershell -Command "Compress-Archive -Path Wardrobe.dll,Wardrobe.deps.json,Wardrobe.json,ECommons.dll,*.png -DestinationPath latest.zip -Force"
+powershell -Command "Compress-Archive -Path Vestiary.dll,Vestiary.deps.json,Vestiary.json,ECommons.dll,*.png -DestinationPath latest.zip -Force"
 ```
 
 Verify:
@@ -33,7 +33,7 @@ unzip -l latest.zip
 ## 4. Commit & Tag
 
 ```bash
-git add Wardrobe/Wardrobe.json Wardrobe/Wardrobe.csproj
+git add Vestiary/Vestiary.json Vestiary/Vestiary.csproj
 git commit -m "vX.X.X.X: <short description>"
 git tag vX.X.X.X
 ```
@@ -47,11 +47,11 @@ git push origin vX.X.X.X
 
 ## 6. GitHub Release
 
-1. Go to: https://github.com/Magg-droid/Wardrobe/releases
+1. Go to: https://github.com/Magg-droid/Vestiary/releases
 2. Click **"Draft a new release"**
 3. Choose tag: `vX.X.X.X`
 4. Title: `vX.X.X.X`
-5. Attach `Wardrobe/bin/Release/latest.zip`
+5. Attach `Vestiary/bin/Release/latest.zip`
 6. Publish
 
 ---
@@ -60,6 +60,6 @@ git push origin vX.X.X.X
 
 | Artifact | Path |
 |----------|------|
-| DLL | `Wardrobe/bin/Release/Wardrobe.dll` |
-| Plugin JSON | `Wardrobe/bin/Release/Wardrobe.json` |
-| Release zip | `Wardrobe/bin/Release/latest.zip` |
+| DLL | `Vestiary/bin/Release/Vestiary.dll` |
+| Plugin JSON | `Vestiary/bin/Release/Vestiary.json` |
+| Release zip | `Vestiary/bin/Release/latest.zip` |
