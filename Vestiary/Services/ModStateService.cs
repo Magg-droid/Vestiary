@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using Vestiary.Models;
 
@@ -11,12 +12,22 @@ public class ModStateService
     private readonly Configuration configuration;
     private readonly PenumbraService penumbra;
     private readonly GlamourerService glamourer;
+    private readonly string snapshotsPath;
+    private List<ModSnapshot> snapshots = new();
 
-    public ModStateService(Configuration configuration, PenumbraService penumbra, GlamourerService glamourer)
+    public ModStateService(Configuration configuration, PenumbraService penumbra, GlamourerService glamourer, string pluginConfigDir)
     {
         this.configuration = configuration;
         this.penumbra = penumbra;
         this.glamourer = glamourer;
+        snapshotsPath = Path.Combine(pluginConfigDir, "mod-snapshots.json");
+        LoadSnapshots();
+    }
+
+    public void ImportSnapshots(List<ModSnapshot>? incoming)
+    {
+        snapshots = incoming ?? new();
+        SaveSnapshots();
     }
 
     public void CaptureState(Guid designId)
@@ -34,7 +45,6 @@ public class ModStateService
         var allMods = penumbra.GetAllModChangedItems();
         var allSettings = penumbra.GetAllModSettings(collection.Value.Id);
 
-        // Build lookup: dir → changed items
         var changedItemsByDir = new Dictionary<string, IReadOnlyDictionary<string, object?>>(StringComparer.OrdinalIgnoreCase);
         foreach (var m in allMods)
             changedItemsByDir[m.ModDirectory] = m.ChangedItems;
@@ -72,24 +82,23 @@ public class ModStateService
             });
         }
 
-        configuration.ModSnapshots ??= new();
-        configuration.ModSnapshots.RemoveAll(s => s.DesignId == designId);
-        configuration.ModSnapshots.Add(snapshot);
-        configuration.Save();
+        snapshots.RemoveAll(s => s.DesignId == designId);
+        snapshots.Add(snapshot);
+        SaveSnapshots();
 
         Plugin.Log.Information($"[SaveMods] 💾 {snapshot.Mods.Count} mods saved ({enabled} enabled, {disabled} disabled) @ {collection.Value.Name} ({sw.ElapsedMilliseconds}ms)");
     }
 
     public bool HasSnapshot(Guid designId) =>
-        configuration.ModSnapshots?.Any(s => s.DesignId == designId) ?? false;
+        snapshots.Any(s => s.DesignId == designId);
 
     public ModSnapshot? GetSnapshot(Guid designId) =>
-        configuration.ModSnapshots?.FirstOrDefault(s => s.DesignId == designId);
+        snapshots.FirstOrDefault(s => s.DesignId == designId);
 
     public void ClearSnapshot(Guid designId)
     {
-        configuration.ModSnapshots?.RemoveAll(s => s.DesignId == designId);
-        configuration.Save();
+        snapshots.RemoveAll(s => s.DesignId == designId);
+        SaveSnapshots();
         Plugin.Log.Information("[SaveMods] Mods cleared.");
     }
 
@@ -116,7 +125,6 @@ public class ModStateService
 
             var itemNames = new HashSet<string>(snapshot.ItemNames, StringComparer.OrdinalIgnoreCase);
 
-            // Use bulk IPC for changed items and settings
             var allMods = penumbra.GetAllModChangedItems();
             var matchingMods = allMods
                 .Where(m => m.ChangedItems.Keys.Any(key => itemNames.Contains(key)))
@@ -168,7 +176,6 @@ public class ModStateService
         }
         else
         {
-            // Legacy: restore from snapshot mods directly
             foreach (var mod in snapshot.Mods)
             {
                 var ec = penumbra.TrySetMod(collection.Value.Id, mod.DirName, mod.Enabled, mod.ModName);
@@ -194,8 +201,68 @@ public class ModStateService
         }
 
         if (snapshotChanged)
-            configuration.Save();
+            SaveSnapshots();
 
         Plugin.Log.Information($"[SaveMods] 🔄 Restored — {desiredOn} on, {desiredOff} off, {unchanged} unchanged, {errors} errors @ {collection.Value.Name} ({sw.ElapsedMilliseconds}ms)");
+    }
+
+    private void LoadSnapshots()
+    {
+        try
+        {
+            if (File.Exists(snapshotsPath))
+            {
+                var json = File.ReadAllText(snapshotsPath);
+                snapshots = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ModSnapshot>>(json) ?? new();
+                return;
+            }
+
+            // One-time extraction from old Vestiary.json (users upgrading from before split)
+            var configPath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "XIVLauncher", "pluginConfigs", "Vestiary.json");
+
+            if (File.Exists(configPath))
+            {
+                var configJson = File.ReadAllText(configPath);
+                var legacy = Newtonsoft.Json.JsonConvert.DeserializeObject<LegacyConfig>(configJson);
+                if (legacy?.ModSnapshots?.Count > 0)
+                {
+                    snapshots = legacy.ModSnapshots;
+                    SaveSnapshots();
+                    configuration.Save(); // re-save Vestiary.json without ModSnapshots
+                    Plugin.Log.Information($"[ModState] Extracted {snapshots.Count} snapshots to dedicated file");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.Warning(ex, "[ModState] Failed to load snapshots");
+        }
+    }
+
+    private void SaveSnapshots()
+    {
+        try
+        {
+            var settings = new Newtonsoft.Json.JsonSerializerSettings
+            {
+                TypeNameHandling = Newtonsoft.Json.TypeNameHandling.None,
+                Formatting = Newtonsoft.Json.Formatting.None
+            };
+            var json = Newtonsoft.Json.JsonConvert.SerializeObject(snapshots, settings);
+            File.WriteAllText(snapshotsPath, json);
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.Warning(ex, "[ModState] Failed to save snapshots");
+        }
+    }
+
+    /// <summary>Minimal DTO for extracting ModSnapshots from old Vestiary.json.</summary>
+    [Serializable]
+    private class LegacyConfig
+    {
+        public List<ModSnapshot>? ModSnapshots { get; set; }
     }
 }

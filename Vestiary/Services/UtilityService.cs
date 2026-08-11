@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
@@ -19,10 +20,10 @@ public class UtilityService
 {
     private readonly string pluginDir;
     private readonly IPluginLog log;
+    private readonly ModStateService? modStateService;
 
     public string ThumbnailsDirectory { get; }
 
-    /// <summary>True when the old Wardrobe config file still exists (checked in both nested and flat locations).</summary>
     public bool CanMigrateFromWardrobe
     {
         get
@@ -30,10 +31,6 @@ public class UtilityService
             var configsRoot = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                 "XIVLauncher", "pluginConfigs");
-
-            // Dalamud can store configs in two layouts:
-            //   Flat:    pluginConfigs/Wardrobe.json
-            //   Nested:  pluginConfigs/Wardrobe/Wardrobe.json
             return File.Exists(Path.Combine(configsRoot, "Wardrobe.json"))
                 || File.Exists(Path.Combine(configsRoot, "Wardrobe", "Wardrobe.json"));
         }
@@ -71,10 +68,11 @@ public class UtilityService
     private const uint KEYEVENTF_KEYUP = 0x0002;
     private const ushort VK_SCROLL = 0x91;
 
-    public UtilityService(string pluginDir, IPluginLog log, Configuration configuration)
+    public UtilityService(string pluginDir, IPluginLog log, Configuration configuration, ModStateService? modStateService = null)
     {
         this.pluginDir = pluginDir;
         this.log = log;
+        this.modStateService = modStateService;
 
         var configDir = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
@@ -85,6 +83,80 @@ public class UtilityService
         log.Information($"Thumbnails directory: {ThumbnailsDirectory}");
 
         MigrateFromWardrobe(configuration);
+    }
+
+    // ── Thumbnail Resize ───────────────────────────
+
+    private const int ThumbMaxWidth = 480;
+    private const int ThumbMaxHeight = 600;
+    private const int ThumbJpegQuality = 85;
+
+    /// <summary>
+    /// Resizes an image to fit within maxWidth x maxHeight (maintaining aspect ratio),
+    /// saves as JPEG, and returns the new .jpg path. Does not upscale images that are
+    /// already smaller than the target.
+    /// </summary>
+    public string ResizeThumbnail(string sourcePath, string destPathWithoutExtension)
+    {
+        var destPath = destPathWithoutExtension + ".jpg";
+
+        try
+        {
+            using var img = Image.FromFile(sourcePath);
+
+            int newWidth = img.Width;
+            int newHeight = img.Height;
+
+            // Only downscale if the image exceeds target dimensions
+            if (newWidth > ThumbMaxWidth || newHeight > ThumbMaxHeight)
+            {
+                double ratio = (double)img.Width / img.Height;
+                double targetRatio = (double)ThumbMaxWidth / ThumbMaxHeight;
+
+                if (ratio > targetRatio)
+                {
+                    newWidth = ThumbMaxWidth;
+                    newHeight = (int)(ThumbMaxWidth / ratio);
+                }
+                else
+                {
+                    newHeight = ThumbMaxHeight;
+                    newWidth = (int)(ThumbMaxHeight * ratio);
+                }
+            }
+
+            using var bmp = new Bitmap(newWidth, newHeight);
+            using var g = Graphics.FromImage(bmp);
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            g.CompositingQuality = CompositingQuality.HighQuality;
+            g.SmoothingMode = SmoothingMode.HighQuality;
+            g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+            g.DrawImage(img, 0, 0, newWidth, newHeight);
+
+            var encoderParams = new EncoderParameters(1);
+            encoderParams.Param[0] = new EncoderParameter(Encoder.Quality, (long)ThumbJpegQuality);
+            var jpegCodec = ImageCodecInfo.GetImageEncoders()
+                .First(c => c.FormatID == ImageFormat.Jpeg.Guid);
+            bmp.Save(destPath, jpegCodec, encoderParams);
+
+            log.Information($"Thumbnail resized: {img.Width}x{img.Height} → {newWidth}x{newHeight}, saved to {destPath}");
+        }
+        catch (Exception ex)
+        {
+            log.Error(ex, $"Failed to resize thumbnail: {sourcePath}");
+            // Fallback: save as JPEG without resize, or just copy the original
+            try
+            {
+                using var img = Image.FromFile(sourcePath);
+                img.Save(destPath, ImageFormat.Jpeg);
+            }
+            catch
+            {
+                try { File.Copy(sourcePath, destPath, overwrite: true); } catch { }
+            }
+        }
+
+        return destPath;
     }
 
     // ── Scroll Lock ─────────────────────────────────
@@ -193,22 +265,22 @@ public class UtilityService
                     using (image)
                     {
                         var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss_fff");
-                        var filename = $"clipboard_{timestamp}.png";
-                        var savePath = Path.Combine(ThumbnailsDirectory, filename);
-                        image.Save(savePath, ImageFormat.Png);
-                        log.Information($"Image saved to: {savePath}");
-                        onImageSaved(savePath);
+                        var tempPath = Path.Combine(ThumbnailsDirectory, $"clipboard_{timestamp}_temp.png");
+                        image.Save(tempPath, ImageFormat.Png);
+                        var destBase = Path.Combine(ThumbnailsDirectory, $"clipboard_{timestamp}");
+                        var finalPath = ResizeThumbnail(tempPath, destBase);
+                        try { File.Delete(tempPath); } catch { }
+                        log.Information($"Clipboard image saved & resized: {finalPath}");
+                        onImageSaved(finalPath);
                     }
                 }
                 else if (sourceFilePath != null)
                 {
-                    var originalExtension = Path.GetExtension(sourceFilePath);
                     var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss_fff");
-                    var filename = $"clipboard_{timestamp}{originalExtension}";
-                    var savePath = Path.Combine(ThumbnailsDirectory, filename);
-                    File.Copy(sourceFilePath, savePath, overwrite: true);
-                    log.Information($"Image file copied to: {savePath}");
-                    onImageSaved(savePath);
+                    var destBase = Path.Combine(ThumbnailsDirectory, $"clipboard_{timestamp}");
+                    var finalPath = ResizeThumbnail(sourceFilePath, destBase);
+                    log.Information($"Clipboard file resized: {finalPath}");
+                    onImageSaved(finalPath);
                 }
             }
             catch (Exception ex)
@@ -277,13 +349,20 @@ public class UtilityService
                 return;
             }
 
+            // Route ModSnapshots to the dedicated file (they're no longer in Configuration)
+            var snapshots = Newtonsoft.Json.JsonConvert.DeserializeObject<LegacyMigrationConfig>(json)?.ModSnapshots;
+            if (snapshots?.Count > 0 && modStateService != null)
+            {
+                modStateService.ImportSnapshots(snapshots);
+                log.Information($"[Migration]   {snapshots.Count} snapshots to mod-snapshots.json");
+            }
+
             configuration.Collections = oldConfig.Collections ?? new();
             configuration.DesignMetadata = oldConfig.DesignMetadata ?? new();
             configuration.HiddenDesignIds = oldConfig.HiddenDesignIds ?? new();
             configuration.FavoriteDesignIds = oldConfig.FavoriteDesignIds ?? new();
             configuration.EmoteCards = oldConfig.EmoteCards ?? new();
             configuration.EmoteCollections = oldConfig.EmoteCollections ?? new();
-            configuration.ModSnapshots = oldConfig.ModSnapshots ?? new();
             configuration.ApplyEquipmentOnly = oldConfig.ApplyEquipmentOnly;
             configuration.ShowHidden = oldConfig.ShowHidden;
             configuration.EnableSaveMods = oldConfig.EnableSaveMods;
@@ -341,6 +420,13 @@ public class UtilityService
         {
             log.Warning(ex, "[Migration] Wardrobe → Vestiary migration error (non-fatal)");
         }
+    }
+
+    /// <summary>Minimal DTO for extracting ModSnapshots from old Wardrobe.json during migration.</summary>
+    [Serializable]
+    private class LegacyMigrationConfig
+    {
+        public List<Models.ModSnapshot>? ModSnapshots { get; set; }
     }
 
 }

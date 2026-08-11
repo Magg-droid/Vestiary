@@ -23,7 +23,6 @@ public class Configuration : IPluginConfiguration
     public bool IsMinimized { get; set; } = false;
     public string ThemeName { get; set; } = "Classic";
     public List<Guid> HiddenDesignIds { get; set; } = new();
-    public List<ModSnapshot>? ModSnapshots { get; set; } = new();
     public List<EmoteCard> EmoteCards { get; set; } = new();
     public List<EmoteCollection> EmoteCollections { get; set; } = new();
     public List<Guid> FavoriteDesignIds { get; set; } = new();

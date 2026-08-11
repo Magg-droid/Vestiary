@@ -231,8 +231,12 @@ public class CameraWindow : Window, IDisposable
             g.CopyFromScreen(sx, sy, 0, 0, new Size(sw, sh), CopyPixelOperation.SourceCopy);
             var dir = utility.ThumbnailsDirectory;
             Directory.CreateDirectory(dir);
-            var path = Path.Combine(dir, $"camera_{DateTime.Now:yyyyMMdd_HHmmss_fff}.png");
-            bmp.Save(path, ImageFormat.Png);
+            var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss_fff");
+            var tempPath = Path.Combine(dir, $"camera_{timestamp}_temp.png");
+            bmp.Save(tempPath, ImageFormat.Png);
+            var destBase = Path.Combine(dir, $"camera_{timestamp}");
+            var path = utility.ResizeThumbnail(tempPath, destBase);
+            try { File.Delete(tempPath); } catch { }
             var cb = onImageCaptured; Close(); cb?.Invoke(path);
         }
         catch (Exception ex) { Plugin.Log.Error(ex, "Capture failed"); }

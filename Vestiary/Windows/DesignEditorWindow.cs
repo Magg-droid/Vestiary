@@ -235,23 +235,16 @@ public class DesignEditorWindow : Window, IDisposable
             if (!File.Exists(selectedPath))
                 return;
 
-            var extension = Path.GetExtension(selectedPath);
             var thumbnailsDir = utility.ThumbnailsDirectory;
-            
-            // Create thumbnails directory if it doesn't exist
             Directory.CreateDirectory(thumbnailsDir);
 
-            // Delete any existing image files for this design (any extension)
-            // This cleans up old images
+            // Delete any existing image files for this design
             var existingFiles = Directory.GetFiles(thumbnailsDir, $"{editingDesignId}.*");
             foreach (var existingFile in existingFiles)
             {
                 try
                 {
-                    // Invalidate from cache first
                     plugin.TextureCache.InvalidateTexture(existingFile);
-                    
-                    // Then delete the file
                     File.Delete(existingFile);
                     Plugin.Log.Information($"Deleted old image: {existingFile}");
                 }
@@ -261,16 +254,12 @@ public class DesignEditorWindow : Window, IDisposable
                 }
             }
 
-            // Use a timestamp to create a unique filename each time
-            // This ensures no cached texture conflicts
+            // Resize and compress to a compact JPEG thumbnail
             string timestamp = DateTime.Now.Ticks.ToString();
-            var destinationPath = Path.Combine(thumbnailsDir, $"{editingDesignId}_{timestamp}{extension}");
+            var destBase = Path.Combine(thumbnailsDir, $"{editingDesignId}_{timestamp}");
+            var destinationPath = utility.ResizeThumbnail(selectedPath, destBase);
 
-            // Copy the new image with unique name
-            File.Copy(selectedPath, destinationPath, overwrite: true);
-
-            // If the source was a clipboard temp file in the thumbnails directory, delete it now
-            // that we've copied it to the design-specific path
+            // If the source was a temp file in the thumbnails directory, clean it up
             var thumbnailsDirNorm = Path.GetFullPath(thumbnailsDir);
             var sourceDir = Path.GetFullPath(Path.GetDirectoryName(selectedPath) ?? "");
             var sourceFileName = Path.GetFileName(selectedPath);
@@ -282,20 +271,20 @@ public class DesignEditorWindow : Window, IDisposable
                 {
                     plugin.TextureCache.InvalidateTexture(selectedPath);
                     File.Delete(selectedPath);
-                    Plugin.Log.Information($"Deleted clipboard temp file: {selectedPath}");
+                    Plugin.Log.Information($"Deleted temp file: {selectedPath}");
                 }
                 catch (Exception deleteEx)
                 {
-                    Plugin.Log.Warning(deleteEx, $"Failed to delete clipboard temp file: {selectedPath}");
+                    Plugin.Log.Warning(deleteEx, $"Failed to delete temp file: {selectedPath}");
                 }
             }
 
             customImagePath = destinationPath;
-            Plugin.Log.Information($"New image saved with unique name: {destinationPath}");
+            Plugin.Log.Information($"New thumbnail saved: {destinationPath}");
         }
         catch (Exception ex)
         {
-            Plugin.Log.Error(ex, $"Failed to copy image file: {selectedPath}");
+            Plugin.Log.Error(ex, $"Failed to process image: {selectedPath}");
         }
     }
 

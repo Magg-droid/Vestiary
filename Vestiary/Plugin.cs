@@ -70,10 +70,13 @@ public sealed class Plugin : IDalamudPlugin
         DesignMetadataService = new DesignMetadataService(Configuration, GlamourerService);
         HiddenDesignService = new HiddenDesignService(Configuration);
         PenumbraService = new PenumbraService(PluginInterface, Log, DataManager);
-        ModStateService = new ModStateService(Configuration, PenumbraService, GlamourerService);
+        var configDir = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "XIVLauncher", "pluginConfigs", "Vestiary");
+        ModStateService = new ModStateService(Configuration, PenumbraService, GlamourerService, configDir);
         EmoteService = new EmoteService(Configuration, PenumbraService);
         FavoriteService = new FavoriteService(Configuration, CollectionService);
-        UtilityService = new UtilityService(pluginDir, Log, Configuration);
+        UtilityService = new UtilityService(pluginDir, Log, Configuration, ModStateService);
         RouletteService = new RouletteService(Configuration, GlamourerService, ModStateService, CollectionService, HiddenDesignService, Framework);
         TextureCache = new TextureCache(TextureProvider);
 
