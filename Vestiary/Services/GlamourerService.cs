@@ -17,6 +17,10 @@ public class GlamourerService
     private readonly ICallGateSubscriber<Guid, int> deleteDesignSubscriber;
     private readonly IPluginLog log;
 
+    private Dictionary<Guid, (string DisplayName, string FullPath, uint DisplayColor, bool ShownInQdb)>? cachedDesignList;
+    private DateTime cacheExpiry = DateTime.MinValue;
+    private static readonly TimeSpan DesignListCacheTtl = TimeSpan.FromSeconds(2);
+
     public GlamourerService(IDalamudPluginInterface pluginInterface, IPluginLog pluginLog)
     {
         log = pluginLog;
@@ -37,9 +41,28 @@ public class GlamourerService
             "Glamourer.DeleteDesign");
     }
 
+    /// <summary>
+    /// Get the full design list from Glamourer. Results are cached for 2 seconds
+    /// to avoid redundant IPC calls every frame. The cache is invalidated immediately
+    /// when a design is applied or deleted.
+    /// </summary>
     public Dictionary<Guid, (string DisplayName, string FullPath, uint DisplayColor, bool ShownInQdb)> GetDesignList()
     {
-        return designListSubscriber.InvokeFunc();
+        if (cachedDesignList != null && DateTime.UtcNow < cacheExpiry)
+            return cachedDesignList;
+
+        cachedDesignList = designListSubscriber.InvokeFunc();
+        cacheExpiry = DateTime.UtcNow + DesignListCacheTtl;
+        return cachedDesignList;
+    }
+
+    /// <summary>
+    /// Force the next GetDesignList call to fetch fresh data from Glamourer.
+    /// </summary>
+    private void InvalidateDesignListCache()
+    {
+        cachedDesignList = null;
+        cacheExpiry = DateTime.MinValue;
     }
 
     public string? GetDesignBase64(Guid designId)
@@ -118,6 +141,7 @@ public class GlamourerService
             
             // Apply to player (object index 0), key=0 (no locking)
             int result = applyDesignSubscriber.InvokeFunc(designId, 0, 0, designFlags);
+            InvalidateDesignListCache();
             
             if (result == 0)
             {
@@ -148,6 +172,7 @@ public class GlamourerService
         try
         {
             int result = deleteDesignSubscriber.InvokeFunc(designId);
+            InvalidateDesignListCache();
             
             if (result == 0)
             {

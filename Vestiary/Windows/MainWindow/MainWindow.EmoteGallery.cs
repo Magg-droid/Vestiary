@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 using Dalamud.Bindings.ImGui;
@@ -400,7 +401,11 @@ public partial class MainWindow
             var uploadMin = new Vector2(iconMin.X, iconMax.Y + iconGap);
             var uploadMax = new Vector2(iconMax.X, uploadMin.Y + iconSize);
             DrawEmoteIcon(uploadMin, uploadMax, uploadIconPath, Strings.TooltipUpload,
-                p => plugin.UtilityService.OpenImageFilePicker(p => card.ThumbnailPath = p));
+                p => plugin.UtilityService.OpenImageFilePicker(p =>
+                {
+                    var destBase = Path.Combine(plugin.UtilityService.ThumbnailsDirectory, $"emote_{card.Id}_{DateTime.Now.Ticks}");
+                    card.ThumbnailPath = plugin.UtilityService.ResizeThumbnail(p, destBase);
+                }));
             var clipMin = new Vector2(iconMin.X, uploadMax.Y + iconGap);
             var clipMax = new Vector2(iconMax.X, clipMin.Y + iconSize);
             DrawEmoteIcon(clipMin, clipMax, clipboardIconPath, Strings.TooltipClipboard,

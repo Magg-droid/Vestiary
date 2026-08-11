@@ -159,6 +159,60 @@ public class UtilityService
         return destPath;
     }
 
+    // ── Orphan Cleanup ─────────────────────────────
+
+    /// <summary>
+    /// Delete thumbnail files and metadata entries for designs that no longer
+    /// exist in Glamourer. Call once after plugin initialization.
+    /// </summary>
+    public void CleanupOrphanedThumbnails(ICollection<Guid> activeDesignIds, List<Models.DesignMetadata> metadata)
+    {
+        try
+        {
+            var activeSet = new HashSet<Guid>(activeDesignIds);
+            var orphanedIds = new HashSet<Guid>();
+            int filesDeleted = 0;
+
+            if (!Directory.Exists(ThumbnailsDirectory))
+                return;
+
+            foreach (var file in Directory.GetFiles(ThumbnailsDirectory))
+            {
+                var fileName = Path.GetFileName(file);
+                var idEnd = fileName.IndexOf('_');
+                if (idEnd < 0)
+                    idEnd = fileName.LastIndexOf('.');
+                if (idEnd < 0)
+                    continue;
+
+                if (Guid.TryParse(fileName[..idEnd], out var designId) && !activeSet.Contains(designId))
+                {
+                    try
+                    {
+                        File.Delete(file);
+                        orphanedIds.Add(designId);
+                        filesDeleted++;
+                        log.Information($"Cleaned up orphaned thumbnail: {fileName}");
+                    }
+                    catch (Exception ex)
+                    {
+                        log.Warning(ex, $"Failed to delete orphaned thumbnail: {fileName}");
+                    }
+                }
+            }
+
+            // Also prune orphaned metadata entries
+            int metadataRemoved = metadata.RemoveAll(m => orphanedIds.Contains(m.DesignId) || !activeSet.Contains(m.DesignId));
+
+            if (filesDeleted > 0 || metadataRemoved > 0)
+                log.Information($"Orphan cleanup: {filesDeleted} thumbnail(s), {metadataRemoved} metadata entry(s) removed");
+        }
+        catch (Exception ex)
+        {
+            log.Error(ex, "Failed during orphaned thumbnail cleanup");
+        }
+    }
+
     // ── Scroll Lock ─────────────────────────────────
 
     public void ToggleGameUI()

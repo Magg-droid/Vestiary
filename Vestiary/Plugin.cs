@@ -80,6 +80,17 @@ public sealed class Plugin : IDalamudPlugin
         RouletteService = new RouletteService(Configuration, GlamourerService, ModStateService, CollectionService, HiddenDesignService, Framework);
         TextureCache = new TextureCache(TextureProvider);
 
+        // One-time cleanup of orphaned thumbnails from deleted designs
+        try
+        {
+            var activeDesigns = GlamourerService.GetDesignList();
+            UtilityService.CleanupOrphanedThumbnails(activeDesigns.Keys, Configuration.DesignMetadata);
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Orphaned thumbnail cleanup skipped (Glamourer may not be installed yet)");
+        }
+
         var goatImagePath = Path.Combine(pluginDir, "goat.png");
         var noPreviewImagePath = Path.Combine(pluginDir, "..", "..", "Data", "no-preview.jpg");
         var cameraIconPath = Path.Combine(pluginDir, "camera_icon.png");
@@ -136,6 +147,7 @@ public sealed class Plugin : IDalamudPlugin
 
         PluginInterface.UiBuilder.Draw += WindowSystem.Draw;
         PluginInterface.UiBuilder.Draw += ProcessPendingEmote;
+        PluginInterface.UiBuilder.Draw += OnDrawFlushConfig;
         PluginInterface.UiBuilder.OpenConfigUi += ToggleConfigUi;
         PluginInterface.UiBuilder.OpenMainUi += ToggleMainUi;
 
@@ -146,8 +158,11 @@ public sealed class Plugin : IDalamudPlugin
 
     public void Dispose()
     {
+        Configuration.FlushNow();
+
         PluginInterface.UiBuilder.Draw -= WindowSystem.Draw;
         PluginInterface.UiBuilder.Draw -= ProcessPendingEmote;
+        PluginInterface.UiBuilder.Draw -= OnDrawFlushConfig;
         PluginInterface.UiBuilder.OpenConfigUi -= ToggleConfigUi;
         PluginInterface.UiBuilder.OpenMainUi -= ToggleMainUi;
 
@@ -192,6 +207,11 @@ public sealed class Plugin : IDalamudPlugin
         MainWindow._pendingEmoteCommand = string.Empty;
         Chat.SendMessage(cmd);
         Plugin.Log.Information($"[Emotes] Sent: {cmd}");
+    }
+
+    private void OnDrawFlushConfig()
+    {
+        Configuration.FlushIfNeeded();
     }
 
     private void OnGuideCommand(string command, string args)
