@@ -4,7 +4,7 @@ A visual companion for Glamourer.
 
 Vestiary turns your Glamourer design list into a visual gallery so you can browse, organize, and apply outfits faster.
 
-- Current internal plugin version: 1.1.2.0
+- Current internal plugin version: 1.1.4.0
 
 ## What Vestiary Does
 
