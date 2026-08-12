@@ -151,6 +151,9 @@ public sealed class Plugin : IDalamudPlugin
         PluginInterface.UiBuilder.OpenConfigUi += ToggleConfigUi;
         PluginInterface.UiBuilder.OpenMainUi += ToggleMainUi;
 
+        // keep plugin window visible during gpose so I can take snapshots even in gpose
+        PluginInterface.UiBuilder.DisableAutomaticUiHide = true;
+
         ECommonsMain.Init(PluginInterface, this);
 
         Log.Information($"===A cool log message from {PluginInterface.Manifest.Name}===");
