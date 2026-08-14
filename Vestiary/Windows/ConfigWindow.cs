@@ -94,19 +94,19 @@ public class ConfigWindow : Window, IDisposable
 
         int selectedTheme = configuration.ThemeName switch
         {
-            "Ocean" => 1,
-            "Midnight Purple" => 2,
-            "Forest" => 3,
+            "Midnight Purple" => 1,
+            "Champagne" => 2,
+            "Rose" => 3,
             _ => 0,
         };
-        if (ImGui.RadioButton(Strings.SettingsThemeClassic, ref selectedTheme, 0))
-            SetTheme("Classic");
-        if (ImGui.RadioButton(Strings.SettingsThemeOcean, ref selectedTheme, 1))
+        if (ImGui.RadioButton(Strings.SettingsThemeOcean, ref selectedTheme, 0))
             SetTheme("Ocean");
-        if (ImGui.RadioButton(Strings.SettingsThemePurple, ref selectedTheme, 2))
+        if (ImGui.RadioButton(Strings.SettingsThemePurple, ref selectedTheme, 1))
             SetTheme("Midnight Purple");
-        if (ImGui.RadioButton(Strings.SettingsThemeForest, ref selectedTheme, 3))
-            SetTheme("Forest");
+        if (ImGui.RadioButton(Strings.SettingsThemeChampagne, ref selectedTheme, 2))
+            SetTheme("Champagne");
+        if (ImGui.RadioButton(Strings.SettingsThemeRose, ref selectedTheme, 3))
+            SetTheme("Rose");
 
         if (!migrationDone && plugin.UtilityService.CanMigrateFromWardrobe)
         {

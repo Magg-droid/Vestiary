@@ -64,7 +64,7 @@ EMOTE SECTION
 3. Refresh the gallery card visuals. Update card sizing, spacing, hover states, image framing, icon placement, and metadata alignment to feel more premium and closer to the reference, while preserving all click targets, tooltips, and existing actions.
 4. Refine the header and rail styling. Make the browse rail, search box, count, Show hidden checkbox, section chips, and the collection-create plus button feel more modern and cohesive, and keep the plus button beside the Imported chip, but keep the current search, settings, section switching, and collection creation behavior exactly as it works today.
 5. Apply the same visual treatment to the emote section. It should use the same wireframe language and card styling, but keep its current behavior, card actions, and restore/apply flow unchanged.
-6. Tune the theme layer to support the new look. Update `ClassicTheme` and, if needed, the other theme variants so the redesigned UI can use consistent colors, contrast, and hover states without hardcoding colors in window code.
+6. Tune the theme layer to support the new look. Update `OceanTheme` and, if needed, the other theme variants so the redesigned UI can use consistent colors, contrast, and hover states without hardcoding colors in window code.
 7. Validate that behavior did not change. Confirm the same actions still apply, favorite, hide/unhide, delete, search, upload, restore, and switch views exactly as before.
 
 **Relevant files**
@@ -74,10 +74,10 @@ EMOTE SECTION
 - `d:\Projects\Plugins\Wardrobe\Vestiary\Windows\MainWindow\MainWindow.Gallery.cs` — gallery container and empty state
 - `d:\Projects\Plugins\Wardrobe\Vestiary\Windows\MainWindow\MainWindow.DesignCard.cs` — card layout, thumbnail, actions, and button presentation
 - `d:\Projects\Plugins\Wardrobe\Vestiary\Windows\MainWindow\MainWindow.EmoteGallery.cs` — emote mode layout, which must remain functional and visually consistent
-- `d:\Projects\Plugins\Wardrobe\Vestiary\ClassicTheme.cs` — primary theme colors and visual tuning
-- `d:\Projects\Plugins\Wardrobe\Vestiary\OceanTheme.cs` — secondary theme consistency if the redesign needs shared palette changes
+- `d:\Projects\Plugins\Wardrobe\Vestiary\OceanTheme.cs` — default theme colors and visual tuning
 - `d:\Projects\Plugins\Wardrobe\Vestiary\MidnightPurpleTheme.cs` — secondary theme consistency if the redesign needs shared palette changes
-- `d:\Projects\Plugins\Wardrobe\Vestiary\ForestTheme.cs` — secondary theme consistency if the redesign needs shared palette changes
+- `d:\Projects\Plugins\Wardrobe\Vestiary\ChampagneTheme.cs` — secondary theme consistency if the redesign needs shared palette changes
+- `d:\Projects\Plugins\Wardrobe\Vestiary\RoseTheme.cs` — secondary theme consistency if the redesign needs shared palette changes
 - `d:\Projects\Plugins\Wardrobe\Vestiary\ITheme.cs` — extend only if the redesign truly needs new shared color tokens
 
 **Verification**
@@ -98,4 +98,4 @@ EMOTE SECTION
 **Further Considerations**
 1. Decide whether PI should implement only the visual refresh first, or whether the split-pane/right-detail look should be staged as a second pass.
 2. Decide whether the redesign should keep the current collection tab model, or visually reinterpret it as a sidebar while preserving the same underlying collection logic.
-3. Decide whether all theme variants should be updated now, or whether the initial pass should focus on `ClassicTheme` and then propagate the palette later.
+3. Decide whether all theme variants should be updated now, or whether the initial pass should focus on `OceanTheme` and then propagate the palette later.

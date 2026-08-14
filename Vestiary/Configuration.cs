@@ -27,7 +27,7 @@ public class Configuration : IPluginConfiguration
     public bool RouletteExcludeFavorites { get; set; } = true;
     public List<Guid> RouletteCollectionIds { get; set; } = new();
     public bool IsMinimized { get; set; } = false;
-    public string ThemeName { get; set; } = "Classic";
+    public string ThemeName { get; set; } = "Ocean";
     public List<Guid> HiddenDesignIds { get; set; } = new();
     public List<EmoteCard> EmoteCards { get; set; } = new();
     public List<EmoteCollection> EmoteCollections { get; set; } = new();

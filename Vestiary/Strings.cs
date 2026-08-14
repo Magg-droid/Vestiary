@@ -2,7 +2,7 @@ namespace Vestiary;
 
 /// <summary>
 /// All user-facing strings. Change here for localization or rewording.
-/// For parametrized strings, use methods (e.g., <c>Strings.DesignCount(12)</c>).
+/// For parametrized strings, use methods (e.g., <c>Strings.EmoteCardCount(12)</c>).
 /// </summary>
 public static class Strings
 {
@@ -108,11 +108,10 @@ public static class Strings
     public const string NoSearchResults     = "No matching designs across collections.";
     public const string GlamourerNotFound   = "Glamourer not found or not installed";
 
-    public static string DesignCount(int count) =>
-        $"{count} designs";
+    public const string StatsSeparator = "•";
+    public static string DesignCount(int count) => $"{count} designs";
+    public static string FavoriteCount(int count) => $"{count} favorites";
 
-    public static string DesignCountWithHidden(int visible, int hidden) =>
-        $"{visible} designs ({hidden} hidden)";
 
     // ── Main window · Design card ───────────────────
     public const string CardApply          = "Apply";
@@ -179,10 +178,10 @@ public static class Strings
     public const string SettingsShowHidden = "Show Hidden";
     public const string SettingsShowHiddenTooltip = "Show hidden designs instead of visible ones";
     public const string SettingsThemeHeading = "Theme";
-    public const string SettingsThemeClassic = "Classic";
     public const string SettingsThemeOcean   = "Ocean";
     public const string SettingsThemePurple  = "Midnight Purple";
-    public const string SettingsThemeForest  = "Forest";
+    public const string SettingsThemeChampagne = "Champagne";
+    public const string SettingsThemeRose = "Rose";
 
     // ── Migration ───────────────────────────────────
     public const string SettingsMigrationHeading = "Migrate from Wardrobe";

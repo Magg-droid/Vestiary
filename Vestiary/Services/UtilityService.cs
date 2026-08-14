@@ -427,7 +427,7 @@ public class UtilityService
             configuration.RouletteExcludeFavorites = oldConfig.RouletteExcludeFavorites;
             configuration.RouletteCollectionIds = oldConfig.RouletteCollectionIds ?? new();
             configuration.IsMinimized = oldConfig.IsMinimized;
-            configuration.ThemeName = oldConfig.ThemeName ?? "Classic";
+            configuration.ThemeName = oldConfig.ThemeName ?? "Ocean";
 
             log.Information(
                 $"[Migration]   Loaded: {configuration.Collections.Count} collections, " +

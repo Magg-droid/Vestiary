@@ -30,7 +30,12 @@ Instead of scrolling through a text list of hundreds of designs, you see outfit 
 Vestiary/
 ├── Plugin.cs                         ← Entry point, lifecycle, P/Invoke, clipboard, file picker
 ├── Configuration.cs                  ← Persisted settings (collections, metadata, version)
-├── RoseGoldTheme.cs                  ← All 56 UI colors — change here to re-theme
+├── ITheme.cs                         ← UI color contract (all tokens)
+├── OceanTheme.cs                     ← Default theme
+├── MidnightPurpleTheme.cs
+├── ChampagneTheme.cs
+├── RoseTheme.cs
+├── ThemeManager.cs                   ← Active theme selector
 ├── Strings.cs                        ← All user-facing strings — change here to reword
 │
 ├── Models/
@@ -132,9 +137,8 @@ ImGui widgets (TabBar, TabItem) don't support our custom look (top-rounded tabs,
 DrawList gives pixel-perfect control but requires manual hit-testing with InvisibleButton.
 Cost: no built-in accessibility, careful cursor management needed.
 
-### Why RoseGoldTheme.cs and Strings.cs?
-Extracted to avoid magic values scattered across files.
-Enables future theme switching and localization.
+### Why theme classes and Strings.cs?
+The `ITheme` + `ThemeManager` system avoids magic values scattered across files and enables live theme switching. `Strings.cs` centralizes all user-facing text for localization and rewording.
 See [CodingStandards.md](CodingStandards.md) for usage rules.
 
 ---

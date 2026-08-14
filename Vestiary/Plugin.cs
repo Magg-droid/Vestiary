@@ -5,6 +5,7 @@ using System.Linq;
 using Dalamud.Game.Command;
 using Dalamud.IoC;
 using Dalamud.Plugin;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
 using ECommons;
@@ -145,7 +146,7 @@ public sealed class Plugin : IDalamudPlugin
             HelpMessage = Strings.CommandHelpRandom
         });
 
-        PluginInterface.UiBuilder.Draw += WindowSystem.Draw;
+        PluginInterface.UiBuilder.Draw += DrawWindows;
         PluginInterface.UiBuilder.Draw += ProcessPendingEmote;
         PluginInterface.UiBuilder.Draw += OnDrawFlushConfig;
         PluginInterface.UiBuilder.OpenConfigUi += ToggleConfigUi;
@@ -163,7 +164,7 @@ public sealed class Plugin : IDalamudPlugin
     {
         Configuration.FlushNow();
 
-        PluginInterface.UiBuilder.Draw -= WindowSystem.Draw;
+        PluginInterface.UiBuilder.Draw -= DrawWindows;
         PluginInterface.UiBuilder.Draw -= ProcessPendingEmote;
         PluginInterface.UiBuilder.Draw -= OnDrawFlushConfig;
         PluginInterface.UiBuilder.OpenConfigUi -= ToggleConfigUi;
@@ -201,6 +202,15 @@ public sealed class Plugin : IDalamudPlugin
         }
 
         MainWindow.Toggle();
+    }
+
+    private void DrawWindows()
+    {
+        ImGui.PushStyleColor(ImGuiCol.TitleBg, ThemeManager.Current.WindowBg);
+        ImGui.PushStyleColor(ImGuiCol.TitleBgActive, ThemeManager.Current.RailBg);
+        ImGui.PushStyleColor(ImGuiCol.TitleBgCollapsed, ThemeManager.Current.WindowBg);
+        WindowSystem.Draw();
+        ImGui.PopStyleColor(3);
     }
 
     private void ProcessPendingEmote()

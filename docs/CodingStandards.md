@@ -99,18 +99,18 @@ public class GalleryState
 
 ## 1. Theme Colors
 
-**All UI colors live in `Vestiary/RoseGoldTheme.cs`.**
+**All UI colors live in the theme classes (`Vestiary/*Theme.cs`), exposed through `ThemeManager.Current`.**
 
 - Never hardcode a `Vector4` color in window code.
-- Import `RoseGoldTheme` and use its named constants.
-- Adding a future theme (e.g., `OceanTheme`) means copying the file, tweaking values, and toggling in config.
+- Use `ThemeManager.Current.<Token>` for all colors.
+- Every theme implements `ITheme`; the active theme is selected in `ThemeManager.SetTheme`.
 
 ```csharp
 // ❌  Don't
 ImGui.TextColored(new Vector4(0.9f, 0.8f, 0.7f, 1f), "Hello");
 
 // ✅  Do
-ImGui.TextColored(RoseGoldTheme.TextHeading, "Hello");
+ImGui.TextColored(ThemeManager.Current.TextHeading, "Hello");
 ```
 
 | Property naming | Example |
@@ -148,7 +148,12 @@ ImGui.Text(Strings.ColDesignsMatch(count));
 
 ```
 Vestiary/
-├── RoseGoldTheme.cs      ← all colors
+├── ITheme.cs             ← color contract (all tokens)
+├── OceanTheme.cs         ← default theme
+├── MidnightPurpleTheme.cs
+├── ChampagneTheme.cs
+├── RoseTheme.cs
+├── ThemeManager.cs       ← active theme selector
 ├── Strings.cs            ← all user-facing strings
 ├── Plugin.cs             ← plugin lifecycle (keep lean)
 ├── Configuration.cs      ← persisted settings

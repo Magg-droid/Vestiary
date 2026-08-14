@@ -89,7 +89,7 @@
 - **Layout**: Three buttons — Apply (steel blue), Edit (warm grey), Delete (muted red)
 - **Sizes**: Apply 62px, Edit 62px, Delete 70px — all 28px height
 - **Spacing**: 12px between buttons, centered as a group
-- **Colors**: See `RoseGoldTheme.cs` for actual values
+- **Colors**: See the theme classes (`OceanTheme.cs`, `MidnightPurpleTheme.cs`, `ChampagneTheme.cs`, `RoseTheme.cs`) for actual values
 - **Rounding**: 4px
 - **Positioning**: Centered, below design name
 - **Tooltips**: Each button has contextual tooltip with keyboard modifier hints

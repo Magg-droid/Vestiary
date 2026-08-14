@@ -94,7 +94,7 @@ Your outfits can remember their Penumbra mod setup. When you apply the outfit la
 | **Show Hidden** | Reveal hidden designs tab |
 | **Enable Save Mods** | Turn on Penumbra mod saving (default: off) |
 | **Enable Glamour Roulette** | Turn on the Roulette section in Browse |
-| **Theme** | Pick from Classic, Ocean, Midnight Purple, or Forest |
+| **Theme** | Pick from Ocean, Midnight Purple, Champagne, or Rose |
 
 ---
 
@@ -122,10 +122,10 @@ Four color themes available. Switch live in Settings — no reload needed.
 
 | Theme | Vibe |
 |---|---|
-| **Classic** | Warm grey |
-| **Ocean** | Cool blue-grey |
-| **Midnight Purple** | Grey-lavender |
-| **Forest** | Charcoal sage |
+| **Ocean** | Default · cool blue-grey |
+| **Midnight Purple** | Muted violet |
+| **Champagne** | Antique gold |
+| **Rose** | Blush rose |
 
 ---
 

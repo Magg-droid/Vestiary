@@ -6,17 +6,16 @@ namespace Vestiary;
 /// </summary>
 public static class ThemeManager
 {
-    public static ITheme Current { get; private set; } = new ClassicTheme();
+    public static ITheme Current { get; private set; } = new OceanTheme();
 
     public static void SetTheme(string themeName)
     {
         Current = themeName switch
         {
-            "Classic" => new ClassicTheme(),
-            "Ocean" => new OceanTheme(),
             "Midnight Purple" => new MidnightPurpleTheme(),
-            "Forest" => new ForestTheme(),
-            _ => new ClassicTheme(),
+            "Champagne" => new ChampagneTheme(),
+            "Rose" => new RoseTheme(),
+            _ => new OceanTheme(),
         };
     }
 }

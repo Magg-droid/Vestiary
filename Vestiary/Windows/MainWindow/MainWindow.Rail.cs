@@ -10,21 +10,29 @@ public partial class MainWindow
 
     private void DrawRail()
     {
+        var dl = ImGui.GetWindowDrawList();
+        var winPos = ImGui.GetWindowPos();
+        var contentMin = ImGui.GetWindowContentRegionMin();
+        float top = winPos.Y + contentMin.Y - ImGui.GetStyle().WindowPadding.Y;
+        float bottom = winPos.Y + ImGui.GetWindowSize().Y;
+
+        // Panel background — merged to the window's left/top/bottom edges.
+        dl.AddRectFilled(
+            new Vector2(winPos.X, top),
+            new Vector2(winPos.X + RailWidth, bottom),
+            ImGui.GetColorU32(ThemeManager.Current.RailBg));
+        dl.AddLine(
+            new Vector2(winPos.X + RailWidth - 1f, top),
+            new Vector2(winPos.X + RailWidth - 1f, bottom),
+            ImGui.GetColorU32(ThemeManager.Current.RailDivider), 1f);
+
+        ImGui.SetCursorScreenPos(new Vector2(winPos.X, top));
         ImGui.BeginChild("##Rail", new Vector2(RailWidth, -1), false,
             ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
 
-        var dl = ImGui.GetWindowDrawList();
-        var railStart = ImGui.GetCursorScreenPos();
         var railW = ImGui.GetContentRegionAvail().X;
 
-        // Rail background
-        dl.AddRectFilled(
-            railStart,
-            railStart + new Vector2(railW, ImGui.GetWindowHeight()),
-            ImGui.GetColorU32(ThemeManager.Current.RailBg));
-
-        ImGui.Spacing();
-        ImGui.Spacing();
+        ImGui.Dummy(new Vector2(0, 4f));
 
         // Glamour
         DrawRailItem(Strings.RailGlamour, _currentView == 0, () => _currentView = 0);
@@ -93,11 +101,11 @@ public partial class MainWindow
 
     private void DrawRailItem(string label, bool active, Action onClick)
     {
-        float itemW = ImGui.GetContentRegionAvail().X - 16f;
-        float itemH = 30f;
-        float rounding = 8f;
+        float itemW = ImGui.GetContentRegionAvail().X - 26f;
+        float itemH = 35f;
+        float rounding = 4f;
 
-        ImGui.SetCursorPosX(8f);
+        ImGui.SetCursorPosX(13f);
         var min = ImGui.GetCursorScreenPos();
         var max = min + new Vector2(itemW, itemH);
         var dl = ImGui.GetWindowDrawList();

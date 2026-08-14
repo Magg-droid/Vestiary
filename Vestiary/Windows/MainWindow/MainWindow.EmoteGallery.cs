@@ -28,13 +28,12 @@ public partial class MainWindow
             ImGui.GetColorU32(ThemeManager.Current.CountText), countText);
 
         const float chipPadX = 14f;
-        const float chipPadY = 5f;
-        const float chipRounding = 16f;
+        const float chipH = 35f;
+        const float chipRounding = 4f;
         const float chipSpacing = 6f;
         const float plusChipW = 36f;
 
         float cursorX = start.X;
-        float maxH = ImGui.CalcTextSize("+").Y + chipPadY * 2;
         float chipRightLimit = rightEdge - countSize.X - 16f;
         bool openEditCollectionPopup = false;
 
@@ -43,8 +42,6 @@ public partial class MainWindow
             bool isSelected = _selectedEmoteCollectionId == collection.Id;
             var textSize = ImGui.CalcTextSize(collection.Name);
             float chipW = textSize.X + chipPadX * 2;
-            float chipH = textSize.Y + chipPadY * 2;
-            if (chipH > maxH) maxH = chipH;
 
             float reserveW = plusChipW + chipSpacing;
             if (cursorX + chipW + reserveW > chipRightLimit)
@@ -61,7 +58,7 @@ public partial class MainWindow
                     : ImGui.GetColorU32(ThemeManager.Current.ChipBg);
             dl.AddRectFilled(chipMin, chipMax, bg, chipRounding);
             dl.AddRect(chipMin, chipMax, ImGui.GetColorU32(ThemeManager.Current.ChipBorder), chipRounding, 0, 1f);
-            dl.AddText(new Vector2(cursorX + chipPadX, start.Y + chipPadY),
+            dl.AddText(new Vector2(cursorX + chipPadX, start.Y + (chipH - textSize.Y) / 2f),
                 ImGui.GetColorU32(isSelected ? ThemeManager.Current.ChipTextActive : ThemeManager.Current.ChipText),
                 collection.Name);
 
@@ -98,17 +95,17 @@ public partial class MainWindow
             ImGui.OpenPopup("##edit_emote_collection_popup");
 
         var plusMin = new Vector2(cursorX + 2f, start.Y);
-        var plusMax = new Vector2(plusMin.X + plusChipW, start.Y + maxH);
+        var plusMax = new Vector2(plusMin.X + plusChipW, start.Y + chipH);
         bool plusHover = ImGui.IsMouseHoveringRect(plusMin, plusMax);
         uint plusBg = ImGui.GetColorU32(plusHover ? ThemeManager.Current.ChipBgHovered : ThemeManager.Current.ChipBg);
         dl.AddRectFilled(plusMin, plusMax, plusBg, chipRounding);
         dl.AddRect(plusMin, plusMax, ImGui.GetColorU32(ThemeManager.Current.ChipBorder), chipRounding, 0, 1f);
         var plusTextSize = ImGui.CalcTextSize("+");
-        dl.AddText(new Vector2(plusMin.X + (plusChipW - plusTextSize.X) / 2f, plusMin.Y + chipPadY),
+        dl.AddText(new Vector2(plusMin.X + (plusChipW - plusTextSize.X) / 2f, plusMin.Y + (chipH - plusTextSize.Y) / 2f),
             ImGui.GetColorU32(ThemeManager.Current.ChipText), "+");
 
         ImGui.SetCursorScreenPos(plusMin);
-        ImGui.InvisibleButton("##new_emote_collection_chip", new Vector2(plusChipW, maxH));
+        ImGui.InvisibleButton("##new_emote_collection_chip", new Vector2(plusChipW, chipH));
         if (ImGui.IsItemClicked())
             ImGui.OpenPopup("##new_emote_collection_popup");
 
@@ -177,7 +174,7 @@ public partial class MainWindow
             ImGui.EndPopup();
         }
 
-        ImGui.SetCursorScreenPos(new Vector2(start.X, start.Y + maxH));
+        ImGui.SetCursorScreenPos(new Vector2(start.X, start.Y + chipH));
         ImGui.Dummy(new Vector2(availW, 0));
     }
 
@@ -206,18 +203,17 @@ public partial class MainWindow
         float availW = ImGui.GetContentRegionAvail().X;
 
         const float chipPadX = 14f;
-        const float chipPadY = 5f;
-        const float chipRounding = 16f;
+        const float chipH = 35f;
+        const float chipRounding = 4f;
 
         var textSize = ImGui.CalcTextSize(Strings.SearchResultsChip);
         float chipW = textSize.X + chipPadX * 2;
-        float chipH = textSize.Y + chipPadY * 2;
         var chipMin = new Vector2(start.X, start.Y);
         var chipMax = new Vector2(start.X + chipW, start.Y + chipH);
 
         dl.AddRectFilled(chipMin, chipMax, ImGui.GetColorU32(ThemeManager.Current.ChipBgActive), chipRounding);
         dl.AddRect(chipMin, chipMax, ImGui.GetColorU32(ThemeManager.Current.ChipBorder), chipRounding, 0, 1f);
-        dl.AddText(new Vector2(chipMin.X + chipPadX, chipMin.Y + chipPadY),
+        dl.AddText(new Vector2(chipMin.X + chipPadX, chipMin.Y + (chipH - textSize.Y) / 2f),
             ImGui.GetColorU32(ThemeManager.Current.ChipTextActive), Strings.SearchResultsChip);
 
         var countText = Strings.EmoteCardCount(resultCount);
@@ -240,6 +236,9 @@ public partial class MainWindow
         var emoteCommands = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         foreach (var emote in emoteSheet)
         {
+            // Skip facial expressions (EmoteCategory row 3 = Expressions).
+            if (emote.EmoteCategory.ValueNullable?.RowId == 3) continue;
+
             var name = emote.Name.ToString();
             if (string.IsNullOrEmpty(name)) continue;
             if (!sortedEmotes.Contains(name)) sortedEmotes.Add(name);

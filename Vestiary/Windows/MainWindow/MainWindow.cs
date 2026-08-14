@@ -494,24 +494,23 @@ public partial class MainWindow : Window, IDisposable
                 return;
             }
 
-            // ── Full-width top bar: VESTIARY + search ──
-            DrawTopBar();
-            ImGui.Spacing();
-
-            // Separator line
-            var sepPos = ImGui.GetCursorScreenPos();
-            dl.AddLine(
-                new Vector2(sepPos.X, sepPos.Y),
-                new Vector2(sepPos.X + ImGui.GetContentRegionAvail().X, sepPos.Y),
-                ImGui.GetColorU32(ThemeManager.Current.RailDivider), 1f);
-            ImGui.Spacing();
-
             // ── Split: left rail + right content ──
             DrawRail();
 
             ImGui.SameLine();
 
             ImGui.BeginChild("##MainContent", Vector2.Zero, false, ImGuiWindowFlags.NoScrollbar);
+
+            // Top bar: Browse + search (content area only)
+            DrawTopBar();
+
+            // Separator line (content area)
+            var sepPos = ImGui.GetCursorScreenPos();
+            dl.AddLine(
+                new Vector2(sepPos.X, sepPos.Y),
+                new Vector2(sepPos.X + ImGui.GetContentRegionAvail().X, sepPos.Y),
+                ImGui.GetColorU32(ThemeManager.Current.RailDivider), 1f);
+            ImGui.Spacing();
 
             // Emote view: skip chips + status, go straight to gallery
             if (_currentView == 1)
@@ -545,7 +544,7 @@ public partial class MainWindow : Window, IDisposable
             // Chip row + status row on one line: chips left, hidden+count right
             ImGui.Dummy(new Vector2(0, 5f));
             DrawChipAndStatusRow(sortedCollections);
-            ImGui.Dummy(new Vector2(0, 16f));
+            ImGui.Dummy(new Vector2(0, 1f));
 
             // Gallery
             DrawGalleryContent();

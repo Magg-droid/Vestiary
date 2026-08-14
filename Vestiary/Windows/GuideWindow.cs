@@ -55,7 +55,7 @@ public class GuideWindow : Window, IDisposable
             "Apply Equipment Only — apply equipment without changing your character's appearance. Hold Ctrl while applying to temporarily switch modes.\n\n" +
             "Show Hidden — display the hidden designs tab.\n\n" +
             "Enable Save Mods — save and restore your Penumbra mod settings when applying designs.\n\n" +
-            "Theme — choose between Classic, Ocean, Midnight Purple, and Forest. The theme changes immediately."),
+            "Theme — choose between Ocean, Midnight Purple, Champagne, and Rose. The theme changes immediately."),
 
         ("Help & Support",
             "Open this guide anytime from the Browse rail via Help or with /vsguide.\n\n" +
