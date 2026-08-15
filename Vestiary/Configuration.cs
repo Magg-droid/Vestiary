@@ -5,6 +5,17 @@ using Vestiary.Models;
 
 namespace Vestiary;
 
+/// <summary>
+/// Controls how the design gallery is sorted.
+/// </summary>
+public enum DesignSortMode
+{
+    Default = 0,
+    OldestFirst = 1,
+    NewestFirst = 2,
+    Recent = 3,
+}
+
 [Serializable]
 public class Configuration : IPluginConfiguration
 {
@@ -15,6 +26,8 @@ public class Configuration : IPluginConfiguration
     private long lastChangeTick;
 
     public int Version { get; set; } = 1;
+
+    public DesignSortMode DesignSortMode { get; set; } = DesignSortMode.Default;
 
     public bool IsConfigWindowMovable { get; set; } = true;
     public bool ApplyEquipmentOnly { get; set; }
@@ -32,6 +45,7 @@ public class Configuration : IPluginConfiguration
     public List<EmoteCard> EmoteCards { get; set; } = new();
     public List<EmoteCollection> EmoteCollections { get; set; } = new();
     public List<Guid> FavoriteDesignIds { get; set; } = new();
+    public Dictionary<Guid, DateTime> LastAppliedAt { get; set; } = new();
     public List<Collection> Collections { get; set; } = new();
     public List<DesignMetadata> DesignMetadata { get; set; } = new();
 

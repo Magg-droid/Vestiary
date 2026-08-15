@@ -27,12 +27,87 @@ public partial class MainWindow
         float searchY = start.Y + topPad;
         float topBarH = topPad + searchInputH;
 
+        const float sortBtnSize = 35f;
+        float sortBtnX = searchX - sortBtnSize - 8f;
+        float sortBtnY = searchY;
+
         // "Browse" title — same size as rail menu text, centered on the search box.
         var browseSize = ImGui.CalcTextSize(Strings.BrowseHeading);
         ImGui.SetCursorScreenPos(new Vector2(start.X + 8f, start.Y + topPad + searchInputH / 2f - browseSize.Y / 2f));
         ImGui.PushStyleColor(ImGuiCol.Text, ThemeManager.Current.TextHeading);
         ImGui.Text(Strings.BrowseHeading);
         ImGui.PopStyleColor();
+
+        if (_currentView == 0)
+        {
+            // Sort button — rounded square with up/down arrows, left of the search box.
+            var sortMode = plugin.Configuration.DesignSortMode;
+            var sortBtnMin = new Vector2(sortBtnX, sortBtnY);
+            var sortBtnMax = sortBtnMin + new Vector2(sortBtnSize, sortBtnSize);
+            bool sortHovered = ImGui.IsMouseHoveringRect(sortBtnMin, sortBtnMax);
+
+            dl.AddRectFilled(sortBtnMin, sortBtnMax,
+                ImGui.GetColorU32(sortHovered ? ThemeManager.Current.ChipBgHovered : ThemeManager.Current.ChipBg), 4f);
+            dl.AddRect(sortBtnMin, sortBtnMax,
+                ImGui.GetColorU32(ThemeManager.Current.ChipBorder), 4f, 0, 1f);
+
+            var sortTex = plugin.TextureCache.GetOrLoadTexture(sortIconPath)?.GetWrapOrDefault();
+            if (sortTex != null)
+            {
+                const float sortIconS = 22f;
+                var sortIconMin = sortBtnMin + new Vector2((sortBtnSize - sortIconS) / 2f);
+                var sortIconMax = sortIconMin + new Vector2(sortIconS, sortIconS);
+                dl.AddImage(sortTex.Handle, sortIconMin, sortIconMax, Vector2.Zero, Vector2.One,
+                    ImGui.GetColorU32(sortHovered ? ThemeManager.Current.IconHovered : ThemeManager.Current.IconDefault));
+            }
+
+            ImGui.SetCursorScreenPos(sortBtnMin);
+            ImGui.InvisibleButton("##sort_button", new Vector2(sortBtnSize, sortBtnSize));
+            if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
+            {
+                ImGui.SetNextWindowPos(new Vector2(sortBtnMin.X, sortBtnMax.Y + 4f));
+                ImGui.OpenPopup("##design_sort_menu");
+            }
+
+            if (sortHovered)
+            {
+                ImGui.SetTooltip(Strings.SettingsSortHeading);
+                ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+            }
+
+            ImGui.PushStyleVar(ImGuiStyleVar.PopupBorderSize, 1f);
+            ImGui.PushStyleVar(ImGuiStyleVar.PopupRounding, 4f);
+            ImGui.PushStyleColor(ImGuiCol.PopupBg, ThemeManager.Current.SearchBg);
+            ImGui.PushStyleColor(ImGuiCol.Border, ThemeManager.Current.ChipBorder);
+
+            if (ImGui.BeginPopup("##design_sort_menu"))
+            {
+                if (ImGui.MenuItem(Strings.SettingsSortDefault, "", sortMode == DesignSortMode.Default))
+                {
+                    SetSortMode(DesignSortMode.Default);
+                    ImGui.CloseCurrentPopup();
+                }
+                if (ImGui.MenuItem(Strings.SettingsSortOldestFirst, "", sortMode == DesignSortMode.OldestFirst))
+                {
+                    SetSortMode(DesignSortMode.OldestFirst);
+                    ImGui.CloseCurrentPopup();
+                }
+                if (ImGui.MenuItem(Strings.SettingsSortNewestFirst, "", sortMode == DesignSortMode.NewestFirst))
+                {
+                    SetSortMode(DesignSortMode.NewestFirst);
+                    ImGui.CloseCurrentPopup();
+                }
+                if (ImGui.MenuItem(Strings.SettingsSortRecent, "", sortMode == DesignSortMode.Recent))
+                {
+                    SetSortMode(DesignSortMode.Recent);
+                    ImGui.CloseCurrentPopup();
+                }
+                ImGui.EndPopup();
+            }
+
+            ImGui.PopStyleColor(2);
+            ImGui.PopStyleVar(2);
+        }
 
         ImGui.SetCursorScreenPos(new Vector2(searchX, searchY));
         float searchVPad = (searchInputH - ImGui.GetTextLineHeight()) / 2f;
@@ -64,6 +139,12 @@ public partial class MainWindow
         // Keep cursor at the bottom of the top bar so the divider sits below the search box.
         ImGui.SetCursorScreenPos(new Vector2(start.X, start.Y + topBarH));
         ImGui.Dummy(new Vector2(availW, 0));
+    }
+
+    private void SetSortMode(DesignSortMode mode)
+    {
+        plugin.Configuration.DesignSortMode = mode;
+        plugin.Configuration.Save();
     }
 
 

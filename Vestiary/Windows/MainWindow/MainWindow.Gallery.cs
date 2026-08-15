@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using Dalamud.Bindings.ImGui;
 
@@ -22,20 +24,21 @@ public partial class MainWindow
         var visibleFiltered = FilterBySearch(visibleDesigns);
         var hiddenFiltered = FilterBySearch(hiddenDesigns);
         var designsToShow = hiddenDesignService.ShowHidden ? hiddenFiltered : visibleFiltered;
+        var sortedDesigns = SortDesignsForDisplay(designsToShow);
 
         ImGui.Spacing();
 
-        if (designsToShow.Count > 0)
+        if (sortedDesigns.Count > 0)
         {
             if (plugin.Configuration.IsMinimized)
             {
                 // No inner child — let window itself scroll, avoids scrollbar gap
-                DrawDesignGallery(designsToShow, hiddenDesignService.ShowHidden);
+                DrawDesignGallery(sortedDesigns, hiddenDesignService.ShowHidden);
             }
             else
             {
                 ImGui.BeginChild("##DesignGalleryScroll", new Vector2(-1, -1), false, ImGuiWindowFlags.None);
-                DrawDesignGallery(designsToShow, hiddenDesignService.ShowHidden);
+                DrawDesignGallery(sortedDesigns, hiddenDesignService.ShowHidden);
                 ImGui.EndChild();
             }
         }
@@ -58,6 +61,30 @@ public partial class MainWindow
             ImGui.SetWindowFontScale(1f);
         }
     }
+
+    private List<KeyValuePair<Guid, (string DisplayName, string FullPath, uint DisplayColor, bool ShownInQdb)>> SortDesignsForDisplay(
+        Dictionary<Guid, (string DisplayName, string FullPath, uint DisplayColor, bool ShownInQdb)> designs)
+    {
+        var mode = plugin.Configuration.DesignSortMode;
+
+        IEnumerable<KeyValuePair<Guid, (string DisplayName, string FullPath, uint DisplayColor, bool ShownInQdb)>> sorted = mode switch
+        {
+            DesignSortMode.OldestFirst =>
+                designs.OrderBy(d => plugin.GlamourerService.GetDesignLastEdit(d.Key)),
+            DesignSortMode.NewestFirst =>
+                designs.OrderByDescending(d => plugin.GlamourerService.GetDesignLastEdit(d.Key)),
+            DesignSortMode.Recent =>
+                designs.OrderByDescending(d => GetLastAppliedAt(d.Key)),
+            _ => designs,
+        };
+
+        return sorted.ToList();
+    }
+
+    private DateTime GetLastAppliedAt(Guid designId) =>
+        plugin.Configuration.LastAppliedAt.TryGetValue(designId, out var appliedAt)
+            ? appliedAt
+            : DateTime.MinValue;
 
     private void DrawEmptyCollectionsState()
     {

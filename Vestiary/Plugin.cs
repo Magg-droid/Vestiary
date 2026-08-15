@@ -56,6 +56,7 @@ public sealed class Plugin : IDalamudPlugin
     public bool IsCameraActive { get; private set; }
     private bool wasMainWindowOpen;
     private bool wasDesignEditorOpen;
+    private bool wasGuideOpen;
     private Guid lastRandomCommandDesignId = Guid.Empty;
 
     public Plugin()
@@ -66,7 +67,7 @@ public sealed class Plugin : IDalamudPlugin
 
         var pluginDir = PluginInterface.AssemblyLocation.Directory?.FullName!;
 
-        GlamourerService = new GlamourerService(PluginInterface, Log);
+        GlamourerService = new GlamourerService(PluginInterface, Log, Configuration);
         CollectionService = new CollectionService(Configuration, GlamourerService);
         DesignMetadataService = new DesignMetadataService(Configuration, GlamourerService);
         HiddenDesignService = new HiddenDesignService(Configuration);
@@ -103,12 +104,13 @@ public sealed class Plugin : IDalamudPlugin
         var starEmptyPath = Path.Combine(pluginDir, "star_empty.png");
         var starFilledPath = Path.Combine(pluginDir, "star_filled.png");
         var searchIconPath = Path.Combine(pluginDir, "search_icon.png");
+        var sortIconPath = Path.Combine(pluginDir, "sort_icon.png");
 
         ConfigWindow = new ConfigWindow(this);
         MainWindow = new MainWindow(this, UtilityService, goatImagePath, CollectionService,
             DesignMetadataService, HiddenDesignService, FavoriteService, noPreviewImagePath,
             cameraIconPath, uploadIconPath, clipboardIconPath, viewIconPath, hiddenIconPath,
-            starEmptyPath, starFilledPath, searchIconPath, saveModsIconPath);
+            starEmptyPath, starFilledPath, searchIconPath, sortIconPath, saveModsIconPath);
         CollectionEditorWindow = new CollectionEditorWindow(this, CollectionService);
         DesignEditorWindow = new DesignEditorWindow(this, UtilityService, DesignMetadataService, GlamourerService);
         CameraWindow = new CameraWindow(this, UtilityService);
@@ -353,11 +355,13 @@ public sealed class Plugin : IDalamudPlugin
     {
         wasMainWindowOpen = MainWindow.IsOpen;
         wasDesignEditorOpen = DesignEditorWindow.IsOpen;
+        wasGuideOpen = GuideWin.IsOpen;
 
         MainWindow.IsOpen = false;
         DesignEditorWindow.IsOpen = false;
         CollectionEditorWindow.IsOpen = false;
         ConfigWindow.IsOpen = false;
+        GuideWin.IsOpen = false;
 
         UtilityService.ToggleGameUI();
 
@@ -373,5 +377,7 @@ public sealed class Plugin : IDalamudPlugin
 
         if (wasMainWindowOpen) MainWindow.IsOpen = true;
         if (wasDesignEditorOpen) DesignEditorWindow.IsOpen = true;
+        if (wasGuideOpen) GuideWin.IsOpen = true;
     }
+    // test
 }

@@ -108,6 +108,27 @@ public class ConfigWindow : Window, IDisposable
         if (ImGui.RadioButton(Strings.SettingsThemeRose, ref selectedTheme, 3))
             SetTheme("Rose");
 
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Spacing();
+
+        ImGui.TextColored(ThemeManager.Current.TextHeading, Strings.SettingsSortHeading);
+        ImGui.SameLine();
+        ImGui.TextColored(ThemeManager.Current.TextSubtle, "(?)");
+        if (ImGui.IsItemHovered())
+            ImGui.SetTooltip(Strings.SettingsSortTooltip);
+        ImGui.Spacing();
+
+        int sortMode = (int)configuration.DesignSortMode;
+        if (ImGui.RadioButton(Strings.SettingsSortDefault, ref sortMode, 0))
+            SetSortMode(DesignSortMode.Default);
+        if (ImGui.RadioButton(Strings.SettingsSortOldestFirst, ref sortMode, 1))
+            SetSortMode(DesignSortMode.OldestFirst);
+        if (ImGui.RadioButton(Strings.SettingsSortNewestFirst, ref sortMode, 2))
+            SetSortMode(DesignSortMode.NewestFirst);
+        if (ImGui.RadioButton(Strings.SettingsSortRecent, ref sortMode, 3))
+            SetSortMode(DesignSortMode.Recent);
+
         if (!migrationDone && plugin.UtilityService.CanMigrateFromWardrobe)
         {
             ImGui.Spacing();
@@ -146,5 +167,11 @@ public class ConfigWindow : Window, IDisposable
         configuration.ThemeName = name;
         configuration.Save();
         ThemeManager.SetTheme(name);
+    }
+
+    private void SetSortMode(DesignSortMode mode)
+    {
+        configuration.DesignSortMode = mode;
+        configuration.Save();
     }
 }

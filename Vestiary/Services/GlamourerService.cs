@@ -4,6 +4,7 @@ using Dalamud.Plugin.Services;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 
 namespace Vestiary.Services;
@@ -16,14 +17,18 @@ public class GlamourerService
     private readonly ICallGateSubscriber<Guid, int, uint, ulong, int> applyDesignSubscriber;
     private readonly ICallGateSubscriber<Guid, int> deleteDesignSubscriber;
     private readonly IPluginLog log;
+    private readonly Configuration configuration;
 
     private Dictionary<Guid, (string DisplayName, string FullPath, uint DisplayColor, bool ShownInQdb)>? cachedDesignList;
     private DateTime cacheExpiry = DateTime.MinValue;
     private static readonly TimeSpan DesignListCacheTtl = TimeSpan.FromSeconds(2);
 
-    public GlamourerService(IDalamudPluginInterface pluginInterface, IPluginLog pluginLog)
+    private readonly Dictionary<Guid, DateTime> designDateCache = new();
+
+    public GlamourerService(IDalamudPluginInterface pluginInterface, IPluginLog pluginLog, Configuration configuration)
     {
         log = pluginLog;
+        this.configuration = configuration;
         
         designListSubscriber = pluginInterface.GetIpcSubscriber<Dictionary<Guid, (string DisplayName, string FullPath, uint DisplayColor, bool ShownInQdb)>>(
             "Glamourer.GetDesignListExtended");
@@ -51,9 +56,30 @@ public class GlamourerService
         if (cachedDesignList != null && DateTime.UtcNow < cacheExpiry)
             return cachedDesignList;
 
+        var previous = cachedDesignList;
         cachedDesignList = designListSubscriber.InvokeFunc();
         cacheExpiry = DateTime.UtcNow + DesignListCacheTtl;
+
+        // Designs were added or removed: drop cached dates so newly-created
+        // designs get fresh timestamps and deleted ones don't linger in memory.
+        if (previous != null && !KeysMatch(previous, cachedDesignList))
+            designDateCache.Clear();
+
         return cachedDesignList;
+    }
+
+    private static bool KeysMatch<T>(Dictionary<Guid, T> a, Dictionary<Guid, T> b)
+    {
+        if (a.Count != b.Count)
+            return false;
+
+        foreach (var key in a.Keys)
+        {
+            if (!b.ContainsKey(key))
+                return false;
+        }
+
+        return true;
     }
 
     /// <summary>
@@ -63,6 +89,7 @@ public class GlamourerService
     {
         cachedDesignList = null;
         cacheExpiry = DateTime.MinValue;
+        designDateCache.Clear();
     }
 
     public string? GetDesignBase64(Guid designId)
@@ -84,6 +111,69 @@ public class GlamourerService
             log.Error($"[ModSnapshot] GetDesignJObject failed for {designId}: {ex.Message}");
             return null;
         }
+    }
+
+    /// <summary>
+    /// Get the last updated date for a design. Falls back to the creation date
+    /// if no last-updated timestamp is available. Dates are fetched once per
+    /// design and cached until a design is applied, deleted, or the design list
+    /// changes (new/removed designs).
+    /// </summary>
+    public DateTime GetDesignLastEdit(Guid designId)
+    {
+        if (!designDateCache.TryGetValue(designId, out var date))
+        {
+            date = ReadLastEditFromDesign(designId);
+            designDateCache[designId] = date;
+        }
+
+        return date;
+    }
+
+    private DateTime ReadLastEditFromDesign(Guid designId)
+    {
+        var design = GetDesignJObject(designId);
+        if (design == null)
+            return DateTime.MinValue;
+
+        var lastEdit = ParseDesignDate(design["LastEdit"]);
+        if (lastEdit != DateTime.MinValue)
+            return lastEdit;
+
+        return ParseDesignDate(design["CreationDate"]);
+    }
+
+    private static DateTime ParseDesignDate(JToken? token)
+    {
+        if (token == null || token.Type == JTokenType.Null)
+            return DateTime.MinValue;
+
+        if (token.Type == JTokenType.Date)
+            return token.ToObject<DateTime>();
+
+        if (token.Type == JTokenType.Integer || token.Type == JTokenType.Float)
+        {
+            var value = token.ToObject<long>();
+            return value > 100_000_000_000
+                ? DateTimeOffset.FromUnixTimeMilliseconds(value).UtcDateTime
+                : DateTimeOffset.FromUnixTimeSeconds(value).UtcDateTime;
+        }
+
+        if (token.Type == JTokenType.String)
+        {
+            var text = token.ToString();
+            if (DateTime.TryParse(text, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var parsed))
+                return parsed;
+
+            if (long.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var unix))
+            {
+                return unix > 100_000_000_000
+                    ? DateTimeOffset.FromUnixTimeMilliseconds(unix).UtcDateTime
+                    : DateTimeOffset.FromUnixTimeSeconds(unix).UtcDateTime;
+            }
+        }
+
+        return DateTime.MinValue;
     }
 
     /// <summary>
@@ -147,6 +237,9 @@ public class GlamourerService
             {
                 var applyType = equipmentOnly ? "(equipment only)" : "(full design)";
                 log.Information($"Successfully applied design: {designId} {applyType}");
+
+                configuration.LastAppliedAt[designId] = DateTime.UtcNow;
+                configuration.Save();
             }
             else
             {

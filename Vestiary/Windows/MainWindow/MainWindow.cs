@@ -21,6 +21,7 @@ public partial class MainWindow : Window, IDisposable
     private readonly string starEmptyPath;
     private readonly string starFilledPath;
     private readonly string searchIconPath;
+    private readonly string sortIconPath;
     private readonly Plugin plugin;
     private readonly UtilityService utility;
     private readonly CollectionService collectionService;
@@ -65,6 +66,7 @@ public partial class MainWindow : Window, IDisposable
         string starEmptyPath,
         string starFilledPath,
         string searchIconPath,
+        string sortIconPath,
         string saveModsIconPath
     )
         : base("Vestiary##With a hidden ID", ImGuiWindowFlags.None)
@@ -85,6 +87,7 @@ public partial class MainWindow : Window, IDisposable
         this.starEmptyPath = starEmptyPath;
         this.starFilledPath = starFilledPath;
         this.searchIconPath = searchIconPath;
+        this.sortIconPath = sortIconPath;
         this.saveModsIconPath = saveModsIconPath;
         this.plugin = plugin;
         this.utility = utility;
@@ -125,10 +128,12 @@ public partial class MainWindow : Window, IDisposable
     public void Dispose() { }
 
     /// <summary>
-    /// True when a sub-window (config, guide) is open and should block main window interaction.
+    /// True when an in-window popup or menu is open and should block card interactions.
+    /// Separate windows (config, guide) are intentionally not included — they are not
+    /// modal, and ImGui's window hover checks already prevent clicks through them.
     /// </summary>
     private bool IsInteractionBlocked =>
-        plugin.IsConfigOpen || plugin.GuideWin.IsOpen || _minimizedMenuOpen || _popupInteractionBlocked;
+        _minimizedMenuOpen || _popupInteractionBlocked;
 
     /// <summary>
     /// Filters designs by search text. Matches nickname first, then Glamourer display name. Case-insensitive.

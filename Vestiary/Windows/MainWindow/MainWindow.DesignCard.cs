@@ -10,7 +10,7 @@ namespace Vestiary.Windows;
 public partial class MainWindow
 {
     private void DrawDesignGallery(
-        Dictionary<Guid, (string DisplayName, string FullPath, uint DisplayColor, bool ShownInQdb)> designs,
+        List<KeyValuePair<Guid, (string DisplayName, string FullPath, uint DisplayColor, bool ShownInQdb)>> designs,
         bool isHidden = false)
     {
         bool minimized = plugin.Configuration.IsMinimized;

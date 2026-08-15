@@ -177,6 +177,12 @@ public static class Strings
     public const string SettingsApplyEquipmentTooltip = "When enabled, design apply will only change gear, not character appearance";
     public const string SettingsShowHidden = "Show Hidden";
     public const string SettingsShowHiddenTooltip = "Show hidden designs instead of visible ones";
+    public const string SettingsSortHeading = "Sort Designs";
+    public const string SettingsSortDefault = "Default";
+    public const string SettingsSortOldestFirst = "Oldest first";
+    public const string SettingsSortNewestFirst = "Newest first";
+    public const string SettingsSortRecent = "Recently applied";
+    public const string SettingsSortTooltip = "Sorts designs by their last updated date in Glamourer, or by how recently they were applied.";
     public const string SettingsThemeHeading = "Theme";
     public const string SettingsThemeOcean   = "Ocean";
     public const string SettingsThemePurple  = "Midnight Purple";
